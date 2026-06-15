@@ -211,11 +211,11 @@ police_ani = [
 @run_async
 def brainanimation(update: Update, context: CallbackContext):
     bot, args = context.bot, context.args
-    msg = update.effective_message.reply_text("PROCESSING...")
+    msg = update.effective_message.reply_text("处理中...")
     for x in range(EDIT_TIMES):
         msg.edit_text(brain_chain[x % 14])
         time.sleep(EDIT_SLEEP)
-    msg.edit_text("YOU PUT BRAIN IN DUSTBIN")
+    msg.edit_text("你把脑子放在垃圾桶里了")
 
 
 @user_admin
@@ -234,11 +234,11 @@ def clockanimation(update: Update, context: CallbackContext):
 @run_async
 def policeanimation(update: Update, context: CallbackContext):
     bot, args = context.bot, context.args
-    msg = update.effective_message.reply_text("CALL TIANA POLICE")
+    msg = update.effective_message.reply_text("呼叫警察")
     for x in range(EDIT_TIMES):
         msg.edit_text(police_ani[x % 11])
         time.sleep(EDIT_SLEEP)
-    msg.edit_text("Mastermind POLICE IS HERE")
+    msg.edit_text("天才警察来了")
 
 
 @user_admin
@@ -260,7 +260,7 @@ def bombs(update: Update, context: CallbackContext):
     for x in range(EDIT_TIMES):
         msg.edit_text(bomb_ettu[x % 9])
         time.sleep(EDIT_SLEEP)
-    msg.edit_text("RIP PLOX...")
+    msg.edit_text("安息吧...")
 
 
 @user_admin

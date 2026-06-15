@@ -103,8 +103,8 @@ def send(update, message, keyboard, backup_message):
         elif excp.message == "Button_url_invalid":
             msg = update.effective_message.reply_text(
                 markdown_parser(
-                    backup_message + "\nNote: the current message has an invalid url "
-                    "in one of its buttons. Please update."
+                    backup_message + "\n注意：当前消息的某个按钮包含无效链接，"
+                    "请更新。"
                 ),
                 parse_mode=ParseMode.MARKDOWN,
                 reply_to_message_id=reply,
@@ -112,9 +112,8 @@ def send(update, message, keyboard, backup_message):
         elif excp.message == "Unsupported url protocol":
             msg = update.effective_message.reply_text(
                 markdown_parser(
-                    backup_message + "\nNote: the current message has buttons which "
-                    "use url protocols that are unsupported by "
-                    "telegram. Please update."
+                    backup_message + "\n注意：当前消息的按钮使用了 Telegram 不支持的链接协议，"
+                    "请更新。"
                 ),
                 parse_mode=ParseMode.MARKDOWN,
                 reply_to_message_id=reply,
@@ -122,8 +121,8 @@ def send(update, message, keyboard, backup_message):
         elif excp.message == "Wrong url host":
             msg = update.effective_message.reply_text(
                 markdown_parser(
-                    backup_message + "\nNote: the current message has some bad urls. "
-                    "Please update."
+                    backup_message + "\n注意：当前消息包含一些无效链接，"
+                    "请更新。"
                 ),
                 parse_mode=ParseMode.MARKDOWN,
                 reply_to_message_id=reply,
@@ -136,8 +135,8 @@ def send(update, message, keyboard, backup_message):
         else:
             msg = update.effective_message.reply_text(
                 markdown_parser(
-                    backup_message + "\nNote: An error occured when sending the "
-                    "custom message. Please update."
+                    backup_message + "\n注意：发送自定义消息时出现错误，"
+                    "请更新。"
                 ),
                 parse_mode=ParseMode.MARKDOWN,
                 reply_to_message_id=reply,
@@ -183,75 +182,75 @@ def new_member(update: Update, context: CallbackContext):
             # Give the owner a special welcome
             if new_mem.id == OWNER_ID:
                 update.effective_message.reply_text(
-                    "ᴏʜ ɢᴇɴᴏs? ʟᴇᴛs ɢᴇᴛ ᴛʜɪs ᴍᴏᴠɪɴɢ.", reply_to_message_id=reply
+                    "哦，主人来了？让我们开始吧。", reply_to_message_id=reply
                 )
                 welcome_log = (
                     f"{html.escape(chat.title)}\n"
                     f"#ᴜsᴇʀ_ᴊᴏɪɴᴇᴅ\n"
-                    f"Bᴏᴛ Oᴡɴᴇʀ Jᴜsᴛ Jᴏɪɴᴇᴅ ᴛʜᴇ ɢʀᴏᴜᴘ"
+                    f"机器人主人刚刚加入了群组"
                 )
                 continue
 
             # Welcome Devs
             elif new_mem.id in DEV_USERS:
                 update.effective_message.reply_text(
-                    "Bᴇ ᴄᴏᴏʟ! A ᴍᴇᴍʙᴇʀ ᴏғ ᴛʜᴇ Hᴇʀᴏᴇs Assᴏᴄɪᴀᴛɪᴏɴ Jᴜsᴛ Jᴏɪɴᴇᴅ.",
+                    "保持冷静！英雄协会的成员刚刚加入。",
                     reply_to_message_id=reply,
                 )
                 welcome_log = (
                     f"{html.escape(chat.title)}\n"
                     f"#ᴜsᴇʀ_ᴊᴏɪɴᴇᴅ\n"
-                    f"Bᴏᴛ ᴅᴇᴠ Jᴜsᴛ Jᴏɪɴᴇᴅ ᴛʜᴇ ɢʀᴏᴜᴘ"
+                    f"机器人开发者刚刚加入了群组"
                 )
                 continue
 
             # Welcome Sudos
             elif new_mem.id in DRAGONS:
                 update.effective_message.reply_text(
-                    "Wʜᴏᴀ! A Dʀᴀɢᴏɴ ᴅɪsᴀsᴛᴇʀ Jᴜsᴛ Jᴏɪɴᴇᴅ! Sᴛᴀʏ Aʟᴇʀᴛ!",
+                    "哇！一条龙级灾难刚刚加入！保持警惕！",
                     reply_to_message_id=reply,
                 )
                 welcome_log = (
                     f"{html.escape(chat.title)}\n"
                     f"#ᴜsᴇʀ_ᴊᴏɪɴᴇᴅ\n"
-                    f"Bᴏᴛ Sᴜᴅᴏ Jᴜsᴛ Jᴏɪɴᴇᴅ ᴛʜᴇ ɢʀᴏᴜᴘ"
+                    f"机器人超管刚刚加入了群组"
                 )
                 continue
 
             # Welcome Support
             elif new_mem.id in DEMONS:
                 update.effective_message.reply_text(
-                    "Huh! Someone with a Demon disaster level just joined!",
+                    "哼！一个鬼级灾难刚刚加入！",
                     reply_to_message_id=reply,
                 )
                 welcome_log = (
                     f"{html.escape(chat.title)}\n"
                     f"#USER_JOINED\n"
-                    f"Bot Support just joined the group"
+                    f"机器人支持成员刚刚加入了群组"
                 )
                 continue
 
             # Welcome Whitelisted
             elif new_mem.id in TIGERS:
                 update.effective_message.reply_text(
-                    "Roar! A Tiger disaster just joined!", reply_to_message_id=reply
+                    "吼！一只虎级灾难刚刚加入！", reply_to_message_id=reply
                 )
                 welcome_log = (
                     f"{html.escape(chat.title)}\n"
                     f"#USER_JOINED\n"
-                    f"A whitelisted user joined the chat"
+                    f"一位白名单用户加入了群组"
                 )
                 continue
 
             # Welcome Tigers
             elif new_mem.id in WOLVES:
                 update.effective_message.reply_text(
-                    "Awoo! A Wolf disaster just joined!", reply_to_message_id=reply
+                    "嗷！一只狼级灾难刚刚加入！", reply_to_message_id=reply
                 )
                 welcome_log = (
                     f"{html.escape(chat.title)}\n"
                     f"#USER_JOINED\n"
-                    f"A whitelisted user joined the chat"
+                    f"一位白名单用户加入了群组"
                 )
                 continue
 
@@ -260,20 +259,20 @@ def new_member(update: Update, context: CallbackContext):
                 if not MukeshRobot.ALLOW_CHATS:
                     with suppress(BadRequest):
                         update.effective_message.reply_text(
-                            f"ɢʀᴏᴜᴘ ᴀʀᴇ ᴅɪsᴀʙʟᴇᴅ ғᴏʀ {bot.first_name}, ɪ'ᴍ ʙᴜsʏ."
+                            f"群组功能对 {bot.first_name} 已禁用，我很忙。"
                         )
                     bot.leave_chat(update.effective_chat.id)
                     return
                 bot.send_message(
                     EVENT_LOGS,
-                    "#ɴᴇᴡ_ɢʀᴏᴜᴘ\n<b>ɢʀᴏᴜᴘ ɴᴀᴍᴇ :</b> {}\n<b>ᴄʜᴀᴛ ɪᴅ:</b> <code>{}</code> ".format(
+                    "#ɴᴇᴡ_ɢʀᴏᴜᴘ\n<b>群组名称：</b> {}\n<b>群组 ID：</b> <code>{}</code> ".format(
                         html.escape(chat.title),
                         chat.id,
                     ),
                     parse_mode=ParseMode.HTML,
                 )
                 update.effective_message.reply_text(
-                    "Watashi ga kita !", reply_to_message_id=reply
+                    "我来了！", reply_to_message_id=reply
                 )
                 continue
 
@@ -398,12 +397,12 @@ def new_member(update: Update, context: CallbackContext):
                         )
                     new_join_mem = f'<a href="tg://user?id={user.id}">{html.escape(new_mem.first_name)}</a>'
                     message = msg.reply_text(
-                        f"{new_join_mem}, ᴄʟɪᴄᴋ ᴛʜᴇ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ᴛᴏ ᴘʀᴏᴠᴇ ʏᴏᴜ'ʀᴇ ʜᴜᴍᴀɴ.\n Yᴏᴜ ʜᴀᴠᴇ 𝟷𝟸𝟶 sᴇᴄᴏɴᴅs.",
+                        f"{new_join_mem}，请点击下方按钮证明你是真人。\n 你有 120 秒时间。",
                         reply_markup=InlineKeyboardMarkup(
                             [
                                 {
                                     InlineKeyboardButton(
-                                        text="ʏᴇs ɪ'ᴍ ʜᴜᴍᴀɴ ",
+                                        text="是的，我是真人",
                                         callback_data=f"user_join_({new_mem.id})",
                                     )
                                 }
@@ -460,7 +459,7 @@ def new_member(update: Update, context: CallbackContext):
         return (
             f"{html.escape(chat.title)}\n"
             f"#USER_JOINED\n"
-            f"<b>User</b>: {mention_html(user.id, user.first_name)}\n"
+            f"<b>用户</b>: {mention_html(user.id, user.first_name)}\n"
             f"<b>ID</b>: <code>{user.id}</code>"
         )
 
@@ -479,7 +478,7 @@ def check_not_bot(member, chat_id, message_id, context):
 
         try:
             bot.edit_message_text(
-                "*kicks user*\nThey can always rejoin and try.",
+                "*踢出用户*\n他们随时可以重新加入并再次尝试。",
                 chat_id=chat_id,
                 message_id=message_id,
             )
@@ -583,8 +582,8 @@ def welcome(update: Update, context: CallbackContext):
         noformat = True
         pref, welcome_m, cust_content, welcome_type = sql.get_welc_pref(chat.id)
         update.effective_message.reply_text(
-            f"This chat has it's welcome setting set to: `{pref}`.\n"
-            f"*The welcome message (not filling the {{}}) is:*",
+            f"此群的欢迎消息设置为：`{pref}`。\n"
+            f"*欢迎消息（未填充变量）为：*",
             parse_mode=ParseMode.MARKDOWN,
         )
 
@@ -621,18 +620,18 @@ def welcome(update: Update, context: CallbackContext):
         if args[0].lower() in ("on", "yes"):
             sql.set_welc_preference(str(chat.id), True)
             update.effective_message.reply_text(
-                "Okay! I'll greet members when they join."
+                "好的！有新成员加入时我会发送欢迎消息。"
             )
 
         elif args[0].lower() in ("off", "no"):
             sql.set_welc_preference(str(chat.id), False)
             update.effective_message.reply_text(
-                "I'll go loaf around and not welcome anyone then."
+                "好，那我就不欢迎任何人了。"
             )
 
         else:
             update.effective_message.reply_text(
-                "I understand 'on/yes' or 'off/no' only!"
+                "我只接受 'on/yes' 或 'off/no'！"
             )
 
 
@@ -645,8 +644,8 @@ def goodbye(update: Update, context: CallbackContext):
         noformat = True
         pref, goodbye_m, goodbye_type = sql.get_gdbye_pref(chat.id)
         update.effective_message.reply_text(
-            f"This chat has it's goodbye setting set to: `{pref}`.\n"
-            f"*The goodbye  message (not filling the {{}}) is:*",
+            f"此群的离开消息设置为：`{pref}`。\n"
+            f"*离开消息（未填充变量）为：*",
             parse_mode=ParseMode.MARKDOWN,
         )
 
@@ -674,16 +673,16 @@ def goodbye(update: Update, context: CallbackContext):
     elif len(args) >= 1:
         if args[0].lower() in ("on", "yes"):
             sql.set_gdbye_preference(str(chat.id), True)
-            update.effective_message.reply_text("Ok!")
+            update.effective_message.reply_text("好的！")
 
         elif args[0].lower() in ("off", "no"):
             sql.set_gdbye_preference(str(chat.id), False)
-            update.effective_message.reply_text("Ok!")
+            update.effective_message.reply_text("好的！")
 
         else:
             # idek what you're writing, say yes or no
             update.effective_message.reply_text(
-                "I understand 'on/yes' or 'off/no' only!"
+                "我只接受 'on/yes' 或 'off/no'！"
             )
 
 
@@ -697,17 +696,17 @@ def set_welcome(update: Update, context: CallbackContext) -> str:
     text, data_type, content, buttons = get_welcome_type(msg)
 
     if data_type is None:
-        msg.reply_text("You didn't specify what to reply with!")
+        msg.reply_text("你没有指定回复内容！")
         return ""
 
     sql.set_custom_welcome(chat.id, content, text, data_type, buttons)
-    msg.reply_text("Successfully set custom welcome message!")
+    msg.reply_text("自定义欢迎消息设置成功！")
 
     return (
         f"<b>{html.escape(chat.title)}:</b>\n"
         f"#SET_WELCOME\n"
-        f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
-        f"Set the welcome message."
+        f"<b>管理员：</b> {mention_html(user.id, user.first_name)}\n"
+        f"设置了欢迎消息。"
     )
 
 
@@ -719,14 +718,14 @@ def reset_welcome(update: Update, context: CallbackContext) -> str:
 
     sql.set_custom_welcome(chat.id, None, sql.DEFAULT_WELCOME, sql.Types.TEXT)
     update.effective_message.reply_text(
-        "Successfully reset welcome message to default!"
+        "欢迎消息已重置为默认内容！"
     )
 
     return (
         f"<b>{html.escape(chat.title)}:</b>\n"
         f"#RESET_WELCOME\n"
-        f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
-        f"Reset the welcome message to default."
+        f"<b>管理员：</b> {mention_html(user.id, user.first_name)}\n"
+        f"已将欢迎消息重置为默认内容。"
     )
 
 
@@ -739,16 +738,16 @@ def set_goodbye(update: Update, context: CallbackContext) -> str:
     text, data_type, content, buttons = get_welcome_type(msg)
 
     if data_type is None:
-        msg.reply_text("You didn't specify what to reply with!")
+        msg.reply_text("你没有指定回复内容！")
         return ""
 
     sql.set_custom_gdbye(chat.id, content or text, data_type, buttons)
-    msg.reply_text("Successfully set custom goodbye message!")
+    msg.reply_text("自定义离开消息设置成功！")
     return (
         f"<b>{html.escape(chat.title)}:</b>\n"
         f"#SET_GOODBYE\n"
-        f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
-        f"Set the goodbye message."
+        f"<b>管理员：</b> {mention_html(user.id, user.first_name)}\n"
+        f"设置了离开消息。"
     )
 
 
@@ -760,14 +759,14 @@ def reset_goodbye(update: Update, context: CallbackContext) -> str:
 
     sql.set_custom_gdbye(chat.id, sql.DEFAULT_GOODBYE, sql.Types.TEXT)
     update.effective_message.reply_text(
-        "Successfully reset goodbye message to default!"
+        "离开消息已重置为默认内容！"
     )
 
     return (
         f"<b>{html.escape(chat.title)}:</b>\n"
         f"#RESET_GOODBYE\n"
-        f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
-        f"Reset the goodbye message."
+        f"<b>管理员：</b> {mention_html(user.id, user.first_name)}\n"
+        f"已将离开消息重置为默认内容。"
     )
 
 
@@ -782,46 +781,46 @@ def welcomemute(update: Update, context: CallbackContext) -> str:
     if len(args) >= 1:
         if args[0].lower() in ("off", "no"):
             sql.set_welcome_mutes(chat.id, False)
-            msg.reply_text("I will no longer mute people on joining!")
+            msg.reply_text("成员加入时将不再被静音！")
             return (
                 f"<b>{html.escape(chat.title)}:</b>\n"
                 f"#WELCOME_MUTE\n"
-                f"<b>• Admin:</b> {mention_html(user.id, user.first_name)}\n"
-                f"Has toggled welcome mute to <b>OFF</b>."
+                f"<b>• 管理员：</b> {mention_html(user.id, user.first_name)}\n"
+                f"已将欢迎静音切换为 <b>OFF</b>。"
             )
         elif args[0].lower() in ["soft"]:
             sql.set_welcome_mutes(chat.id, "soft")
             msg.reply_text(
-                "I will restrict users' permission to send media for 24 hours."
+                "新成员发送媒体的权限将被限制 24 小时。"
             )
             return (
                 f"<b>{html.escape(chat.title)}:</b>\n"
                 f"#WELCOME_MUTE\n"
-                f"<b>• Admin:</b> {mention_html(user.id, user.first_name)}\n"
-                f"Has toggled welcome mute to <b>SOFT</b>."
+                f"<b>• 管理员：</b> {mention_html(user.id, user.first_name)}\n"
+                f"已将欢迎静音切换为 <b>SOFT</b>。"
             )
         elif args[0].lower() in ["strong"]:
             sql.set_welcome_mutes(chat.id, "strong")
             msg.reply_text(
-                "I will now mute people when they join until they prove they're not a bot.\nThey will have 120seconds before they get kicked."
+                "新成员加入后将被静音，直到他们证明自己不是机器人。\n他们有 120 秒时间，否则将被踢出。"
             )
             return (
                 f"<b>{html.escape(chat.title)}:</b>\n"
                 f"#WELCOME_MUTE\n"
-                f"<b>• Admin:</b> {mention_html(user.id, user.first_name)}\n"
-                f"Has toggled welcome mute to <b>STRONG</b>."
+                f"<b>• 管理员：</b> {mention_html(user.id, user.first_name)}\n"
+                f"已将欢迎静音切换为 <b>STRONG</b>。"
             )
         else:
             msg.reply_text(
-                "Please enter <code>off</code>/<code>no</code>/<code>soft</code>/<code>strong</code>!",
+                "请输入 <code>off</code>/<code>no</code>/<code>soft</code>/<code>strong</code> 之一！",
                 parse_mode=ParseMode.HTML,
             )
             return ""
     else:
         curr_setting = sql.welcome_mutes(chat.id)
         reply = (
-            f"\n Give me a setting!\nChoose one out of: <code>off</code>/<code>no</code> or <code>soft</code> or <code>strong</code> only! \n"
-            f"Current setting: <code>{curr_setting}</code>"
+            f"\n 请给出一个设置！\n只能选择：<code>off</code>/<code>no</code> 或 <code>soft</code> 或 <code>strong</code>！\n"
+            f"当前设置：<code>{curr_setting}</code>"
         )
         msg.reply_text(reply, parse_mode=ParseMode.HTML)
         return ""
@@ -838,34 +837,34 @@ def clean_welcome(update: Update, context: CallbackContext) -> str:
         clean_pref = sql.get_clean_pref(chat.id)
         if clean_pref:
             update.effective_message.reply_text(
-                "I should be deleting welcome messages up to two days old."
+                "我会删除两天内的旧欢迎消息。"
             )
         else:
             update.effective_message.reply_text(
-                "I'm currently not deleting old welcome messages!"
+                "我目前不会删除旧欢迎消息！"
             )
         return ""
 
     if args[0].lower() in ("on", "yes"):
         sql.set_clean_welcome(str(chat.id), True)
-        update.effective_message.reply_text("I'll try to delete old welcome messages!")
+        update.effective_message.reply_text("我会尝试删除旧的欢迎消息！")
         return (
             f"<b>{html.escape(chat.title)}:</b>\n"
             f"#CLEAN_WELCOME\n"
-            f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
-            f"Has toggled clean welcomes to <code>ON</code>."
+            f"<b>管理员：</b> {mention_html(user.id, user.first_name)}\n"
+            f"已将清理欢迎消息切换为 <code>ON</code>。"
         )
     elif args[0].lower() in ("off", "no"):
         sql.set_clean_welcome(str(chat.id), False)
-        update.effective_message.reply_text("I won't delete old welcome messages.")
+        update.effective_message.reply_text("我不会删除旧的欢迎消息了。")
         return (
             f"<b>{html.escape(chat.title)}:</b>\n"
             f"#CLEAN_WELCOME\n"
-            f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
-            f"Has toggled clean welcomes to <code>OFF</code>."
+            f"<b>管理员：</b> {mention_html(user.id, user.first_name)}\n"
+            f"已将清理欢迎消息切换为 <code>OFF</code>。"
         )
     else:
-        update.effective_message.reply_text("I understand 'on/yes' or 'off/no' only!")
+        update.effective_message.reply_text("我只接受 'on/yes' 或 'off/no'！")
         return ""
 
 
@@ -878,28 +877,28 @@ def cleanservice(update: Update, context: CallbackContext) -> str:
             var = args[0]
             if var in ("no", "off"):
                 sql.set_clean_service(chat.id, False)
-                update.effective_message.reply_text("Welcome clean service is : off")
+                update.effective_message.reply_text("清理服务消息：已关闭")
             elif var in ("yes", "on"):
                 sql.set_clean_service(chat.id, True)
-                update.effective_message.reply_text("Welcome clean service is : on")
+                update.effective_message.reply_text("清理服务消息：已开启")
             else:
                 update.effective_message.reply_text(
-                    "Invalid option", parse_mode=ParseMode.HTML
+                    "无效选项", parse_mode=ParseMode.HTML
                 )
         else:
             update.effective_message.reply_text(
-                "Usage is <code>on</code>/<code>yes</code> or <code>off</code>/<code>no</code>",
+                "用法：<code>on</code>/<code>yes</code> 或 <code>off</code>/<code>no</code>",
                 parse_mode=ParseMode.HTML,
             )
     else:
         curr = sql.clean_service(chat.id)
         if curr:
             update.effective_message.reply_text(
-                "Welcome clean service is : <code>on</code>", parse_mode=ParseMode.HTML
+                "清理服务消息：<code>on</code>", parse_mode=ParseMode.HTML
             )
         else:
             update.effective_message.reply_text(
-                "Welcome clean service is : <code>off</code>", parse_mode=ParseMode.HTML
+                "清理服务消息：<code>off</code>", parse_mode=ParseMode.HTML
             )
 
 
@@ -917,7 +916,7 @@ def user_button(update: Update, context: CallbackContext):
         member_dict = VERIFIED_USER_WAITLIST.pop(user.id)
         member_dict["status"] = True
         VERIFIED_USER_WAITLIST.update({user.id: member_dict})
-        query.answer(text="Yeet! You're a human, unmuted!")
+        query.answer(text="验证成功！你是真人，已解除静音！")
         bot.restrict_chat_member(
             chat.id,
             user.id,
@@ -964,43 +963,37 @@ def user_button(update: Update, context: CallbackContext):
                     sql.set_clean_welcome(chat.id, sent.message_id)
 
     else:
-        query.answer(text="You're not allowed to do this!")
+        query.answer(text="你无权执行此操作！")
 
 
 
 WELC_HELP_TXT = (
-    "Your group's welcome/goodbye messages can be personalised in multiple ways. If you want the messages"
-    " to be individually generated, like the default welcome message is, you can use *these* variables:\n"
-    " • `{first}`*:* this represents the user's *first* name\n"
-    " • `{last}`*:* this represents the user's *last* name. Defaults to *first name* if user has no "
-    "last name.\n"
-    " • `{fullname}`*:* this represents the user's *full* name. Defaults to *first name* if user has no "
-    "last name.\n"
-    " • `{username}`*:* this represents the user's *username*. Defaults to a *mention* of the user's "
-    "first name if has no username.\n"
-    " • `{mention}`*:* this simply *mentions* a user - tagging them with their first name.\n"
-    " • `{id}`*:* this represents the user's *id*\n"
-    " • `{count}`*:* this represents the user's *member number*.\n"
-    " • `{chatname}`*:* this represents the *current chat name*.\n"
-    "\nEach variable MUST be surrounded by `{}` to be replaced.\n"
-    "Welcome messages also support markdown, so you can make any elements bold/italic/code/links. "
-    "Buttons are also supported, so you can make your welcomes look awesome with some nice intro "
-    "buttons.\n"
-    f"To create a button linking to your rules, use this: `[Rules](buttonurl://t.me/{dispatcher.bot.username}?start=group_id)`. "
-    "Simply replace `group_id` with your group's id, which can be obtained via /id, and you're good to "
-    "go. Note that group ids are usually preceded by a `-` sign; this is required, so please don't "
-    "remove it.\n"
-    "You can even set images/gifs/videos/voice messages as the welcome message by "
-    "replying to the desired media, and calling `/setwelcome`."
+    "群组的欢迎/离开消息可以通过多种方式个性化设置。如果你希望消息针对每个用户单独生成（就像默认欢迎消息那样），"
+    "可以使用*以下*变量：\n"
+    " • `{first}`*:* 代表用户的*名字*\n"
+    " • `{last}`*:* 代表用户的*姓氏*。如果用户没有姓氏，则默认为*名字*。\n"
+    " • `{fullname}`*:* 代表用户的*全名*。如果用户没有姓氏，则默认为*名字*。\n"
+    " • `{username}`*:* 代表用户的*用户名*。如果没有用户名，则默认为*提及*用户名字。\n"
+    " • `{mention}`*:* 简单地*提及*用户——用其名字标记。\n"
+    " • `{id}`*:* 代表用户的 *ID*\n"
+    " • `{count}`*:* 代表用户的*成员编号*。\n"
+    " • `{chatname}`*:* 代表*当前群组名称*。\n"
+    "\n每个变量必须用 `{}` 包裹才能被替换。\n"
+    "欢迎消息同样支持 Markdown，可以让文字显示为粗体/斜体/代码/链接。"
+    "也支持按钮，让你的欢迎消息配上精美的按钮更加出彩。\n"
+    f"要创建一个链接到群规的按钮，请使用：`[规则](buttonurl://t.me/{dispatcher.bot.username}?start=group_id)`。"
+    "只需将 `group_id` 替换为群组 ID（可通过 /id 获取）即可。"
+    "注意群组 ID 通常以 `-` 开头，这是必须的，请勿删除。\n"
+    "你还可以通过回复图片/GIF/视频/语音消息，然后发送 `/setwelcome` 将其设置为欢迎消息。"
 )
 
 WELC_MUTE_HELP_TXT = (
-    "ʏᴏᴜ ᴄᴀɴ ɢᴇᴛ ᴛʜᴇ ʙᴏᴛ ᴛᴏ ᴍᴜᴛᴇ ɴᴇᴡ ᴘᴇᴏᴘʟᴇ ᴡʜᴏ ᴊᴏɪɴ ʏᴏᴜʀ ɢʀᴏᴜᴘ ᴀɴᴅ ʜᴇɴᴄᴇ ᴘʀᴇᴠᴇɴᴛ sᴘᴀᴍʙᴏᴛs ғʀᴏᴍ ғʟᴏᴏᴅɪɴɢ ʏᴏᴜʀ ɢʀᴏᴜᴘ. "
-    "ᴛʜᴇ ғᴏʟʟᴏᴡɪɴɢ ᴏᴘᴛɪᴏɴs ᴀʀᴇ ᴘᴏssɪʙʟᴇ:\n"
-    "• `/welcomemute  sᴏғᴛ`*:* ʀᴇsᴛʀɪᴄᴛs ɴᴇᴡ ᴍᴇᴍʙᴇʀs ғʀᴏᴍ sᴇɴᴅɪɴɢ ᴍᴇᴅɪᴀ ғᴏʀ 24 ʜᴏᴜʀs.\n"
-    "• `/welcomemute  sᴛʀᴏɴɢ`*:* ᴍᴜᴛᴇs ɴᴇᴡ ᴍᴇᴍʙᴇʀs ᴛɪʟʟ ᴛʜᴇʏ ᴛᴀᴘ ᴏɴ ᴀ ʙᴜᴛᴛᴏɴ ᴛʜᴇʀᴇʙʏ ᴠᴇʀɪғʏɪɴɢ ᴛʜᴇʏ'ʀᴇ ʜᴜᴍᴀɴ.\n"
-    "• `/welcomemute  ᴏғғ`*:* ᴛᴜʀɴs ᴏғғ ᴡᴇʟᴄᴏᴍᴇᴍᴜᴛᴇ.\n"
-    "*ɴᴏᴛᴇ:* sᴛʀᴏɴɢ ᴍᴏᴅᴇ ᴋɪᴄᴋs ᴀ ᴜsᴇʀ ғʀᴏᴍ ᴛʜᴇ ᴄʜᴀᴛ ɪғ ᴛʜᴇʏ ᴅᴏɴᴛ ᴠᴇʀɪғʏ ɪɴ 120sᴇᴄᴏɴᴅs. ᴛʜᴇʏ ᴄᴀɴ ᴀʟᴡᴀʏs ʀᴇᴊᴏɪɴ ᴛʜᴏᴜɢʜ"
+    "你可以让机器人对加入群组的新成员进行静音，从而防止垃圾机器人刷屏。"
+    "以下是可用选项：\n"
+    "• `/welcomemute  soft`*:* 限制新成员 24 小时内无法发送媒体。\n"
+    "• `/welcomemute  strong`*:* 对新成员静音，直到他们点击按钮验证自己是真人。\n"
+    "• `/welcomemute  off`*:* 关闭欢迎静音。\n"
+    "*注意:* strong 模式下，若用户在 120 秒内未完成验证将被踢出。但他们随时可以重新加入。"
 )
 
 
@@ -1036,24 +1029,24 @@ def __chat_settings__(chat_id, user_id):
     welcome_pref = sql.get_welc_pref(chat_id)[0]
     goodbye_pref = sql.get_gdbye_pref(chat_id)[0]
     return (
-        "This chat has it's welcome preference set to `{}`.\n"
-        "It's goodbye preference is `{}`.".format(welcome_pref, goodbye_pref)
+        "此群的欢迎消息设置为 `{}`。\n"
+        "离开消息设置为 `{}`。".format(welcome_pref, goodbye_pref)
     )
 
 
 __help__ = """
- ❍ /welcome <on/off>*:* ᴇɴᴀʙʟᴇ/ᴅɪsᴀʙʟᴇ ᴡᴇʟᴄᴏᴍᴇ ᴍᴇssᴀɢᴇs.
- ❍ /welcome *:* sʜᴏᴡs ᴄᴜʀʀᴇɴᴛ ᴡᴇʟᴄᴏᴍᴇ sᴇᴛᴛɪɴɢs.
- ❍ /welcome  ɴᴏғᴏʀᴍᴀᴛ*:* sʜᴏᴡs ᴄᴜʀʀᴇɴᴛ ᴡᴇʟᴄᴏᴍᴇ sᴇᴛᴛɪɴɢs, ᴡɪᴛʜᴏᴜᴛ ᴛʜᴇ ғᴏʀᴍᴀᴛᴛɪɴɢ - ᴜsᴇғᴜʟ ᴛᴏ ʀᴇᴄʏᴄʟᴇ ʏᴏᴜʀ ᴡᴇʟᴄᴏᴍᴇ ᴍᴇssᴀɢᴇs!
- ❍ /goodbye *:* sᴀᴍᴇ ᴜsᴀɢᴇ ᴀɴᴅ ᴀʀɢs ᴀs `/welcome`.
- ❍ /setwelcome <sᴏᴍᴇᴛᴇxᴛ>*:* sᴇᴛ ᴀ ᴄᴜsᴛᴏᴍ ᴡᴇʟᴄᴏᴍᴇ ᴍᴇssᴀɢᴇ. ɪғ ᴜsᴇᴅ ʀᴇᴘʟʏɪɴɢ ᴛᴏ ᴍᴇᴅɪᴀ, ᴜsᴇs ᴛʜᴀᴛ ᴍᴇᴅɪᴀ.
- ❍ /setgoodbye  <sᴏᴍᴇᴛᴇxᴛ>*:* sᴇᴛ ᴀ ᴄᴜsᴛᴏᴍ ɢᴏᴏᴅʙʏᴇ ᴍᴇssᴀɢᴇ. ɪғ ᴜsᴇᴅ ʀᴇᴘʟʏɪɴɢ ᴛᴏ ᴍᴇᴅɪᴀ, ᴜsᴇs ᴛʜᴀᴛ ᴍᴇᴅɪᴀ.
- ❍ /resetwelcome *:* ʀᴇsᴇᴛ ᴛᴏ ᴛʜᴇ ᴅᴇғᴀᴜʟᴛ ᴡᴇʟᴄᴏᴍᴇ ᴍᴇssᴀɢᴇ.
- ❍ /resetgoodbye *:* ʀᴇsᴇᴛ ᴛᴏ ᴛʜᴇ ᴅᴇғᴀᴜʟᴛ ɢᴏᴏᴅʙʏᴇ ᴍᴇssᴀɢᴇ.
- ❍ /cleanwelcome  <on/off>*:* ᴏɴ ɴᴇᴡ ᴍᴇᴍʙᴇʀ, ᴛʀʏ ᴛᴏ ᴅᴇʟᴇᴛᴇ ᴛʜᴇ ᴘʀᴇᴠɪᴏᴜs ᴡᴇʟᴄᴏᴍᴇ ᴍᴇssᴀɢᴇ ᴛᴏ ᴀᴠᴏɪᴅ sᴘᴀᴍᴍɪɴɢ ᴛʜᴇ ᴄʜᴀᴛ.
- ❍ /welcomemutehelp *:* ɢɪᴠᴇs ɪɴғᴏʀᴍᴀᴛɪᴏɴ ᴀʙᴏᴜᴛ ᴡᴇʟᴄᴏᴍᴇ ᴍᴜᴛᴇs.
- ❍ /cleanservice <on/off*:* ᴅᴇʟᴇᴛᴇs ᴛᴇʟᴇɢʀᴀᴍs ᴡᴇʟᴄᴏᴍᴇ/ʟᴇғᴛ sᴇʀᴠɪᴄᴇ ᴍᴇssᴀɢᴇs. 
- ❍ /welcomehelp *:* ᴠɪᴇᴡ ᴍᴏʀᴇ ғᴏʀᴍᴀᴛᴛɪɴɢ ɪɴғᴏʀᴍᴀᴛɪᴏɴ ғᴏʀ ᴄᴜsᴛᴏᴍ ᴡᴇʟᴄᴏᴍᴇ/ɢᴏᴏᴅʙʏᴇ ᴍᴇssᴀɢᴇs.
+ ❍ /welcome <开/关>*:* 开启或关闭欢迎消息。
+ ❍ /welcome*:* 显示当前欢迎消息设置。
+ ❍ /welcome noformat*:* 显示无格式的欢迎消息——便于回收利用。
+ ❍ /goodbye*:* 类似 /welcome，但针对离开消息。
+ ❍ /setwelcome <欢迎内容>*:* 设置自定义欢迎消息。支持 Markdown、按钮和媒体。
+ ❍ /setgoodbye <再见内容>*:* 设置自定义再见消息。支持 Markdown、按钮和媒体。
+ ❍ /resetwelcome*:* 恢复默认欢迎消息。
+ ❍ /resetgoodbye*:* 恢复默认再见消息。
+ ❍ /cleanwelcome <开/关>*:* 有新成员加入时，尝试删除上一条欢迎消息以避免刷屏。
+ ❍ /welcomemutehelp*:* 显示欢迎静音的相关信息。
+ ❍ /cleanservice <开/关>*:* 删除 Telegram 的加入/离开服务消息。
+ ❍ /welcomehelp*:* 查看自定义欢迎/再见消息的更多格式说明。
 """
 
 NEW_MEM_HANDLER = MessageHandler(
@@ -1110,7 +1103,7 @@ dispatcher.add_handler(CLEAN_SERVICE_HANDLER)
 dispatcher.add_handler(BUTTON_VERIFY_HANDLER)
 dispatcher.add_handler(WELCOME_MUTE_HELP)
 
-__mod_name__ = "Wᴇʟᴄᴏᴍᴇ"
+__mod_name__ = "欢迎"
 __command_list__ = []
 __handlers__ = [
     NEW_MEM_HANDLER,

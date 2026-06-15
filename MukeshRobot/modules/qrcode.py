@@ -36,20 +36,20 @@ async def qrcode_(_, message: Message):
         text = message.reply_to_message.text
     else:
         text =message.text.split(None, 1)[1]
-    m =await message.reply_text( "`Please wait...,\n\nCreating your Qrcode ...`")
+    m =await message.reply_text( "`请稍候……\n\n正在生成二维码……`")
     write = requests.get(f"https://mukesh-api.vercel.app/qrcode?query={text}").json()["results"]
 
     caption = f"""
-sᴜᴄᴇssғᴜʟʟʏ Gᴇɴᴇʀᴀᴛᴇᴅ Qʀᴄᴏᴅᴇ 💘
-✨ **Gᴇɴᴇʀᴀᴛᴇᴅ ʙʏ :** @{BOT_USERNAME}
-🥀 **ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ :** {message.from_user.mention}
+二维码生成成功 💘
+✨ **生成者：** @{BOT_USERNAME}
+🥀 **请求者：** {message.from_user.mention}
 """
     await m.delete()
     await message.reply_photo(photo=write,caption=caption)
 # -----------CREDITS -----------
 # telegram : @legend_coder
 # github : noob-mukesh
-__mod_name__ = "Qʀᴄᴏᴅᴇ"
+__mod_name__ = "二维码"
 __help__ = """
- ➻ /qrcode : ɢɪᴠᴇ sᴏᴍᴇ ᴛᴇxᴛ ᴛᴏ ɢᴇɴᴇʀᴀᴛᴇ ǫʀᴄᴏᴅᴇ
+ ➻ /qrcode <文本> : 输入文字内容，生成对应二维码
  """

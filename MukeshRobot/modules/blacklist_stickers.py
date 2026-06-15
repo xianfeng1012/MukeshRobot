@@ -33,7 +33,7 @@ def blackliststicker(update: Update, context: CallbackContext):
         chat_id = update.effective_chat.id
         chat_name = chat.title
 
-    sticker_list = "<b>List blacklisted stickers currently in {}:</b>\n".format(
+    sticker_list = "<b>{} 中当前的黑名单贴纸列表：</b>\n".format(
         chat_name
     )
 
@@ -48,12 +48,12 @@ def blackliststicker(update: Update, context: CallbackContext):
 
     split_text = split_message(sticker_list)
     for text in split_text:
-        if sticker_list == "<b>List blacklisted stickers currently in {}:</b>\n".format(
+        if sticker_list == "<b>{} 中当前的黑名单贴纸列表：</b>\n".format(
             chat_name
         ).format(html.escape(chat_name)):
             send_message(
                 update.effective_message,
-                "There are no blacklist stickers in <b>{}</b>!".format(
+                "<b>{}</b> 中暂无黑名单贴纸！".format(
                     html.escape(chat_name)
                 ),
                 parse_mode=ParseMode.HTML,
@@ -96,7 +96,7 @@ def add_blackliststicker(update: Update, context: CallbackContext):
             except BadRequest:
                 send_message(
                     update.effective_message,
-                    "Sticker `{}` can not be found!".format(trigger),
+                    "找不到贴纸 `{}`！".format(trigger),
                     parse_mode="markdown",
                 )
 
@@ -106,7 +106,7 @@ def add_blackliststicker(update: Update, context: CallbackContext):
         if len(to_blacklist) == 1:
             send_message(
                 update.effective_message,
-                "Sticker <code>{}</code> added to blacklist stickers in <b>{}</b>!".format(
+                "贴纸 <code>{}</code> 已添加到 <b>{}</b> 的黑名单贴纸中！".format(
                     html.escape(to_blacklist[0]), html.escape(chat_name)
                 ),
                 parse_mode=ParseMode.HTML,
@@ -114,7 +114,7 @@ def add_blackliststicker(update: Update, context: CallbackContext):
         else:
             send_message(
                 update.effective_message,
-                "<code>{}</code> stickers added to blacklist sticker in <b>{}</b>!".format(
+                "<code>{}</code> 个贴纸已添加到 <b>{}</b> 的黑名单中！".format(
                     added, html.escape(chat_name)
                 ),
                 parse_mode=ParseMode.HTML,
@@ -123,7 +123,7 @@ def add_blackliststicker(update: Update, context: CallbackContext):
         added = 0
         trigger = msg.reply_to_message.sticker.set_name
         if trigger is None:
-            send_message(update.effective_message, "Sticker is invalid!")
+            send_message(update.effective_message, "无效的贴纸！")
             return
         try:
             bot.getStickerSet(trigger)
@@ -132,7 +132,7 @@ def add_blackliststicker(update: Update, context: CallbackContext):
         except BadRequest:
             send_message(
                 update.effective_message,
-                "Sticker `{}` can not be found!".format(trigger),
+                "找不到贴纸 `{}`！".format(trigger),
                 parse_mode="markdown",
             )
 
@@ -141,7 +141,7 @@ def add_blackliststicker(update: Update, context: CallbackContext):
 
         send_message(
             update.effective_message,
-            "Sticker <code>{}</code> added to blacklist stickers in <b>{}</b>!".format(
+            "贴纸 <code>{}</code> 已添加到 <b>{}</b> 的黑名单贴纸中！".format(
                 trigger, html.escape(chat_name)
             ),
             parse_mode=ParseMode.HTML,
@@ -149,7 +149,7 @@ def add_blackliststicker(update: Update, context: CallbackContext):
     else:
         send_message(
             update.effective_message,
-            "Tell me what stickers you want to add to the blacklist.",
+            "请告诉我你想将哪些贴纸添加到黑名单中。",
         )
 
 
@@ -188,20 +188,20 @@ def unblackliststicker(update: Update, context: CallbackContext):
             if successful:
                 send_message(
                     update.effective_message,
-                    "Sticker <code>{}</code> deleted from blacklist in <b>{}</b>!".format(
+                    "贴纸 <code>{}</code> 已从 <b>{}</b> 的黑名单中移除！".format(
                         html.escape(to_unblacklist[0]), html.escape(chat_name)
                     ),
                     parse_mode=ParseMode.HTML,
                 )
             else:
                 send_message(
-                    update.effective_message, "This sticker is not on the blacklist...!"
+                    update.effective_message, "该贴纸不在黑名单中！"
                 )
 
         elif successful == len(to_unblacklist):
             send_message(
                 update.effective_message,
-                "Sticker <code>{}</code> deleted from blacklist in <b>{}</b>!".format(
+                "<code>{}</code> 个贴纸已从 <b>{}</b> 的黑名单中移除！".format(
                     successful, html.escape(chat_name)
                 ),
                 parse_mode=ParseMode.HTML,
@@ -210,14 +210,14 @@ def unblackliststicker(update: Update, context: CallbackContext):
         elif not successful:
             send_message(
                 update.effective_message,
-                "None of these stickers exist, so they cannot be removed.",
+                "这些贴纸均不存在，无法移除。",
                 parse_mode=ParseMode.HTML,
             )
 
         else:
             send_message(
                 update.effective_message,
-                "Sticker <code>{}</code> deleted from blacklist. {} did not exist, so it's not deleted.".format(
+                "<code>{}</code> 个贴纸已从黑名单中移除，另有 {} 个不存在，未作处理。".format(
                     successful, len(to_unblacklist) - successful
                 ),
                 parse_mode=ParseMode.HTML,
@@ -225,14 +225,14 @@ def unblackliststicker(update: Update, context: CallbackContext):
     elif msg.reply_to_message:
         trigger = msg.reply_to_message.sticker.set_name
         if trigger is None:
-            send_message(update.effective_message, "Sticker is invalid!")
+            send_message(update.effective_message, "无效的贴纸！")
             return
         success = sql.rm_from_stickers(chat_id, trigger.lower())
 
         if success:
             send_message(
                 update.effective_message,
-                "Sticker <code>{}</code> deleted from blacklist in <b>{}</b>!".format(
+                "贴纸 <code>{}</code> 已从 <b>{}</b> 的黑名单中移除！".format(
                     trigger, chat_name
                 ),
                 parse_mode=ParseMode.HTML,
@@ -240,12 +240,12 @@ def unblackliststicker(update: Update, context: CallbackContext):
         else:
             send_message(
                 update.effective_message,
-                "{} not found on blacklisted stickers...!".format(trigger),
+                "未在黑名单贴纸中找到 {}！".format(trigger),
             )
     else:
         send_message(
             update.effective_message,
-            "Tell me what stickers you want to add to the blacklist.",
+            "请告诉我你想将哪些贴纸从黑名单中移除。",
         )
 
 
@@ -264,7 +264,7 @@ def blacklist_mode(update: Update, context: CallbackContext):
     else:
         if update.effective_message.chat.type == "private":
             send_message(
-                update.effective_message, "You can do this command in groups, not PM"
+                update.effective_message, "该命令只能在群组中使用，不能在私聊中使用"
             )
             return ""
         chat = update.effective_chat
@@ -273,58 +273,58 @@ def blacklist_mode(update: Update, context: CallbackContext):
 
     if args:
         if args[0].lower() in ["off", "nothing", "no"]:
-            settypeblacklist = "turn off"
+            settypeblacklist = "关闭"
             sql.set_blacklist_strength(chat_id, 0, "0")
         elif args[0].lower() in ["del", "delete"]:
-            settypeblacklist = "left, the message will be deleted"
+            settypeblacklist = "消息将被删除"
             sql.set_blacklist_strength(chat_id, 1, "0")
         elif args[0].lower() == "warn":
-            settypeblacklist = "warned"
+            settypeblacklist = "警告"
             sql.set_blacklist_strength(chat_id, 2, "0")
         elif args[0].lower() == "mute":
-            settypeblacklist = "muted"
+            settypeblacklist = "禁言"
             sql.set_blacklist_strength(chat_id, 3, "0")
         elif args[0].lower() == "kick":
-            settypeblacklist = "kicked"
+            settypeblacklist = "踢出"
             sql.set_blacklist_strength(chat_id, 4, "0")
         elif args[0].lower() == "ban":
-            settypeblacklist = "banned"
+            settypeblacklist = "封禁"
             sql.set_blacklist_strength(chat_id, 5, "0")
         elif args[0].lower() == "tban":
             if len(args) == 1:
-                teks = """It looks like you are trying to set a temporary value to blacklist, but has not determined the time; use `/blstickermode tban <timevalue>`.
-                                          Examples of time values: 4m = 4 minute, 3h = 3 hours, 6d = 6 days, 5w = 5 weeks."""
+                teks = """看起来你在尝试设置黑名单临时封禁，但未指定时长，请使用 `/blstickermode tban <时长>`。
+                                          时长示例：4m = 4分钟，3h = 3小时，6d = 6天，5w = 5周。"""
                 send_message(update.effective_message, teks, parse_mode="markdown")
                 return
-            settypeblacklist = "temporary banned for {}".format(args[1])
+            settypeblacklist = "临时封禁 {}".format(args[1])
             sql.set_blacklist_strength(chat_id, 6, str(args[1]))
         elif args[0].lower() == "tmute":
             if len(args) == 1:
-                teks = """It looks like you are trying to set a temporary value to blacklist, but has not determined the time; use `/blstickermode tmute <timevalue>`.
-                                          Examples of time values: 4m = 4 minute, 3h = 3 hours, 6d = 6 days, 5w = 5 weeks."""
+                teks = """看起来你在尝试设置黑名单临时禁言，但未指定时长，请使用 `/blstickermode tmute <时长>`。
+                                          时长示例：4m = 4分钟，3h = 3小时，6d = 6天，5w = 5周。"""
                 send_message(update.effective_message, teks, parse_mode="markdown")
                 return
-            settypeblacklist = "temporary muted for {}".format(args[1])
+            settypeblacklist = "临时禁言 {}".format(args[1])
             sql.set_blacklist_strength(chat_id, 7, str(args[1]))
         else:
             send_message(
                 update.effective_message,
-                "I only understand off/del/warn/ban/kick/mute/tban/tmute!",
+                "只支持 off/del/warn/ban/kick/mute/tban/tmute！",
             )
             return
         if conn:
-            text = "Blacklist sticker mode changed, users will be `{}` at *{}*!".format(
+            text = "黑名单贴纸模式已更改，用户将被 `{}` 在 *{}*！".format(
                 settypeblacklist, chat_name
             )
         else:
-            text = "Blacklist sticker mode changed, users will be `{}`!".format(
+            text = "黑名单贴纸模式已更改，用户将被 `{}`！".format(
                 settypeblacklist
             )
         send_message(update.effective_message, text, parse_mode="markdown")
         return (
             "<b>{}:</b>\n"
-            "<b>Admin:</b> {}\n"
-            "Changed sticker blacklist mode. users will be {}.".format(
+            "<b>管理员：</b> {}\n"
+            "已更改贴纸黑名单模式，用户将被 {}。".format(
                 html.escape(chat.title),
                 mention_html(user.id, html.escape(user.first_name)),
                 settypeblacklist,
@@ -333,27 +333,27 @@ def blacklist_mode(update: Update, context: CallbackContext):
     else:
         getmode, getvalue = sql.get_blacklist_setting(chat.id)
         if getmode == 0:
-            settypeblacklist = "not active"
+            settypeblacklist = "未启用"
         elif getmode == 1:
-            settypeblacklist = "delete"
+            settypeblacklist = "删除消息"
         elif getmode == 2:
-            settypeblacklist = "warn"
+            settypeblacklist = "警告"
         elif getmode == 3:
-            settypeblacklist = "mute"
+            settypeblacklist = "禁言"
         elif getmode == 4:
-            settypeblacklist = "kick"
+            settypeblacklist = "踢出"
         elif getmode == 5:
-            settypeblacklist = "ban"
+            settypeblacklist = "封禁"
         elif getmode == 6:
-            settypeblacklist = "temporarily banned for {}".format(getvalue)
+            settypeblacklist = "临时封禁 {}".format(getvalue)
         elif getmode == 7:
-            settypeblacklist = "temporarily muted for {}".format(getvalue)
+            settypeblacklist = "临时禁言 {}".format(getvalue)
         if conn:
-            text = "Blacklist sticker mode is currently set to *{}* in *{}*.".format(
-                settypeblacklist, chat_name
+            text = "当前 *{}* 的黑名单贴纸模式设置为 *{}*。".format(
+                chat_name, settypeblacklist
             )
         else:
-            text = "Blacklist sticker mode is currently set to *{}*.".format(
+            text = "当前黑名单贴纸模式设置为 *{}*。".format(
                 settypeblacklist
             )
         send_message(update.effective_message, text, parse_mode=ParseMode.MARKDOWN)
@@ -385,7 +385,7 @@ def del_blackliststicker(update: Update, context: CallbackContext):
                     warn(
                         update.effective_user,
                         chat,
-                        "Using sticker '{}' which in blacklist stickers".format(
+                        "使用了黑名单贴纸 '{}'".format(
                             trigger
                         ),
                         message,
@@ -402,7 +402,7 @@ def del_blackliststicker(update: Update, context: CallbackContext):
                     )
                     bot.sendMessage(
                         chat.id,
-                        "{} muted because using '{}' which in blacklist stickers".format(
+                        "{} 因使用黑名单贴纸 '{}' 已被禁言".format(
                             mention_markdown(user.id, user.first_name), trigger
                         ),
                         parse_mode="markdown",
@@ -414,7 +414,7 @@ def del_blackliststicker(update: Update, context: CallbackContext):
                     if res:
                         bot.sendMessage(
                             chat.id,
-                            "{} kicked because using '{}' which in blacklist stickers".format(
+                            "{} 因使用黑名单贴纸 '{}' 已被踢出".format(
                                 mention_markdown(user.id, user.first_name), trigger
                             ),
                             parse_mode="markdown",
@@ -425,7 +425,7 @@ def del_blackliststicker(update: Update, context: CallbackContext):
                     chat.ban_member(user.id)
                     bot.sendMessage(
                         chat.id,
-                        "{} banned because using '{}' which in blacklist stickers".format(
+                        "{} 因使用黑名单贴纸 '{}' 已被封禁".format(
                             mention_markdown(user.id, user.first_name), trigger
                         ),
                         parse_mode="markdown",
@@ -437,8 +437,8 @@ def del_blackliststicker(update: Update, context: CallbackContext):
                     chat.ban_member(user.id, until_date=bantime)
                     bot.sendMessage(
                         chat.id,
-                        "{} banned for {} because using '{}' which in blacklist stickers".format(
-                            mention_markdown(user.id, user.first_name), value, trigger
+                        "{} 因使用黑名单贴纸 '{}' 已被临时封禁 {}".format(
+                            mention_markdown(user.id, user.first_name), trigger, value
                         ),
                         parse_mode="markdown",
                     )
@@ -454,8 +454,8 @@ def del_blackliststicker(update: Update, context: CallbackContext):
                     )
                     bot.sendMessage(
                         chat.id,
-                        "{} muted for {} because using '{}' which in blacklist stickers".format(
-                            mention_markdown(user.id, user.first_name), value, trigger
+                        "{} 因使用黑名单贴纸 '{}' 已被临时禁言 {}".format(
+                            mention_markdown(user.id, user.first_name), trigger, value
                         ),
                         parse_mode="markdown",
                     )
@@ -479,7 +479,7 @@ def __migrate__(old_chat_id, new_chat_id):
 
 def __chat_settings__(chat_id, user_id):
     blacklisted = sql.num_stickers_chat_filters(chat_id)
-    return "There are `{} `blacklisted stickers.".format(blacklisted)
+    return "共有 `{}` 个黑名单贴纸。".format(blacklisted)
 
 
 def __stats__():
@@ -489,19 +489,19 @@ def __stats__():
 
 
 __help__ = """
-ʙʟᴀᴄᴋʟɪsᴛ sᴛɪᴄᴋᴇʀ ɪs ᴜsᴇᴅ ᴛᴏ sᴛᴏᴘ ᴄᴇʀᴛᴀɪɴ sᴛɪᴄᴋᴇʀs. ᴡʜᴇɴᴇᴠᴇʀ ᴀ sᴛɪᴄᴋᴇʀ ɪs sᴇɴᴛ, ᴛʜᴇ ᴍᴇssᴀɢᴇ ᴡɪʟʟ ʙᴇ ᴅᴇʟᴇᴛᴇᴅ ɪᴍᴍᴇᴅɪᴀᴛᴇʟʏ.
-*ɴᴏᴛᴇ:* ʙʟᴀᴄᴋʟɪsᴛ sᴛɪᴄᴋᴇʀs ᴅᴏ ɴᴏᴛ ᴀғғᴇᴄᴛ ᴛʜᴇ ɢʀᴏᴜᴘ ᴀᴅᴍɪɴ
- ❍ /blsticker*:* sᴇᴇ ᴄᴜʀʀᴇɴᴛ ʙʟᴀᴄᴋʟɪsᴛᴇᴅ sᴛɪᴄᴋᴇʀ
-*ᴏɴʟʏ ᴀᴅᴍɪɴ:*
- ❍ /addblsticker <sᴛɪᴄᴋᴇʀ ʟɪɴᴋ>*:* ᴀᴅᴅ ᴛʜᴇ sᴛɪᴄᴋᴇʀ ᴛʀɪɢɢᴇʀ ᴛᴏ ᴛʜᴇ ʙʟᴀᴄᴋ ʟɪsᴛ. ᴄᴀɴ ʙᴇ ᴀᴅᴅᴇᴅ ᴠɪᴀ ʀᴇᴘʟʏ sᴛɪᴄᴋᴇʀ
- ❍ /unblsticker <sᴛɪᴄᴋᴇʀ ʟɪɴᴋ>*:* ʀᴇᴍᴏᴠᴇ ᴛʀɪɢɢᴇʀs ғʀᴏᴍ ʙʟᴀᴄᴋʟɪsᴛ. ᴛʜᴇ sᴀᴍᴇ ɴᴇᴡʟɪɴᴇ ʟᴏɢɪᴄ ᴀᴘᴘʟɪᴇs ʜᴇʀᴇ, sᴏ ʏᴏᴜ ᴄᴀɴ ᴅᴇʟᴇᴛᴇ ᴍᴜʟᴛɪᴘʟᴇ ᴛʀɪɢɢᴇʀs ᴀᴛ ᴏɴᴄᴇ
- ❍ /rmblsticker <sᴛɪᴄᴋᴇʀ ʟɪɴᴋ>*:* sᴀᴍᴇ ᴀs ᴀʙᴏᴠᴇ
- ❍ /blstickermode <ʙᴀɴ/ᴛʙᴀɴ/ᴍᴜᴛᴇ/ᴛᴍᴜᴛᴇ>*:* sᴇᴛs ᴜᴘ ᴀ ᴅᴇғᴀᴜʟᴛ ᴀᴄᴛɪᴏɴ ᴏɴ ᴡʜᴀᴛ ᴛᴏ ᴅᴏ ɪғ ᴜsᴇʀs ᴜsᴇ ʙʟᴀᴄᴋʟɪsᴛᴇᴅ sᴛɪᴄᴋᴇʀs
-ɴᴏᴛᴇ:
- ❍ <sticker link > ᴄᴀɴ ʙᴇ `https://t.me/addstickers//<sticker>` ᴏʀ ᴊᴜsᴛ `<sticker>` ᴏʀ ʀᴇᴘʟʏ ᴛᴏ ᴛʜᴇ sᴛɪᴄᴋᴇʀ ᴍᴇssᴀɢᴇ
+贴纸黑名单用于屏蔽特定贴纸包。一旦有人发送黑名单贴纸，消息将被立即处理。
+*注意：* 贴纸黑名单不会对群组管理员生效。
+ ❍ /blsticker*：* 查看当前黑名单贴纸列表
+*仅管理员：*
+ ❍ /addblsticker <贴纸链接>*：* 将贴纸添加到黑名单。也可以回复贴纸消息来添加
+ ❍ /unblsticker <贴纸链接>*：* 从黑名单移除贴纸。支持换行批量移除多个贴纸
+ ❍ /rmblsticker <贴纸链接>*：* 同上
+ ❍ /blstickermode <ban/tban/mute/tmute>*：* 设置用户发送黑名单贴纸时的默认处罚方式
+注意：
+ ❍ <贴纸链接> 可以是 `https://t.me/addstickers/<贴纸>` 或直接输入 `<贴纸>` 名称，或者回复贴纸消息
 """
 
-__mod_name__ = "Sᴛɪᴄᴋᴇʀ"
+__mod_name__ = "贴纸黑名单"
 
 BLACKLIST_STICKER_HANDLER = DisableAbleCommandHandler(
     "blsticker", blackliststicker, admin_ok=True, run_async=True

@@ -12,25 +12,25 @@ async def handler(event):
         return
 
     if not event.reply_to_msg_id:
-        await event.reply("Provide Some Text To Draw!")
+        await event.reply("请提供要添加的文字！")
 
         return
 
     reply_message = await event.get_reply_message()
 
     if not reply_message.media:
-        await event.reply("```Reply to a image/sticker.```")
+        await event.reply("```请回复一张图片或贴纸。```")
 
         return
 
     file = await bot.download_media(reply_message)
 
-    msg = await event.reply("```Memifying this image! ✊🏻 ```")
+    msg = await event.reply("```正在生成表情包！✊🏻 ```")
 
     text = str(event.pattern_match.group(1)).strip()
 
     if len(text) < 1:
-        return await msg.reply("You might want to try `/mmf text`")
+        return await msg.reply("请尝试使用 `/mmf 文字`")
 
     meme = await drawText(file, text)
 
@@ -176,6 +176,6 @@ async def drawText(image_path, text):
     return webp_file
 
 
-__mod_name__ = "Mᴍғ"
-__help__ = """ 
-⫸ /mmf <ᴛᴇxᴛ> ◉ ᴛᴏ ᴍᴇᴍɪғʏ """
+__mod_name__ = "表情包生成"
+__help__ = """
+⫸ /mmf <文字> ◉ 生成表情包 """

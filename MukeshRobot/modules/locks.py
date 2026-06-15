@@ -138,7 +138,7 @@ def unrestr_members(
 def locktypes(update, context):
     update.effective_message.reply_text(
         "\n • ".join(
-            ["Locks available: "]
+            ["可锁定类型："]
             + sorted(list(LOCK_TYPES) + list(LOCK_CHAT_RESTRICTION))
         )
     )
@@ -165,26 +165,26 @@ def lock(update, context) -> str:
                     chat = dispatcher.bot.getChat(conn)
                     chat_id = conn
                     chat_name = chat.title
-                    text = "Locked {} for non-admins in {}!".format(ltype, chat_name)
+                    text = "已在 {} 中为非管理员锁定 {}！".format(chat_name, ltype)
                 else:
                     if update.effective_message.chat.type == "private":
                         send_message(
                             update.effective_message,
-                            "This command is meant to use in group not in PM",
+                            "此命令仅限在群组中使用，不可在私聊中使用",
                         )
                         return ""
                     chat = update.effective_chat
                     chat_id = update.effective_chat.id
                     chat_name = update.effective_message.chat.title
-                    text = "Locked {} for non-admins!".format(ltype)
+                    text = "已为非管理员锁定 {}！".format(ltype)
                 sql.update_lock(chat.id, ltype, locked=True)
                 send_message(update.effective_message, text, parse_mode="markdown")
 
                 return (
                     "<b>{}:</b>"
                     "\n#LOCK"
-                    "\n<b>Admin:</b> {}"
-                    "\nLocked <code>{}</code>.".format(
+                    "\n<b>管理员：</b> {}"
+                    "\n已锁定 <code>{}</code>。".format(
                         html.escape(chat.title),
                         mention_html(user.id, user.first_name),
                         ltype,
@@ -198,20 +198,20 @@ def lock(update, context) -> str:
                     chat = dispatcher.bot.getChat(conn)
                     chat_id = conn
                     chat_name = chat.title
-                    text = "Locked {} for all non-admins in {}!".format(
-                        ltype, chat_name
+                    text = "已在 {} 中为所有非管理员锁定 {}！".format(
+                        chat_name, ltype
                     )
                 else:
                     if update.effective_message.chat.type == "private":
                         send_message(
                             update.effective_message,
-                            "This command is meant to use in group not in PM",
+                            "此命令仅限在群组中使用，不可在私聊中使用",
                         )
                         return ""
                     chat = update.effective_chat
                     chat_id = update.effective_chat.id
                     chat_name = update.effective_message.chat.title
-                    text = "Locked {} for all non-admins!".format(ltype)
+                    text = "已为所有非管理员锁定 {}！".format(ltype)
 
                 current_permission = context.bot.getChat(chat_id).permissions
                 context.bot.set_chat_permissions(
@@ -226,8 +226,8 @@ def lock(update, context) -> str:
                 return (
                     "<b>{}:</b>"
                     "\n#Permission_LOCK"
-                    "\n<b>Admin:</b> {}"
-                    "\nLocked <code>{}</code>.".format(
+                    "\n<b>管理员：</b> {}"
+                    "\n已锁定 <code>{}</code>。".format(
                         html.escape(chat.title),
                         mention_html(user.id, user.first_name),
                         ltype,
@@ -237,15 +237,15 @@ def lock(update, context) -> str:
             else:
                 send_message(
                     update.effective_message,
-                    "What are you trying to lock...? Try /locktypes for the list of lockables",
+                    "无效的锁定类型……请使用 /locktypes 查看可锁定类型列表",
                 )
         else:
-            send_message(update.effective_message, "What are you trying to lock...?")
+            send_message(update.effective_message, "请指定要锁定的类型……")
 
     else:
         send_message(
             update.effective_message,
-            "I am not administrator or haven't got enough rights.",
+            "我不是管理员或没有足够的权限。",
         )
 
     return ""
@@ -269,25 +269,25 @@ def unlock(update, context) -> str:
                     chat = dispatcher.bot.getChat(conn)
                     chat_id = conn
                     chat_name = chat.title
-                    text = "Unlocked {} for everyone in {}!".format(ltype, chat_name)
+                    text = "已在 {} 中为所有人解锁 {}！".format(chat_name, ltype)
                 else:
                     if update.effective_message.chat.type == "private":
                         send_message(
                             update.effective_message,
-                            "This command is meant to use in group not in PM",
+                            "此命令仅限在群组中使用，不可在私聊中使用",
                         )
                         return ""
                     chat = update.effective_chat
                     chat_id = update.effective_chat.id
                     chat_name = update.effective_message.chat.title
-                    text = "Unlocked {} for everyone!".format(ltype)
+                    text = "已为所有人解锁 {}！".format(ltype)
                 sql.update_lock(chat.id, ltype, locked=False)
                 send_message(update.effective_message, text, parse_mode="markdown")
                 return (
                     "<b>{}:</b>"
                     "\n#UNLOCK"
-                    "\n<b>Admin:</b> {}"
-                    "\nUnlocked <code>{}</code>.".format(
+                    "\n<b>管理员：</b> {}"
+                    "\n已解锁 <code>{}</code>。".format(
                         html.escape(chat.title),
                         mention_html(user.id, user.first_name),
                         ltype,
@@ -301,24 +301,24 @@ def unlock(update, context) -> str:
                     chat = dispatcher.bot.getChat(conn)
                     chat_id = conn
                     chat_name = chat.title
-                    text = "Unlocked {} for everyone in {}!".format(ltype, chat_name)
+                    text = "已在 {} 中为所有人解锁 {}！".format(chat_name, ltype)
                 else:
                     if update.effective_message.chat.type == "private":
                         send_message(
                             update.effective_message,
-                            "This command is meant to use in group not in PM",
+                            "此命令仅限在群组中使用，不可在私聊中使用",
                         )
                         return ""
                     chat = update.effective_chat
                     chat_id = update.effective_chat.id
                     chat_name = update.effective_message.chat.title
-                    text = "Unlocked {} for everyone!".format(ltype)
+                    text = "已为所有人解锁 {}！".format(ltype)
 
                 can_change_info = chat.get_member(context.bot.id).can_change_info
                 if not can_change_info:
                     send_message(
                         update.effective_message,
-                        "I don't have permission to change group info.",
+                        "我没有权限更改群组信息。",
                         parse_mode="markdown",
                     )
                     return
@@ -337,8 +337,8 @@ def unlock(update, context) -> str:
                 return (
                     "<b>{}:</b>"
                     "\n#UNLOCK"
-                    "\n<b>Admin:</b> {}"
-                    "\nUnlocked <code>{}</code>.".format(
+                    "\n<b>管理员：</b> {}"
+                    "\n已解锁 <code>{}</code>。".format(
                         html.escape(chat.title),
                         mention_html(user.id, user.first_name),
                         ltype,
@@ -347,11 +347,11 @@ def unlock(update, context) -> str:
             else:
                 send_message(
                     update.effective_message,
-                    "What are you trying to unlock...? Try /locktypes for the list of lockables.",
+                    "无效的锁定类型……请使用 /locktypes 查看可锁定类型列表。",
                 )
 
         else:
-            send_message(update.effective_message, "What are you trying to unlock...?")
+            send_message(update.effective_message, "请指定要解锁的类型……")
 
     return ""
 
@@ -425,15 +425,14 @@ def del_lockables(update, context):
                         if not is_bot_admin(chat, context.bot.id):
                             send_message(
                                 update.effective_message,
-                                "I see a bot and I've been told to stop them from joining..."
-                                "but I'm not admin!",
+                                "发现了一个机器人，但我不是管理员，无法阻止其加入！",
                             )
                             return
 
                         chat.kick_member(new_mem.id)
                         send_message(
                             update.effective_message,
-                            "Only admins are allowed to add bots in this chat! Get outta here.",
+                            "本群仅允许管理员添加机器人！",
                         )
                         break
             else:
@@ -454,7 +453,7 @@ def build_lock_message(chat_id):
     locklist = []
     permslist = []
     if locks:
-        res += "*" + "These are the current locks in this Chat:" + "*"
+        res += "*" + "此群当前的锁定情况：" + "*"
         if locks:
             locklist.append("sticker = `{}`".format(locks.sticker))
             locklist.append("audio = `{}`".format(locks.audio))
@@ -489,7 +488,7 @@ def build_lock_message(chat_id):
         # Building lock list string
         for x in locklist:
             res += "\n • {}".format(x)
-    res += "\n\n*" + "These are the current chat permissions:" + "*"
+    res += "\n\n*" + "当前群组权限：" + "*"
     for x in permslist:
         res += "\n • {}".format(x)
     return res
@@ -510,7 +509,7 @@ def list_locks(update, context):
         if update.effective_message.chat.type == "private":
             send_message(
                 update.effective_message,
-                "This command is meant to use in group not in PM",
+                "此命令仅限在群组中使用，不可在私聊中使用",
             )
             return ""
         chat = update.effective_chat
@@ -518,7 +517,7 @@ def list_locks(update, context):
 
     res = build_lock_message(chat.id)
     if conn:
-        res = res.replace("Locks in", "*{}*".format(chat_name))
+        res = res.replace("此群当前的锁定情况：", "{}当前的锁定情况：".format(chat_name))
 
     send_message(update.effective_message, res, parse_mode=ParseMode.MARKDOWN)
 
@@ -561,30 +560,27 @@ def __chat_settings__(chat_id, user_id):
 
 
 __help__ = """
-ᴅᴏ sᴛɪᴄᴋᴇʀs ᴀɴɴᴏʏ ʏᴏᴜ? ᴏʀ ᴡᴀɴᴛ ᴛᴏ ᴀᴠᴏɪᴅ ᴘᴇᴏᴘʟᴇ sʜᴀʀɪɴɢ ʟɪɴᴋs? ᴏʀ ᴘɪᴄᴛᴜʀᴇs? \
-ʏᴏᴜ'ʀᴇ ɪɴ ᴛʜᴇ ʀɪɢʜᴛ ᴘʟᴀᴄᴇ!
-ᴛʜᴇ ʟᴏᴄᴋs ᴍᴏᴅᴜʟᴇ ᴀʟʟᴏᴡs ʏᴏᴜ ᴛᴏ ʟᴏᴄᴋ ᴀᴡᴀʏ sᴏᴍᴇ ᴄᴏᴍᴍᴏɴ ɪᴛᴇᴍs ɪɴ ᴛʜᴇ \
-ᴛᴇʟᴇɢʀᴀᴍ ᴡᴏʀʟᴅ; ᴛʜᴇ ʙᴏᴛ ᴡɪʟʟ ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ ᴅᴇʟᴇᴛᴇ ᴛʜᴇᴍ!
+贴纸让你烦恼？或者想阻止人们分享链接？或者图片？你来对地方了！
+锁定模块允许你锁定 Telegram 中的某些内容类型；机器人会自动删除它们！
 
- ❍ /locktypes *:* ʟɪsᴛs ᴀʟʟ ᴘᴏssɪʙʟᴇ ʟᴏᴄᴋᴛʏᴘᴇs
- 
-*ᴀᴅᴍɪɴs ᴏɴʟʏ:*
- ❍ /lock  <ᴛʏᴘᴇ>*:* ʟᴏᴄᴋ ɪᴛᴇᴍs ᴏғ ᴀ ᴄᴇʀᴛᴀɪɴ ᴛʏᴘᴇ (ɴᴏᴛ ᴀᴠᴀɪʟᴀʙʟᴇ ɪɴ ᴘʀɪᴠᴀᴛᴇ)
- ❍ /unlock  <ᴛʏᴘᴇ>*:* ᴜɴʟᴏᴄᴋ ɪᴛᴇᴍs ᴏғ ᴀ ᴄᴇʀᴛᴀɪɴ ᴛʏᴘᴇ (ɴᴏᴛ ᴀᴠᴀɪʟᴀʙʟᴇ ɪɴ ᴘʀɪᴠᴀᴛᴇ)
- ❍ /locks *:* ᴛʜᴇ ᴄᴜʀʀᴇɴᴛ ʟɪsᴛ ᴏғ ʟᴏᴄᴋs ɪɴ ᴛʜɪs ᴄʜᴀᴛ.
- 
-ʟᴏᴄᴋs ᴄᴀɴ ʙᴇ ᴜsᴇᴅ ᴛᴏ ʀᴇsᴛʀɪᴄᴛ ᴀ ɢʀᴏᴜᴘ's ᴜsᴇʀs.
-ᴇɢ:
-ʟᴏᴄᴋɪɴɢ ᴜʀʟs ᴡɪʟʟ ᴀᴜᴛᴏ-ᴅᴇʟᴇᴛᴇ ᴀʟʟ ᴍᴇssᴀɢᴇs ᴡɪᴛʜ ᴜʀʟs, ʟᴏᴄᴋɪɴɢ sᴛɪᴄᴋᴇʀs ᴡɪʟʟ ʀᴇsᴛʀɪᴄᴛ ᴀʟʟ \
-ɴᴏɴ-ᴀᴅᴍɪɴ ᴜsᴇʀs ғʀᴏᴍ sᴇɴᴅɪɴɢ sᴛɪᴄᴋᴇʀs, ᴇᴛᴄ.
-ʟᴏᴄᴋɪɴɢ ʙᴏᴛs ᴡɪʟʟ sᴛᴏᴘ ɴᴏɴ-ᴀᴅᴍɪɴs ғʀᴏᴍ ᴀᴅᴅɪɴɢ ʙᴏᴛs ᴛᴏ ᴛʜᴇ ᴄʜᴀᴛ.
+ ❍ /locktypes *:* 列出所有可锁定的类型
 
-*ɴᴏᴛᴇ:*
- • ᴜɴʟᴏᴄᴋɪɴɢ ᴘᴇʀᴍɪssɪᴏɴ *ɪɴғᴏ* ᴡɪʟʟ ᴀʟʟᴏᴡ ᴍᴇᴍʙᴇʀs (ɴᴏɴ-ᴀᴅᴍɪɴs) ᴛᴏ ᴄʜᴀɴɢᴇ ᴛʜᴇ ɢʀᴏᴜᴘ ɪɴғᴏʀᴍᴀᴛɪᴏɴ, sᴜᴄʜ ᴀs ᴛʜᴇ ᴅᴇsᴄʀɪᴘᴛɪᴏɴ ᴏʀ ᴛʜᴇ ɢʀᴏᴜᴘ ɴᴀᴍᴇ
- • ᴜɴʟᴏᴄᴋɪɴɢ ᴘᴇʀᴍɪssɪᴏɴ *ᴘɪɴ* ᴡɪʟʟ ᴀʟʟᴏᴡ ᴍᴇᴍʙᴇʀs (ɴᴏɴ-ᴀᴅᴍɪɴs) ᴛᴏ ᴘɪɴ ᴀ ᴍᴇssᴀɢᴇ ɪɴ ᴀ ɢʀᴏᴜᴘ
+*仅管理员:*
+ ❍ /lock  <类型>*:* 锁定某类型的内容（不可在私聊中使用）
+ ❍ /unlock  <类型>*:* 解锁某类型的内容（不可在私聊中使用）
+ ❍ /locks *:* 查看此群的当前锁定列表
+
+锁定功能可用于限制群组用户。
+例如：
+锁定 urls 后将自动删除所有含链接的消息，锁定 stickers 后将禁止非管理员发送贴纸，等等。
+锁定 bots 后将阻止非管理员向群组添加机器人。
+
+*注意:*
+ • 解锁权限 *info* 将允许成员（非管理员）更改群组信息，如简介或群名
+ • 解锁权限 *pin* 将允许成员（非管理员）在群组中置顶消息
 """
 
-__mod_name__ = "Lᴏᴄᴋs"
+__mod_name__ = "锁定"
 
 LOCKTYPES_HANDLER = DisableAbleCommandHandler("locktypes", locktypes, run_async=True)
 LOCK_HANDLER = CommandHandler(

@@ -1,0 +1,117 @@
+"""
+UserBot 主程序
+用户管理机器人 - 负责个人档案、活动记录、统计等功能
+"""
+import logging
+import sys
+from telegram import Update
+from telegram.ext import Application, CommandHandler, ContextTypes
+
+from config import USER_BOT_TOKEN, LOG_LEVEL, LOG_FILE
+from handlers import (
+    cmd_profile, cmd_activity, cmd_stats, cmd_privacy, cmd_achievements
+)
+
+# ============ 日志配置 ============
+logging.basicConfig(
+    level=getattr(logging, LOG_LEVEL),
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler(LOG_FILE),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
+
+
+# ============ 命令处理 ============
+async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """开始命令"""
+    await update.message.reply_text(
+        "👤 *用户管理机器人*\n\n"
+        "欢迎使用！我负责:\n"
+        "👤 个人档案管理\n"
+        "📋 活动记录查询\n"
+        "📊 统计数据分析\n"
+        "🎖️ 成就展示\n\n"
+        "*可用命令:*\n"
+        "/profile - 查看个人档案\n"
+        "/activity - 活动记录\n"
+        "/stats - 统计数据\n"
+        "/achievements - 成就展示\n"
+        "/privacy - 隐私设置",
+        parse_mode='Markdown'
+    )
+
+
+async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """帮助命令"""
+    await update.message.reply_text(
+        "📖 *用户管理机器人帮助*\n\n"
+        "*命令列表:*\n"
+        "/profile - 👤 查看个人档案和统计\n"
+        "/activity - 📋 查看最近活动记录\n"
+        "/stats - 📊 查看详细统计数据\n"
+        "/achievements - 🎖️ 查看已获得的成就\n"
+        "/privacy - 🔐 管理隐私设置\n"
+        "/help - ❓ 显示此帮助信息",
+        parse_mode='Markdown'
+    )
+
+
+# ============ 应用初始化 ============
+async def post_init(application: Application) -> None:
+    """应用初始化后的回调"""
+    logger.info("UserBot 已启动")
+
+
+async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """错误处理"""
+    logger.error(f"UserBot 发生错误: {context.error}", exc_info=context.error)
+
+
+def main():
+    """主函数"""
+    # 检查Token
+    if not USER_BOT_TOKEN:
+        logger.error("USER_BOT_TOKEN 未设置")
+        sys.exit(1)
+
+    # 创建应用
+    application = Application.builder().token(USER_BOT_TOKEN).build()
+
+    # 注册处理器
+    application.add_handler(CommandHandler("start", cmd_start))
+    application.add_handler(CommandHandler("help", cmd_help))
+    application.add_handler(CommandHandler("profile", cmd_profile))
+    application.add_handler(CommandHandler("activity", cmd_activity))
+    application.add_handler(CommandHandler("stats", cmd_stats))
+    application.add_handler(CommandHandler("achievements", cmd_achievements))
+    application.add_handler(CommandHandler("privacy", cmd_privacy))
+
+    # 错误处理
+    application.add_error_handler(error_handler)
+
+    # 初始化回调
+    application.post_init = post_init
+
+    # 启动
+    logger.info("UserBot 启动中...")
+    try:
+        application.run_polling(
+            allowed_updates=Update.ALL_TYPES,
+            stop_signals=[2, 15],
+            timeout=30,
+            read_timeout=30,
+            write_timeout=30,
+            connect_timeout=30
+        )
+    except KeyboardInterrupt:
+        logger.info("UserBot 被中断")
+    except Exception as e:
+        logger.error(f"UserBot 运行失败: {e}")
+        sys.exit(1)
+
+
+if __name__ == '__main__':
+    main()

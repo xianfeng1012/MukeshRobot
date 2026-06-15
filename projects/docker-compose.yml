@@ -1,0 +1,133 @@
+version: '3.8'
+
+services:
+  # MongoDB - 数据库
+  mongodb:
+    image: mongo:latest
+    container_name: telegram_bot_mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: telegram_bot_db
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - bot_network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis - 缓存
+  redis:
+    image: redis:alpine
+    container_name: telegram_bot_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - bot_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 共享API服务器
+  shared-api:
+    build:
+      context: ./shared_api
+    container_name: telegram_bot_shared_api
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      MONGO_URI: mongodb://mongodb:27017
+      MONGO_DB: telegram_bot_db
+      REDIS_URL: redis://redis:6379/0
+      API_HOST: 0.0.0.0
+      API_PORT: 5000
+      API_DEBUG: "False"
+      LOG_LEVEL: INFO
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - bot_network
+    volumes:
+      - ./shared_api/shared_api.log:/app/shared_api.log
+
+  # GroupBot - 群管理机器人
+  group-bot:
+    build:
+      context: ./group_bot
+    container_name: telegram_bot_group_bot
+    restart: always
+    environment:
+      GROUP_BOT_TOKEN: ${GROUP_BOT_TOKEN}
+      SHARED_API_URL: http://shared-api:5000/api
+      API_BOT_TOKEN: ${API_BOT_TOKEN}
+      LOG_LEVEL: INFO
+    depends_on:
+      - shared-api
+    networks:
+      - bot_network
+    volumes:
+      - ./group_bot/group_bot.log:/app/group_bot.log
+
+  # MiniAppBot - 小程序管理机器人
+  miniapp-bot:
+    build:
+      context: ./miniapp_bot
+    container_name: telegram_bot_miniapp_bot
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      MINIAPP_BOT_TOKEN: ${MINIAPP_BOT_TOKEN}
+      SHARED_API_URL: http://shared-api:5000/api
+      API_BOT_TOKEN: ${API_BOT_TOKEN}
+      MINIAPP_URL: ${MINIAPP_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      LOG_LEVEL: INFO
+    depends_on:
+      - shared-api
+    networks:
+      - bot_network
+    volumes:
+      - ./miniapp_bot/miniapp_bot.log:/app/miniapp_bot.log
+
+  # UserBot - 用户管理机器人
+  user-bot:
+    build:
+      context: ./user_bot
+    container_name: telegram_bot_user_bot
+    restart: always
+    environment:
+      USER_BOT_TOKEN: ${USER_BOT_TOKEN}
+      SHARED_API_URL: http://shared-api:5000/api
+      API_BOT_TOKEN: ${API_BOT_TOKEN}
+      LOG_LEVEL: INFO
+    depends_on:
+      - shared-api
+    networks:
+      - bot_network
+    volumes:
+      - ./user_bot/user_bot.log:/app/user_bot.log
+
+networks:
+  bot_network:
+    driver: bridge
+
+volumes:
+  mongo_data:
+    driver: local
+  redis_data:
+    driver: local

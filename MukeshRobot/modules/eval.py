@@ -144,7 +144,7 @@ def clear(update: Update, context: CallbackContext):
     global namespaces
     if update.message.chat_id in namespaces:
         del namespaces[update.message.chat_id]
-    send("Cleared locals.", bot, update)
+    send("已清除局部变量。", bot, update)
 
 
 EVAL_HANDLER = CommandHandler(("e", "ev", "eva", "eval"), evaluate, run_async=True)
@@ -155,10 +155,10 @@ dispatcher.add_handler(EVAL_HANDLER)
 dispatcher.add_handler(EXEC_HANDLER)
 dispatcher.add_handler(CLEAR_HANDLER)
 
-__mod_name__ = "Eᴠᴀʟ"
+__mod_name__ = "执行代码"
 __help__ = f"""
-★ᴏᴡɴᴇʀ ᴄᴍᴅ ★
-★ /eval :- to evaluate simple code
-★ /ex :-  to execute code
-★ /clear :- to run clear cmd
+★ 仅限所有者 ★
+★ /eval ：执行简单代码（eval）
+★ /ex ：执行代码（exec）
+★ /clear ：清除局部变量
 """

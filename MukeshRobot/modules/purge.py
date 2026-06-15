@@ -17,16 +17,16 @@ async def purge_messages(event):
     if not await user_is_admin(
         user_id=event.sender_id, message=event
     ) and event.from_id not in [1087968824]:
-        await event.reply("Only Admins are allowed to use this command")
+        await event.reply("此命令仅限管理员使用")
         return
 
     if not await can_delete_messages(message=event):
-        await event.reply("Can't seem to purge the message")
+        await event.reply("无法删除该消息")
         return
 
     reply_msg = await event.get_reply_message()
     if not reply_msg:
-        await event.reply("Reply to a message to select where to start purging from.")
+        await event.reply("请回复一条消息，以指定批量删除的起始位置。")
         return
     messages = []
     message_id = reply_msg.id
@@ -44,7 +44,7 @@ async def purge_messages(event):
     except:
         pass
     time_ = time.perf_counter() - start
-    text = f"ᴘᴜʀɢᴇᴅ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ɪɴ {time_:0.2f} ꜱᴇᴄᴏɴᴅ(s)\nꜰᴀꜱᴛ ᴀꜰ 😎"
+    text = f"批量删除完成，耗时 {time_:0.2f} 秒\n够快吧 😎"
     await event.respond(text, parse_mode="markdown")
 
 
@@ -55,16 +55,16 @@ async def delete_messages(event):
     if not await user_is_admin(
         user_id=event.sender_id, message=event
     ) and event.from_id not in [1087968824]:
-        await event.reply("Only Admins are allowed to use this command")
+        await event.reply("此命令仅限管理员使用")
         return
 
     if not await can_delete_messages(message=event):
-        await event.reply("Can't seem to delete this?")
+        await event.reply("无法删除该消息")
         return
 
     message = await event.get_reply_message()
     if not message:
-        await event.reply("Whadya want to delete?")
+        await event.reply("请回复一条需要删除的消息。")
         return
     chat = await event.get_input_chat()
     del_message = [message, event.message]
@@ -75,16 +75,16 @@ async def spurge_messages(event):
     if not await user_is_admin(
         user_id=event.sender_id, message=event
     ) and event.from_id not in [1087968824]:
-        await event.reply("Only Admins are allowed to use this command")
+        await event.reply("此命令仅限管理员使用")
         return
 
     if not await can_delete_messages(message=event):
-        await event.reply("Can't seem to purge the message")
+        await event.reply("无法删除该消息")
         return
 
     reply_msg = await event.get_reply_message()
     if not reply_msg:
-        await event.reply("Reply to a message to select where to start purging from.")
+        await event.reply("请回复一条消息，以指定批量删除的起始位置。")
         return
     messages = []
     message_id = reply_msg.id
@@ -103,10 +103,10 @@ async def spurge_messages(event):
         pass
 
 __help__ = """
- ❍ /del *:* ᴅᴇʟᴇᴛᴇs ᴛʜᴇ ᴍᴇssᴀɢᴇ ʏᴏᴜ ʀᴇᴘʟɪᴇᴅ ᴛᴏ
- ❍ /purge *:* ᴅᴇʟᴇᴛᴇs ᴀʟʟ ᴍᴇssᴀɢᴇs ʙᴇᴛᴡᴇᴇɴ ᴛʜɪs ᴀɴᴅ ᴛʜᴇ ʀᴇᴘʟɪᴇᴅ ᴛᴏ ᴍᴇssᴀɢᴇ.
- ❍ /purge  <ɪɴᴛᴇɢᴇʀ x>*:* ᴅᴇʟᴇᴛᴇs ᴛʜᴇ ʀᴇᴘʟɪᴇᴅ ᴍᴇssᴀɢᴇ, ᴀɴᴅ x ᴍᴇssᴀɢᴇs ғᴏʟʟᴏᴡɪɴɢ ɪᴛ ɪғ ʀᴇᴘʟɪᴇᴅ ᴛᴏ ᴀ ᴍᴇssᴀɢᴇ.
- ❍ /spurge *:* ᴅᴇʟᴇᴛᴇs ᴀʟʟ ᴍᴇssᴀɢᴇs ʙᴇᴛᴡᴇᴇɴ ᴛʜɪs ᴀɴᴅ ᴛʜᴇ ʀᴇᴘʟɪᴇᴅ ᴛᴏ ᴍᴇssᴀɢᴇ.
+ ❍ /del *:* 删除你所回复的那条消息
+ ❍ /purge *:* 批量删除从当前消息到所回复消息之间的全部消息
+ ❍ /purge <整数 x> *:* 删除所回复的消息及其之后的 x 条消息
+ ❍ /spurge *:* 静默批量删除从当前消息到所回复消息之间的全部消息
 """
 
 PURGE_HANDLER = purge_messages, events.NewMessage(pattern="^[!/]purge$")
@@ -116,6 +116,6 @@ SPURGE_HANDLER = spurge_messages, events.NewMessage(pattern="^[!/]spurge$")
 telethn.add_event_handler(*PURGE_HANDLER)
 telethn.add_event_handler(*DEL_HANDLER)
 telethn.add_event_handler(*SPURGE_HANDLER)
-__mod_name__ = "Pᴜʀɢᴇ"
+__mod_name__ = "批量删除"
 __command_list__ = ["del", "purge","spurge"]
 __handlers__ = [PURGE_HANDLER, DEL_HANDLER,SPURGE_HANDLER]

@@ -21,11 +21,11 @@ def ReplyCheck(message: Message):
 
 infotext = (
     "[{full_name}](tg://user?id={user_id})\n\n"
-    " ➻ ᴜsᴇʀ ɪᴅ: `{user_id}`\n"
-    " ➻ ғɪʀsᴛ ɴᴀᴍᴇ: `{first_name}`\n"
-    " ➻ ʟᴀsᴛ ɴᴀᴍᴇ: `{last_name}`\n"
-    " ➻ ᴜsᴇʀɴᴀᴍᴇ: `@{username}`\n"
-    " ➻ ʟᴀsᴛ sᴇᴇɴ: `{last_online}`"
+    " ➻ 用户 ID: `{user_id}`\n"
+    " ➻ 名字: `{first_name}`\n"
+    " ➻ 姓氏: `{last_name}`\n"
+    " ➻ 用户名: `@{username}`\n"
+    " ➻ 最后上线: `{last_online}`"
 )
 
 
@@ -33,15 +33,15 @@ def LastOnline(user: User):
     if user.is_bot:
         return ""
     elif user.status == "recently":
-        return "ʀᴇᴄᴇɴᴛʟʏ"
+        return "最近在线"
     elif user.status == "within_week":
-        return "ᴡɪᴛʜɪɴ ᴛʜᴇ ʟᴀsᴛ ᴡᴇᴇᴋ"
+        return "一周内在线"
     elif user.status == "within_month":
-        return "ᴡɪᴛʜɪɴ ᴛʜᴇ ʟᴀsᴛ ᴍᴏɴᴛʜ"
+        return "一个月内在线"
     elif user.status == "long_time_ago":
-        return "ᴀ ʟᴏɴɢ ᴛɪᴍᴇ ᴀɢᴏ :("
+        return "很久以前 :("
     elif user.status == "online":
-        return "ᴄᴜʀʀᴇɴᴛʟʏ ᴏɴʟɪɴᴇ"
+        return "当前在线"
     elif user.status == "offline":
         return datetime.fromtimestamp(user.status.date).strftime(
             "%a, %d %b %Y, %H:%M:%S"
@@ -68,7 +68,7 @@ async def whois(client, message):
     try:
         user = await client.get_users(get_user)
     except PeerIdInvalid:
-        await message.reply("I don't know that user.")
+        await message.reply("未找到该用户。")
         return
     desc = await client.get_chat(get_user)
     desc = desc.description

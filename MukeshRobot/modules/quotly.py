@@ -331,7 +331,7 @@ setattr(Message, "try_delete", _try_delete)
 async def quott_(event):
     match = event.pattern_match.group(1).strip()
     if not event.is_reply:
-        return await event.eor("ᴘʟᴇᴀsᴇ ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴍᴇssᴀɢᴇ")
+        return await event.eor("请回复一条消息")
     msg = await event.reply("⚡️")
     reply = await event.get_reply_message()
     replied_to, reply_ = None, None
@@ -390,9 +390,9 @@ async def quott_(event):
     return message
 
 
-__mod_name__ = "Qᴜᴏᴛʟʏ"
+__mod_name__ = "引用生成"
 
 __help__="""
-•➥ /q → ᴄʀᴇᴀᴛᴇ ᴀ ǫᴜᴏᴛᴇ ғʀᴏᴍ ᴛʜᴇ ᴍᴇssᴀɢᴇ 
-•➥ /q r → ᴄʀᴇᴀᴛᴇ ᴀ ǫᴜᴏᴛᴇ ғʀᴏᴍ ᴛʜᴇ ᴍᴇssᴀɢᴇ ᴡɪᴛʜ ʀᴇᴘʟʏ
+•➥ /q → 将所回复的消息生成引用图片
+•➥ /q r → 将所回复的消息（含回复内容）生成引用图片
  """

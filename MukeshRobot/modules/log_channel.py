@@ -109,13 +109,13 @@ if is_module_loaded(FILENAME):
         if log_channel:
             log_channel_info = bot.get_chat(log_channel)
             message.reply_text(
-                f"This group has all it's logs sent to:"
+                f"此群组的所有日志已发送至："
                 f" {escape_markdown(log_channel_info.title)} (`{log_channel}`)",
                 parse_mode=ParseMode.MARKDOWN,
             )
 
         else:
-            message.reply_text("No log channel has been set for this group!")
+            message.reply_text("此群组未设置日志频道！")
 
     @user_admin
     def setlog(update: Update, context: CallbackContext):
@@ -124,7 +124,7 @@ if is_module_loaded(FILENAME):
         chat = update.effective_chat
         if chat.type == chat.CHANNEL:
             message.reply_text(
-                "Now, forward the /setlog to the group you want to tie this channel to!"
+                "现在，将 /setlog 转发到你想要关联此频道的群组！"
             )
 
         elif message.forward_from_chat:
@@ -142,22 +142,22 @@ if is_module_loaded(FILENAME):
             try:
                 bot.send_message(
                     message.forward_from_chat.id,
-                    f"This channel has been set as the log channel for {chat.title or chat.first_name}.",
+                    f"此频道已设置为 {chat.title or chat.first_name} 的日志频道。",
                 )
             except Unauthorized as excp:
                 if excp.message == "Forbidden: bot is not a member of the channel chat":
-                    bot.send_message(chat.id, "Successfully set log channel!")
+                    bot.send_message(chat.id, "成功设置日志频道！")
                 else:
                     LOGGER.exception("ERROR in setting the log channel.")
 
-            bot.send_message(chat.id, "Successfully set log channel!")
+            bot.send_message(chat.id, "成功设置日志频道！")
 
         else:
             message.reply_text(
-                "The steps to set a log channel are:\n"
-                " - add bot to the desired channel\n"
-                " - send /setlog to the channel\n"
-                " - forward the /setlog to the group\n"
+                "设置日志频道的步骤为：\n"
+                " - 将机器人添加到所需频道\n"
+                " - 在频道中发送 /setlog\n"
+                " - 将 /setlog 转发到群组\n"
             )
 
     @user_admin
@@ -169,15 +169,15 @@ if is_module_loaded(FILENAME):
         log_channel = sql.stop_chat_logging(chat.id)
         if log_channel:
             bot.send_message(
-                log_channel, f"Channel has been unlinked from {chat.title}"
+                log_channel, f"频道已从 {chat.title} 解除关联"
             )
-            message.reply_text("Log channel has been un-set.")
+            message.reply_text("日志频道已取消设置。")
 
         else:
-            message.reply_text("No log channel has been set yet!")
+            message.reply_text("还未设置日志频道！")
 
     def __stats__():
-        return f"• {sql.num_logchannels()} ʟᴏɢ ᴄʜᴀɴɴᴇʟs sᴇᴛ."
+        return f"• {sql.num_logchannels()} 个日志频道已设置。"
 
     def __migrate__(old_chat_id, new_chat_id):
         sql.migrate_chat(old_chat_id, new_chat_id)
@@ -186,22 +186,22 @@ if is_module_loaded(FILENAME):
         log_channel = sql.get_chat_log_channel(chat_id)
         if log_channel:
             log_channel_info = dispatcher.bot.get_chat(log_channel)
-            return f"This group has all it's logs sent to: {escape_markdown(log_channel_info.title)} (`{log_channel}`)"
-        return "No log channel is set for this group!"
+            return f"此群组的所有日志已发送至：{escape_markdown(log_channel_info.title)} (`{log_channel}`)"
+        return "此群组未设置日志频道！"
 
     __help__ = """
-*ᴀᴅᴍɪɴs ᴏɴʟʏ:*
- ❍ /logchannel *:* ɢᴇᴛ ʟᴏɢ ᴄʜᴀɴɴᴇʟ ɪɴғᴏ
- ❍ /setlog *:* sᴇᴛ ᴛʜᴇ ʟᴏɢ ᴄʜᴀɴɴᴇʟ.
- ❍ /unsetlog *:* ᴜɴsᴇᴛ ᴛʜᴇ ʟᴏɢ ᴄʜᴀɴɴᴇʟ.
+*仅限管理员：*
+ ❍ /logchannel *:* 获取日志频道信息
+ ❍ /setlog *:* 设置日志频道。
+ ❍ /unsetlog *:* 取消设置日志频道。
 
-sᴇᴛᴛɪɴɢ ᴛʜᴇ ʟᴏɢ ᴄʜᴀɴɴᴇʟ ɪs ᴅᴏɴᴇ ʙʏ:
-❍ ᴀᴅᴅɪɴɢ ᴛʜᴇ ʙᴏᴛ ᴛᴏ ᴛʜᴇ ᴅᴇsɪʀᴇᴅ ᴄʜᴀɴɴᴇʟ (ᴀs ᴀɴ ᴀᴅᴍɪɴ!)
-❍ sᴇɴᴅɪɴɢ /setlog ɪɴ ᴛʜᴇ ᴄʜᴀɴɴᴇʟ
-❍ ғᴏʀᴡᴀʀᴅɪɴɢ ᴛʜᴇ /setlog ᴛᴏ ᴛʜᴇ ɢʀᴏᴜᴘ
+设置日志频道的步骤：
+❍ 将机器人添加到所需频道（作为管理员！）
+❍ 在频道中发送 /setlog
+❍ 将 /setlog 转发到群组
 """
 
-    __mod_name__ = "Lᴏɢs​"
+    __mod_name__ = "日志"
 
     LOG_HANDLER = CommandHandler("logchannel", logging, run_async=True)
     SET_LOG_HANDLER = CommandHandler("setlog", setlog, run_async=True)

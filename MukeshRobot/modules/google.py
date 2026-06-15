@@ -25,7 +25,7 @@ async def _(event):
     if event.fwd_from:
         return
 
-    webevent = await event.reply("Searching...")
+    webevent = await event.reply("搜索中……")
     match = event.pattern_match.group(1)
     page = re.findall(r"page=\d+", match)
     try:
@@ -47,7 +47,7 @@ async def _(event):
         except IndexError:
             break
     await webevent.edit(
-        "**Search Query:**\n`" + match + "`\n\n**Results:**\n" + msg, link_preview=False
+        "**搜索关键词：**\n`" + match + "`\n\n**搜索结果：**\n" + msg, link_preview=False
     )
 
 
@@ -92,15 +92,15 @@ async def okgoogle(img):
         photo = io.BytesIO()
         await tbot.download_media(message, photo)
     else:
-        await img.reply("`Reply to photo or sticker fu*ker`")
+        await img.reply("`请回复一张图片或贴纸`")
         return
 
     if photo:
-        dev = await img.reply("`Processing...`")
+        dev = await img.reply("`处理中……`")
         try:
             image = Image.open(photo)
         except OSError:
-            await dev.edit("`Unsupported sexuality, most likely.`")
+            await dev.edit("`不支持的图片格式。`")
             return
         name = "okgoogle.png"
         image.save(name, "PNG")
@@ -113,11 +113,11 @@ async def okgoogle(img):
 
         if response != 400:
             await dev.edit(
-                "`Image successfully uploaded to Google. Maybe.`"
-                "\n`Parsing source now. Maybe.`"
+                "`图片已成功上传至谷歌。`"
+                "\n`正在解析结果……`"
             )
         else:
-            await dev.edit("`Google told me to fu*k off.`")
+            await dev.edit("`谷歌返回错误，上传失败。`")
             return
 
         os.remove(name)
@@ -126,9 +126,9 @@ async def okgoogle(img):
         imgspage = match["similar_images"]
 
         if guess and imgspage:
-            await dev.edit(f"[{guess}]({fetchUrl})\n\n`Looking for this Image...`")
+            await dev.edit(f"[{guess}]({fetchUrl})\n\n`正在搜索相似图片……`")
         else:
-            await dev.edit("`Can't find this piece of shit.`")
+            await dev.edit("`未能找到相关图片。`")
             return
 
         if img.pattern_match.group(1):
@@ -149,7 +149,7 @@ async def okgoogle(img):
         except TypeError:
             pass
         await dev.edit(
-            f"[{guess}]({fetchUrl})\n\n[Visually similar images]({imgspage})"
+            f"[{guess}]({fetchUrl})\n\n[视觉相似图片]({imgspage})"
         )
 
 
@@ -240,13 +240,13 @@ async def apk(e):
         app_details = "<a href='" + app_icon + "'>📲&#8203;</a>"
         app_details += " <b>" + app_name + "</b>"
         app_details += (
-            "\n\n<code>Developer :</code> <a href='"
+            "\n\n<code>开发者：</code> <a href='"
             + app_dev_link
             + "'>"
             + app_dev
             + "</a>"
         )
-        app_details += "\n<code>Rating :</code> " + app_rating.replace(
+        app_details += "\n<code>评分：</code> " + app_rating.replace(
             "Rated ", "⭐ "
         ).replace(" out of ", "/").replace(" stars", "", 1).replace(
             " stars", "⭐ "
@@ -254,24 +254,24 @@ async def apk(e):
             "five", "5"
         )
         app_details += (
-            "\n<code>Features :</code> <a href='"
+            "\n<code>详情：</code> <a href='"
             + app_link
-            + "'>View in Play Store</a>"
+            + "'>在 Play 商店查看</a>"
         )
         app_details += "\n\n===> Group Controller<==="
         await e.reply(app_details, link_preview=True, parse_mode="HTML")
     except IndexError:
-        await e.reply("No result found in search. Please enter **Valid app name**")
+        await e.reply("搜索无结果，请输入**有效的应用名称**")
     except Exception as err:
-        await e.reply("Exception Occured:- " + str(err))
+        await e.reply("发生异常：" + str(err))
 
 
-__mod_name__ = "Gᴏᴏɢʟᴇ"
+__mod_name__ = "谷歌搜索"
 
 __help__ = """
- ❍ /google <text>*:* Perform a google search
- ❍ /img <text>*:* Search Google for images and returns them\nFor greater no. of results specify lim, For eg: `/img hello lim=10`
- ❍ /app <appname>*:* Searches for an app in Play Store and returns its details.
- ❍ /reverse |pp |grs: Does a reverse image search of the media which it was replied to.
+ ❍ /google <文本>*:* 执行谷歌搜索
+ ❍ /img <文本>*:* 搜索谷歌图片并返回结果\n如需更多结果，可指定 lim，例如：`/img hello lim=10`
+ ❍ /app <应用名>*:* 在 Play 商店搜索应用并返回详情。
+ ❍ /reverse |pp |grs: 对回复的媒体文件进行谷歌图片反向搜索。
 
 """

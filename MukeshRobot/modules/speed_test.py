@@ -20,7 +20,7 @@ def speedtestxyz(update: Update, context: CallbackContext):
         ]
     ]
     update.effective_message.reply_text(
-        "sᴩᴇᴇᴅᴛᴇsᴛ ᴍᴏᴅᴇ", reply_markup=InlineKeyboardMarkup(buttons)
+        "请选择测速模式", reply_markup=InlineKeyboardMarkup(buttons)
     )
 
 
@@ -28,12 +28,12 @@ def speedtestxyz_callback(update: Update, context: CallbackContext):
     query = update.callback_query
 
     if query.from_user.id in DEV_USERS:
-        msg = update.effective_message.edit_text("ʀᴜɴɴɪɴɢ ᴀ sᴩᴇᴇᴅᴛᴇsᴛ...")
+        msg = update.effective_message.edit_text("测速中……")
         speed = speedtest.Speedtest()
         speed.get_best_server()
         speed.download()
         speed.upload()
-        replymsg = "sᴩᴇᴇᴅᴛᴇsᴛ ʀᴇsᴜʟᴛ"
+        replymsg = "网速测试结果"
 
         if query.data == "speedtest_image":
             speedtest_image = speed.results.share()
@@ -44,10 +44,10 @@ def speedtestxyz_callback(update: Update, context: CallbackContext):
 
         elif query.data == "speedtest_text":
             result = speed.results.dict()
-            replymsg += f"\nDownload: `{convert(result['download'])}Mb/s`\nUpload: `{convert(result['upload'])}Mb/s`\nPing: `{result['ping']}`"
+            replymsg += f"\n下载: `{convert(result['download'])}Mb/s`\n上传: `{convert(result['upload'])}Mb/s`\n延迟: `{result['ping']}`"
             update.effective_message.edit_text(replymsg, parse_mode=ParseMode.MARKDOWN)
     else:
-        query.answer("You are required to join @the_support_chat to use this command.")
+        query.answer("您需要加入 @the_support_chat 才能使用此命令。")
 
 
 SPEED_TEST_HANDLER = DisableAbleCommandHandler(
@@ -61,10 +61,10 @@ dispatcher.add_handler(SPEED_TEST_HANDLER)
 dispatcher.add_handler(SPEED_TEST_CALLBACKHANDLER)
 
 __help__ = """
-» /speedtest *:* ʀᴜɴs ᴀ sᴘᴇᴇᴅᴛᴇsᴛ ᴀɴᴅ ᴄʜᴇᴄᴋ ᴛʜᴇ sᴇʀᴠᴇʀ sᴘᴇᴇᴅ.
+» /speedtest *:* 测试服务器网速并显示结果。
 """
 
-__mod_name__ = "SᴘᴇᴇᴅTᴇsᴛ​"
+__mod_name__ = "网速测试"
 
 __command_list__ = ["speedtest"]
 __handlers__ = [SPEED_TEST_HANDLER, SPEED_TEST_CALLBACKHANDLER]

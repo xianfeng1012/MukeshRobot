@@ -25,10 +25,10 @@ async def is_administrator(user_id: int, message):
 async def rm_deletedacc(client, message):
     con = message.text.split(" ", 1)[1].lower() if len(message.command) > 1 else ""
     del_u = 0
-    del_status = "Group cleaned, 0 deleted accounts found."
-    
+    del_status = "群组已清理，未发现已注销账号。"
+
     if con != "clean":
-        kontol = await message.reply("Searching for deleted accounts...")
+        kontol = await message.reply("正在搜索已注销账号……")
         
         participants=[]
         async for member in app.get_chat_members(message.chat.id):
@@ -42,8 +42,8 @@ async def rm_deletedacc(client, message):
                 await asyncio.sleep(1)
         if del_u > 0:
             del_status = (
-                f"Searching... {del_u} Deleted account(s) Zombie on this group, "
-                "Clean it with command `/zombies clean`"
+                f"搜索完成，本群发现 {del_u} 个已注销的僵尸账号，"
+                "使用命令 `/zombies clean` 清理"
             )
         return await kontol.edit(del_status)
     
@@ -52,9 +52,9 @@ async def rm_deletedacc(client, message):
     admin=await is_administrator(message.from_user.id,message)
     
     if not admin:
-        return await message.reply("Sorry, you are not an admin!")
-    
-    memek = await message.reply("Removing deleted accounts...")
+        return await message.reply("抱歉，你不是管理员！")
+
+    memek = await message.reply("正在移除已注销账号……")
     participants=[]
     async for member in app.get_chat_members(message.chat.id):
         participants.append(member)
@@ -68,19 +68,19 @@ async def rm_deletedacc(client, message):
                 await client.unban_chat_member(message.chat.id, user.user.id)
                 
             except ChatAdminRequired:
-                return await message.edit("Do not have permission to ban in this group")
+                return await message.edit("没有在该群组封禁用户的权限")
             except UserAdminInvalid:
                 del_u -= 1
             await asyncio.sleep(1)
     
     if del_u > 0:
-        del_status = f"Cleaned {del_u} Zombies"
+        del_status = f"已清理 {del_u} 个僵尸账号"
     
     await memek.edit(del_status)
 
 help_text = """
-*ʀᴇᴍᴏᴠᴇ ᴅᴇʟᴇᴛᴇᴅ ᴀᴄᴄᴏᴜɴᴛs*
-❍ /zombies : starts searching for deleted accounts in the group.
-❍ /zombies clean : removes the deleted accounts from the group.
+*清理已注销账号*
+❍ /zombies : 开始搜索群内已注销账号。
+❍ /zombies clean : 将群内已注销账号移除。
 """
-__mod_name__ = "Zᴏᴍʙɪᴇ"
+__mod_name__ = "僵尸账号"

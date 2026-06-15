@@ -89,18 +89,18 @@ def rban(update: Update, context: CallbackContext):
     message = update.effective_message
 
     if not args:
-        message.reply_text("You don't seem to be referring to a chat/user.")
+        message.reply_text("未指定群组或用户。")
         return
 
     user_id, chat_id = extract_user_and_text(message, args)
 
     if not user_id:
         message.reply_text(
-            "You don't seem to be referring to a user or the ID specified is incorrect.."
+            "未指定用户，或提供的 ID 不正确。"
         )
         return
     elif not chat_id:
-        message.reply_text("You don't seem to be referring to a chat.")
+        message.reply_text("未指定群组。")
         return
 
     try:
@@ -108,14 +108,14 @@ def rban(update: Update, context: CallbackContext):
     except BadRequest as excp:
         if excp.message == "Chat not found":
             message.reply_text(
-                "Chat not found! Make sure you entered a valid chat ID and I'm part of that chat."
+                "找不到该群组！请确认群组 ID 正确且我已加入该群组。"
             )
             return
         else:
             raise
 
     if chat.type == "private":
-        message.reply_text("I'm sorry, but that's a private chat!")
+        message.reply_text("抱歉，这是一个私聊！")
         return
 
     if (
@@ -123,7 +123,7 @@ def rban(update: Update, context: CallbackContext):
         or not chat.get_member(bot.id).can_restrict_members
     ):
         message.reply_text(
-            "I can't restrict people there! Make sure I'm admin and can ban users."
+            "我无法在那里限制成员！请确认我是管理员且拥有封禁用户的权限。"
         )
         return
 
@@ -131,26 +131,26 @@ def rban(update: Update, context: CallbackContext):
         member = chat.get_member(user_id)
     except BadRequest as excp:
         if excp.message == "User not found":
-            message.reply_text("I can't seem to find this user")
+            message.reply_text("找不到该用户。")
             return
         else:
             raise
 
     if is_user_ban_protected(chat, user_id, member):
-        message.reply_text("I really wish I could ban admins...")
+        message.reply_text("我真希望能封禁管理员……但做不到。")
         return
 
     if user_id == bot.id:
-        message.reply_text("I'm not gonna BAN myself, are you crazy?")
+        message.reply_text("我不会封禁我自己，你在开玩笑吗？")
         return
 
     try:
         chat.ban_member(user_id)
-        message.reply_text("Banned from chat!")
+        message.reply_text("已从该群组封禁！")
     except BadRequest as excp:
         if excp.message == "Reply message not found":
             # Do not reply
-            message.reply_text("Banned!", quote=False)
+            message.reply_text("已封禁！", quote=False)
         elif excp.message in RBAN_ERRORS:
             message.reply_text(excp.message)
         else:
@@ -162,7 +162,7 @@ def rban(update: Update, context: CallbackContext):
                 chat.id,
                 excp.message,
             )
-            message.reply_text("Well damn, I can't ban that user.")
+            message.reply_text("操作失败，无法封禁该用户。")
 
 
 @bot_admin
@@ -171,18 +171,18 @@ def runban(update: Update, context: CallbackContext):
     message = update.effective_message
 
     if not args:
-        message.reply_text("You don't seem to be referring to a chat/user.")
+        message.reply_text("未指定群组或用户。")
         return
 
     user_id, chat_id = extract_user_and_text(message, args)
 
     if not user_id:
         message.reply_text(
-            "You don't seem to be referring to a user or the ID specified is incorrect.."
+            "未指定用户，或提供的 ID 不正确。"
         )
         return
     elif not chat_id:
-        message.reply_text("You don't seem to be referring to a chat.")
+        message.reply_text("未指定群组。")
         return
 
     try:
@@ -190,14 +190,14 @@ def runban(update: Update, context: CallbackContext):
     except BadRequest as excp:
         if excp.message == "Chat not found":
             message.reply_text(
-                "Chat not found! Make sure you entered a valid chat ID and I'm part of that chat."
+                "找不到该群组！请确认群组 ID 正确且我已加入该群组。"
             )
             return
         else:
             raise
 
     if chat.type == "private":
-        message.reply_text("I'm sorry, but that's a private chat!")
+        message.reply_text("抱歉，这是一个私聊！")
         return
 
     if (
@@ -205,7 +205,7 @@ def runban(update: Update, context: CallbackContext):
         or not chat.get_member(bot.id).can_restrict_members
     ):
         message.reply_text(
-            "I can't unrestrict people there! Make sure I'm admin and can unban users."
+            "我无法在那里解除限制！请确认我是管理员且拥有解除封禁的权限。"
         )
         return
 
@@ -213,28 +213,28 @@ def runban(update: Update, context: CallbackContext):
         chat.get_member(user_id)
     except BadRequest as excp:
         if excp.message == "User not found":
-            message.reply_text("I can't seem to find this user there")
+            message.reply_text("在该群组中找不到该用户。")
             return
         else:
             raise
 
     if is_user_in_chat(chat, user_id):
         message.reply_text(
-            "Why are you trying to remotely unban someone that's already in that chat?"
+            "该用户已在群组中，为什么还要远程解除封禁？"
         )
         return
 
     if user_id == bot.id:
-        message.reply_text("I'm not gonna UNBAN myself, I'm an admin there!")
+        message.reply_text("我不会解除自己的封禁，我本来就是那里的管理员！")
         return
 
     try:
         chat.unban_member(user_id)
-        message.reply_text("Yep, this user can join that chat!")
+        message.reply_text("好的，该用户现在可以加入该群组了！")
     except BadRequest as excp:
         if excp.message == "Reply message not found":
             # Do not reply
-            message.reply_text("Unbanned!", quote=False)
+            message.reply_text("已解除封禁！", quote=False)
         elif excp.message in RUNBAN_ERRORS:
             message.reply_text(excp.message)
         else:
@@ -246,7 +246,7 @@ def runban(update: Update, context: CallbackContext):
                 chat.id,
                 excp.message,
             )
-            message.reply_text("Well damn, I can't unban that user.")
+            message.reply_text("操作失败，无法解除该用户的封禁。")
 
 
 @bot_admin
@@ -255,18 +255,18 @@ def rkick(update: Update, context: CallbackContext):
     message = update.effective_message
 
     if not args:
-        message.reply_text("You don't seem to be referring to a chat/user.")
+        message.reply_text("未指定群组或用户。")
         return
 
     user_id, chat_id = extract_user_and_text(message, args)
 
     if not user_id:
         message.reply_text(
-            "You don't seem to be referring to a user or the ID specified is incorrect.."
+            "未指定用户，或提供的 ID 不正确。"
         )
         return
     elif not chat_id:
-        message.reply_text("You don't seem to be referring to a chat.")
+        message.reply_text("未指定群组。")
         return
 
     try:
@@ -274,14 +274,14 @@ def rkick(update: Update, context: CallbackContext):
     except BadRequest as excp:
         if excp.message == "Chat not found":
             message.reply_text(
-                "Chat not found! Make sure you entered a valid chat ID and I'm part of that chat."
+                "找不到该群组！请确认群组 ID 正确且我已加入该群组。"
             )
             return
         else:
             raise
 
     if chat.type == "private":
-        message.reply_text("I'm sorry, but that's a private chat!")
+        message.reply_text("抱歉，这是一个私聊！")
         return
 
     if (
@@ -289,7 +289,7 @@ def rkick(update: Update, context: CallbackContext):
         or not chat.get_member(bot.id).can_restrict_members
     ):
         message.reply_text(
-            "I can't restrict people there! Make sure I'm admin and can punch users."
+            "我无法在那里限制成员！请确认我是管理员且拥有踢出用户的权限。"
         )
         return
 
@@ -297,26 +297,26 @@ def rkick(update: Update, context: CallbackContext):
         member = chat.get_member(user_id)
     except BadRequest as excp:
         if excp.message == "User not found":
-            message.reply_text("I can't seem to find this user")
+            message.reply_text("找不到该用户。")
             return
         else:
             raise
 
     if is_user_ban_protected(chat, user_id, member):
-        message.reply_text("I really wish I could punch admins...")
+        message.reply_text("我真希望能踢出管理员……但做不到。")
         return
 
     if user_id == bot.id:
-        message.reply_text("I'm not gonna punch myself, are you crazy?")
+        message.reply_text("我不会踢出我自己，你在开玩笑吗？")
         return
 
     try:
         chat.unban_member(user_id)
-        message.reply_text("Punched from chat!")
+        message.reply_text("已从群组踢出！")
     except BadRequest as excp:
         if excp.message == "Reply message not found":
             # Do not reply
-            message.reply_text("Punched!", quote=False)
+            message.reply_text("已踢出！", quote=False)
         elif excp.message in RKICK_ERRORS:
             message.reply_text(excp.message)
         else:
@@ -328,7 +328,7 @@ def rkick(update: Update, context: CallbackContext):
                 chat.id,
                 excp.message,
             )
-            message.reply_text("Well damn, I can't punch that user.")
+            message.reply_text("操作失败，无法踢出该用户。")
 
 
 @bot_admin
@@ -337,18 +337,18 @@ def rmute(update: Update, context: CallbackContext):
     message = update.effective_message
 
     if not args:
-        message.reply_text("You don't seem to be referring to a chat/user.")
+        message.reply_text("未指定群组或用户。")
         return
 
     user_id, chat_id = extract_user_and_text(message, args)
 
     if not user_id:
         message.reply_text(
-            "You don't seem to be referring to a user or the ID specified is incorrect.."
+            "未指定用户，或提供的 ID 不正确。"
         )
         return
     elif not chat_id:
-        message.reply_text("You don't seem to be referring to a chat.")
+        message.reply_text("未指定群组。")
         return
 
     try:
@@ -356,14 +356,14 @@ def rmute(update: Update, context: CallbackContext):
     except BadRequest as excp:
         if excp.message == "Chat not found":
             message.reply_text(
-                "Chat not found! Make sure you entered a valid chat ID and I'm part of that chat."
+                "找不到该群组！请确认群组 ID 正确且我已加入该群组。"
             )
             return
         else:
             raise
 
     if chat.type == "private":
-        message.reply_text("I'm sorry, but that's a private chat!")
+        message.reply_text("抱歉，这是一个私聊！")
         return
 
     if (
@@ -371,7 +371,7 @@ def rmute(update: Update, context: CallbackContext):
         or not chat.get_member(bot.id).can_restrict_members
     ):
         message.reply_text(
-            "I can't restrict people there! Make sure I'm admin and can mute users."
+            "我无法在那里限制成员！请确认我是管理员且拥有禁言用户的权限。"
         )
         return
 
@@ -379,28 +379,28 @@ def rmute(update: Update, context: CallbackContext):
         member = chat.get_member(user_id)
     except BadRequest as excp:
         if excp.message == "User not found":
-            message.reply_text("I can't seem to find this user")
+            message.reply_text("找不到该用户。")
             return
         else:
             raise
 
     if is_user_ban_protected(chat, user_id, member):
-        message.reply_text("I really wish I could mute admins...")
+        message.reply_text("我真希望能禁言管理员……但做不到。")
         return
 
     if user_id == bot.id:
-        message.reply_text("I'm not gonna MUTE myself, are you crazy?")
+        message.reply_text("我不会禁言我自己，你在开玩笑吗？")
         return
 
     try:
         bot.restrict_chat_member(
             chat.id, user_id, permissions=ChatPermissions(can_send_messages=False)
         )
-        message.reply_text("Muted from the chat!")
+        message.reply_text("已在该群组禁言！")
     except BadRequest as excp:
         if excp.message == "Reply message not found":
             # Do not reply
-            message.reply_text("Muted!", quote=False)
+            message.reply_text("已禁言！", quote=False)
         elif excp.message in RMUTE_ERRORS:
             message.reply_text(excp.message)
         else:
@@ -412,7 +412,7 @@ def rmute(update: Update, context: CallbackContext):
                 chat.id,
                 excp.message,
             )
-            message.reply_text("Well damn, I can't mute that user.")
+            message.reply_text("操作失败，无法禁言该用户。")
 
 
 @bot_admin
@@ -421,18 +421,18 @@ def runmute(update: Update, context: CallbackContext):
     message = update.effective_message
 
     if not args:
-        message.reply_text("You don't seem to be referring to a chat/user.")
+        message.reply_text("未指定群组或用户。")
         return
 
     user_id, chat_id = extract_user_and_text(message, args)
 
     if not user_id:
         message.reply_text(
-            "You don't seem to be referring to a user or the ID specified is incorrect.."
+            "未指定用户，或提供的 ID 不正确。"
         )
         return
     elif not chat_id:
-        message.reply_text("You don't seem to be referring to a chat.")
+        message.reply_text("未指定群组。")
         return
 
     try:
@@ -440,14 +440,14 @@ def runmute(update: Update, context: CallbackContext):
     except BadRequest as excp:
         if excp.message == "Chat not found":
             message.reply_text(
-                "Chat not found! Make sure you entered a valid chat ID and I'm part of that chat."
+                "找不到该群组！请确认群组 ID 正确且我已加入该群组。"
             )
             return
         else:
             raise
 
     if chat.type == "private":
-        message.reply_text("I'm sorry, but that's a private chat!")
+        message.reply_text("抱歉，这是一个私聊！")
         return
 
     if (
@@ -455,7 +455,7 @@ def runmute(update: Update, context: CallbackContext):
         or not chat.get_member(bot.id).can_restrict_members
     ):
         message.reply_text(
-            "I can't unrestrict people there! Make sure I'm admin and can unban users."
+            "我无法在那里解除限制！请确认我是管理员且拥有解除封禁的权限。"
         )
         return
 
@@ -463,7 +463,7 @@ def runmute(update: Update, context: CallbackContext):
         member = chat.get_member(user_id)
     except BadRequest as excp:
         if excp.message == "User not found":
-            message.reply_text("I can't seem to find this user there")
+            message.reply_text("在该群组中找不到该用户。")
             return
         else:
             raise
@@ -475,11 +475,11 @@ def runmute(update: Update, context: CallbackContext):
             and member.can_send_other_messages
             and member.can_add_web_page_previews
         ):
-            message.reply_text("This user already has the right to speak in that chat.")
+            message.reply_text("该用户在该群组中已有发言权限。")
             return
 
     if user_id == bot.id:
-        message.reply_text("I'm not gonna UNMUTE myself, I'm an admin there!")
+        message.reply_text("我不会解除自己的禁言，我本来就是那里的管理员！")
         return
 
     try:
@@ -493,11 +493,11 @@ def runmute(update: Update, context: CallbackContext):
                 can_add_web_page_previews=True,
             ),
         )
-        message.reply_text("Yep, this user can talk in that chat!")
+        message.reply_text("好的，该用户现在可以在该群组中发言了！")
     except BadRequest as excp:
         if excp.message == "Reply message not found":
             # Do not reply
-            message.reply_text("Unmuted!", quote=False)
+            message.reply_text("已解除禁言！", quote=False)
         elif excp.message in RUNMUTE_ERRORS:
             message.reply_text(excp.message)
         else:
@@ -509,7 +509,7 @@ def runmute(update: Update, context: CallbackContext):
                 chat.id,
                 excp.message,
             )
-            message.reply_text("Well damn, I can't unmute that user.")
+            message.reply_text("操作失败，无法解除该用户的禁言。")
 
 
 RBAN_HANDLER = CommandHandler(

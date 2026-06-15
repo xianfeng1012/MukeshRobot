@@ -21,7 +21,7 @@ def get_invalid_chats(update: Update, context: CallbackContext, remove: bool = F
     for chat in chats:
 
         if ((100 * chats.index(chat)) / len(chats)) > progress:
-            progress_bar = f"{progress}% completed in getting invalid chats."
+            progress_bar = f"{progress}% 正在获取无效群组……"
             if progress_message:
                 try:
                     bot.editMessageText(
@@ -87,16 +87,16 @@ def get_invalid_gban(update: Update, context: CallbackContext, remove: bool = Fa
 def dbcleanup(update: Update, context: CallbackContext):
     msg = update.effective_message
 
-    msg.reply_text("Getting invalid chat count ...")
+    msg.reply_text("正在获取无效群组数量……")
     invalid_chat_count = get_invalid_chats(update, context)
 
-    msg.reply_text("Getting invalid gbanned count ...")
+    msg.reply_text("正在获取无效全局封禁数量……")
     invalid_gban_count = get_invalid_gban(update, context)
 
-    reply = f"Total invalid chats - {invalid_chat_count}\n"
-    reply += f"Total invalid gbanned users - {invalid_gban_count}"
+    reply = f"无效群组总数：{invalid_chat_count}\n"
+    reply += f"无效全局封禁用户总数：{invalid_gban_count}"
 
-    buttons = [[InlineKeyboardButton("Cleanup DB", callback_data="db_cleanup")]]
+    buttons = [[InlineKeyboardButton("清理数据库", callback_data="db_cleanup")]]
 
     update.effective_message.reply_text(
         reply, reply_markup=InlineKeyboardMarkup(buttons)
@@ -116,22 +116,22 @@ def callback_button(update: Update, context: CallbackContext):
 
     if query_type == "db_leave_chat":
         if query.from_user.id in admin_list:
-            bot.editMessageText("Leaving chats ...", chat_id, message.message_id)
+            bot.editMessageText("正在退出群组……", chat_id, message.message_id)
             chat_count = get_muted_chats(update, context, True)
-            bot.sendMessage(chat_id, f"Left {chat_count} chats.")
+            bot.sendMessage(chat_id, f"已退出 {chat_count} 个群组。")
         else:
-            query.answer("You are not allowed to use this.")
+            query.answer("你没有权限执行此操作。")
     elif query_type == "db_cleanup":
         if query.from_user.id in admin_list:
-            bot.editMessageText("Cleaning up DB ...", chat_id, message.message_id)
+            bot.editMessageText("正在清理数据库……", chat_id, message.message_id)
             invalid_chat_count = get_invalid_chats(update, context, True)
             invalid_gban_count = get_invalid_gban(update, context, True)
-            reply = "Cleaned up {} chats and {} gbanned users from db.".format(
+            reply = "已从数据库中清理 {} 个无效群组和 {} 个无效全局封禁用户。".format(
                 invalid_chat_count, invalid_gban_count
             )
             bot.sendMessage(chat_id, reply)
         else:
-            query.answer("You are not allowed to use this.")
+            query.answer("你没有权限执行此操作。")
 
 
 DB_CLEANUP_HANDLER = CommandHandler("dbcleanup", dbcleanup, run_async=True)
@@ -140,5 +140,5 @@ BUTTON_HANDLER = CallbackQueryHandler(callback_button, pattern="db_.*", run_asyn
 dispatcher.add_handler(DB_CLEANUP_HANDLER)
 dispatcher.add_handler(BUTTON_HANDLER)
 
-__mod_name__ ="Dᴀᴛᴀʙᴀsᴇ"
+__mod_name__ = "数据库"
 __handlers__ = [DB_CLEANUP_HANDLER, BUTTON_HANDLER]

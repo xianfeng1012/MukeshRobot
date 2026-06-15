@@ -41,15 +41,14 @@ def send_rules(update, chat_id, from_pm=False, dest_chat=None):
         if excp.message == "Chat not found" and from_pm:
             bot.send_message(
                 dest_chat,
-                "The rules shortcut for this chat hasn't been set properly! Ask admins to "
-                "fix this.\nMaybe they forgot the hyphen in ID",
+                "此群的群规快捷方式未正确设置！请联系管理员修复。\n可能是 ID 中忘记了连字符。",
             )
             return
         else:
             raise
 
     rules = sql.get_rules(chat_id)
-    text = f"The rules for *{escape_markdown(chat.title)}* are:\n\n{rules}"
+    text = f"*{escape_markdown(chat.title)}* 的群规：\n\n{rules}"
 
     if from_pm and rules:
         bot.send_message(
@@ -61,17 +60,16 @@ def send_rules(update, chat_id, from_pm=False, dest_chat=None):
     elif from_pm:
         bot.send_message(
             dest_chat,
-            "The group admins haven't set any rules for this chat yet. "
-            "This probably doesn't mean it's lawless though...!",
+            "此群尚未设置群规。",
         )
     elif rules and reply_msg:
         reply_msg.reply_text(
-            "ᴄʟɪᴄᴋ ᴏɴ ᴛʜᴇ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ᴛᴏ ɢᴇᴛ ʀᴜʟᴇs.",
+            "点击下方按钮查看群规。",
             reply_markup=InlineKeyboardMarkup(
                 [
                     [
                         InlineKeyboardButton(
-                            text="• ʀᴜʟᴇs •",
+                            text="• 群规 •",
                             url=f"t.me/{bot.username}?start={chat_id}",
                         ),
                     ],
@@ -80,12 +78,12 @@ def send_rules(update, chat_id, from_pm=False, dest_chat=None):
         )
     elif rules:
         update.effective_message.reply_text(
-            "ᴄʟɪᴄᴋ ᴏɴ ᴛʜᴇ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ᴛᴏ ɢᴇᴛ ʀᴜʟᴇs.",
+            "点击下方按钮查看群规。",
             reply_markup=InlineKeyboardMarkup(
                 [
                     [
                         InlineKeyboardButton(
-                            text="• ʀᴜʟᴇs •",
+                            text="• 群规 •",
                             url=f"t.me/{bot.username}?start={chat_id}",
                         ),
                     ],
@@ -94,8 +92,7 @@ def send_rules(update, chat_id, from_pm=False, dest_chat=None):
         )
     else:
         update.effective_message.reply_text(
-            "The group admins haven't set any rules for this chat yet. "
-            "This probably doesn't mean it's lawless though...!",
+            "此群尚未设置群规。",
         )
 
 
@@ -122,9 +119,9 @@ def set_rules(update: Update, context: CallbackContext):
         )
 
         sql.set_rules(chat_id, markdown_rules)
-        update.effective_message.reply_text("Successfully set rules for this group.")
+        update.effective_message.reply_text("群规已保存。")
     else:
-        update.effective_message.reply_text("There's... no rules?")
+        update.effective_message.reply_text("群规内容为空，请提供群规内容。")
 
 
 @connection_status
@@ -132,7 +129,7 @@ def set_rules(update: Update, context: CallbackContext):
 def clear_rules(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
     sql.set_rules(chat_id, "")
-    update.effective_message.reply_text("Successfully cleared rules!")
+    update.effective_message.reply_text("群规已清除。")
 
 
 def __stats__():
@@ -154,14 +151,14 @@ def __chat_settings__(chat_id, user_id):
 
 
 __help__ = """
- ‣ `/rules`*:* get the rules for this chat.
- ‣ `/rules here`*:* get the rules for this chat but send it in the chat.
-*Admins only:*
- ‣ `/setrules <your rules here>`*:* set the rules for this chat.
- ‣ `/clearrules`*:* clear the rules for this chat.
+ ‣ `/rules`*:* 获取此群的群规。
+ ‣ `/rules here`*:* 在群内直接发送群规。
+*仅管理员:*
+ ‣ `/setrules <群规内容>`*:* 设置此群的群规。
+ ‣ `/clearrules`*:* 清除此群的群规。
 """
 
-__mod_name__ = "Rᴜʟᴇs"
+__mod_name__ = "群规"
 
 GET_RULES_HANDLER = CommandHandler("rules", get_rules, run_async=True)
 SET_RULES_HANDLER = CommandHandler("setrules", set_rules, run_async=True)

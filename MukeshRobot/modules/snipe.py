@@ -14,7 +14,7 @@ def snipe(update: Update, context: CallbackContext):
         chat_id = str(args[0])
         del args[0]
     except TypeError:
-        update.effective_message.reply_text("Please give me a chat to echo to!")
+        update.effective_message.reply_text("请提供一个目标群组 ID！")
     to_send = " ".join(args)
     if len(to_send) >= 2:
         try:
@@ -22,17 +22,17 @@ def snipe(update: Update, context: CallbackContext):
         except TelegramError:
             LOGGER.warning("Couldn't send to group %s", str(chat_id))
             update.effective_message.reply_text(
-                "Couldn't send the message. Perhaps I'm not part of that group?"
+                "无法发送消息，可能我不在该群组中。"
             )
 
 
 __help__ = """
-*ᴅᴇᴠ  ᴏɴʟʏ:* 
-• /snipe <ᴄʜᴀᴛɪᴅ> <sᴛʀɪɴɢ>
-ᴍᴀᴋᴇ ᴍᴇ sᴇɴᴅ ᴀ ᴍᴇssᴀɢᴇ ᴛᴏ ᴀ sᴘᴇᴄɪғɪᴄ ᴄʜᴀᴛ.
+*仅限开发者：*
+• /snipe <群组ID> <消息内容>
+让机器人向指定群组发送一条消息。
 """
 
-__mod_name__ = "Sɴɪᴘᴇ"
+__mod_name__ = "狙击"
 
 SNIPE_HANDLER = CommandHandler(
     "snipe", snipe, pass_args=True, filters=CustomFilters.dev_filter

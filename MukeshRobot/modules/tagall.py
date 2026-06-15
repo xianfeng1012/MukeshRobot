@@ -17,7 +17,7 @@ async def mentionall(event):
     chat_id = event.chat_id
     if event.is_private:
         return await event.respond(
-            "__This command can be use in groups and channels!__"
+            "__此命令只能在群组和频道中使用！__"
         )
 
     is_admin = False
@@ -31,10 +31,10 @@ async def mentionall(event):
         ):
             is_admin = True
     if not is_admin:
-        return await event.respond("__Only admins can mention all!__")
+        return await event.respond("__只有管理员才能标记所有成员！__")
 
     if event.pattern_match.group(1) and event.is_reply:
-        return await event.respond("__Give me one argument!__")
+        return await event.respond("__请只提供一个参数！__")
     elif event.pattern_match.group(1):
         mode = "text_on_cmd"
         msg = event.pattern_match.group(1)
@@ -43,11 +43,11 @@ async def mentionall(event):
         msg = await event.get_reply_message()
         if msg == None:
             return await event.respond(
-                "__ɪ ᴄᴀɴ'ᴛ ᴍᴇɴᴛɪᴏɴ ᴍᴇᴍʙᴇʀs ғᴏʀ ᴏʟᴅᴇʀ ᴍᴇssᴀɢᴇs! (ᴍᴇssᴀɢᴇs ᴡʜɪᴄʜ ᴀʀᴇ sᴇɴᴛ ʙᴇғᴏʀᴇ ɪ'ᴍ ᴀᴅᴅᴇᴅ ᴛᴏ ɢʀᴏᴜᴘ__"
+                "__无法对旧消息标记成员！（在我被添加到群组之前发送的消息）__"
             )
     else:
         return await event.respond(
-            "__Reply to a message or give me some text to mention others!__"
+            "__请回复一条消息或提供文本内容以标记其他成员！__"
         )
 
     spam_chats.append(chat_id)
@@ -76,7 +76,7 @@ async def mentionall(event):
 @client.on(events.NewMessage(pattern="^/cancel$"))
 async def cancel_spam(event):
     if not event.chat_id in spam_chats:
-        return await event.respond("ᴛʜᴇʀᴇ ɪs ɴᴏ ᴘʀᴏᴄᴄᴇss ᴏɴ ɢᴏɪɴɢ..")
+        return await event.respond("当前没有正在进行的标记任务。")
     is_admin = False
     try:
         partici_ = await client(GetParticipantRequest(event.chat_id, event.sender_id))
@@ -88,19 +88,19 @@ async def cancel_spam(event):
         ):
             is_admin = True
     if not is_admin:
-        return await event.respond("__ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴇxᴇᴄᴜᴛᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ!__")
+        return await event.respond("__只有管理员才能执行此命令！__")
 
     else:
         try:
             spam_chats.remove(event.chat_id)
         except:
             pass
-        return await event.respond("sᴛᴏᴘᴘᴇᴅ ᴍᴇɴᴛɪᴏɴ.__")
+        return await event.respond("已停止标记。__")
 
 
-__mod_name__ = "Tᴀɢᴀʟʟ"
+__mod_name__ = "全体标记"
 __help__ = """
-──「  ᴏɴʟʏ ғᴏʀ ᴀᴅᴍɪɴs 」──
+──「  仅限管理员  」──
 
-❍ /tagall ᴏʀ @all '(ʀᴇᴘʟʏ ᴛᴏ ᴍᴇssᴀɢᴇ ᴏʀ ᴀᴅᴅ ᴀɴᴏᴛʜᴇʀ ᴍᴇssᴀɢᴇ) ᴛᴏ ᴍᴇɴᴛɪᴏɴ ᴀʟʟ ᴍᴇᴍʙᴇʀs ɪɴ ʏᴏᴜʀ ɢʀᴏᴜᴘ, ᴡɪᴛʜᴏᴜᴛ ᴇxᴄᴇᴘᴛɪᴏɴ.'
+❍ /tagall 或 @all '（回复消息或添加附加消息）标记群内所有成员，无一例外。'
 """

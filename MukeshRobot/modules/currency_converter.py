@@ -13,7 +13,7 @@ def convert(update: Update, context: CallbackContext):
             orig_cur_amount = float(args[1])
 
         except ValueError:
-            update.effective_message.reply_text("Invalid Amount Of Currency")
+            update.effective_message.reply_text("无效的货币金额")
             return
 
         orig_cur = args[2].upper()
@@ -33,7 +33,7 @@ def convert(update: Update, context: CallbackContext):
                 response["Realtime Currency Exchange Rate"]["5. Exchange Rate"]
             )
         except KeyError:
-            update.effective_message.reply_text("Currency Not Supported.")
+            update.effective_message.reply_text("无效的货币代码，暂不支持该货币。")
             return
         new_cur_amount = round(orig_cur_amount * current_rate, 5)
         update.effective_message.reply_text(
@@ -45,16 +45,16 @@ def convert(update: Update, context: CallbackContext):
 
     else:
         update.effective_message.reply_text(
-            f"*Invalid Args!!:* Required 3 But Passed {len(args) -1}",
+            f"*参数错误：* 需要 3 个参数，但收到了 {len(args) -1} 个",
             parse_mode=ParseMode.MARKDOWN,
         )
 
 
 __help__ = """
-Converts money from one exchange to another
+进行货币换算
 
-Usage: /cash amount from to
-Example: /cash 20 USD INR
+用法：/cash <金额> <源货币> <目标货币>
+示例：/cash 100 USD CNY
 """
 
 CONVERTER_HANDLER = CommandHandler("cash", convert, run_async=True)
@@ -63,4 +63,4 @@ __command_list__ = ["cash"]
 
 __handlers__ = [CONVERTER_HANDLER]
 
-__mod_name__ = "Cᴀsʜ"
+__mod_name__ = "汇率换算"

@@ -39,7 +39,7 @@ def blacklist(update, context):
         chat_id = update.effective_chat.id
         chat_name = chat.title
 
-    filter_list = "Current blacklisted words in <b>{}</b>:\n".format(chat_name)
+    filter_list = "<b>{}</b> 的黑名单词语：\n".format(chat_name)
 
     all_blacklisted = sql.get_chat_blacklist(chat_id)
 
@@ -55,12 +55,12 @@ def blacklist(update, context):
 
     split_text = split_message(filter_list)
     for text in split_text:
-        if filter_list == "Current blacklisted words in <b>{}</b>:\n".format(
+        if filter_list == "<b>{}</b> 的黑名单词语：\n".format(
             html.escape(chat_name)
         ):
             send_message(
                 update.effective_message,
-                "No blacklisted words in <b>{}</b>!".format(html.escape(chat_name)),
+                "<b>{}</b> 暂无黑名单词语！".format(html.escape(chat_name)),
                 parse_mode=ParseMode.HTML,
             )
             return
@@ -97,8 +97,8 @@ def add_blacklist(update, context):
         if len(to_blacklist) == 1:
             send_message(
                 update.effective_message,
-                "Added blacklist <code>{}</code> in chat: <b>{}</b>!".format(
-                    html.escape(to_blacklist[0]), html.escape(chat_name)
+                "已在 <b>{}</b> 中添加黑名单触发词 <code>{}</code>！".format(
+                    html.escape(chat_name), html.escape(to_blacklist[0])
                 ),
                 parse_mode=ParseMode.HTML,
             )
@@ -106,8 +106,8 @@ def add_blacklist(update, context):
         else:
             send_message(
                 update.effective_message,
-                "Added blacklist trigger: <code>{}</code> in <b>{}</b>!".format(
-                    len(to_blacklist), html.escape(chat_name)
+                "已在 <b>{}</b> 中添加 <code>{}</code> 个黑名单触发词！".format(
+                    html.escape(chat_name), len(to_blacklist)
                 ),
                 parse_mode=ParseMode.HTML,
             )
@@ -115,7 +115,7 @@ def add_blacklist(update, context):
     else:
         send_message(
             update.effective_message,
-            "Tell me which words you would like to add in blacklist.",
+            "请告诉我你想添加到黑名单的词语。",
         )
 
 
@@ -153,21 +153,21 @@ def unblacklist(update, context):
             if successful:
                 send_message(
                     update.effective_message,
-                    "Removed <code>{}</code> from blacklist in <b>{}</b>!".format(
-                        html.escape(to_unblacklist[0]), html.escape(chat_name)
+                    "已从 <b>{}</b> 的黑名单中移除 <code>{}</code>！".format(
+                        html.escape(chat_name), html.escape(to_unblacklist[0])
                     ),
                     parse_mode=ParseMode.HTML,
                 )
             else:
                 send_message(
-                    update.effective_message, "This is not a blacklist trigger!"
+                    update.effective_message, "该词语不在黑名单中！"
                 )
 
         elif successful == len(to_unblacklist):
             send_message(
                 update.effective_message,
-                "Removed <code>{}</code> from blacklist in <b>{}</b>!".format(
-                    successful, html.escape(chat_name)
+                "已从 <b>{}</b> 的黑名单中移除 <code>{}</code> 个触发词！".format(
+                    html.escape(chat_name), successful
                 ),
                 parse_mode=ParseMode.HTML,
             )
@@ -175,15 +175,14 @@ def unblacklist(update, context):
         elif not successful:
             send_message(
                 update.effective_message,
-                "None of these triggers exist so it can't be removed.",
+                "这些触发词均不在黑名单中，无法移除。",
                 parse_mode=ParseMode.HTML,
             )
 
         else:
             send_message(
                 update.effective_message,
-                "Removed <code>{}</code> from blacklist. {} did not exist, "
-                "so were not removed.".format(
+                "已移除 <code>{}</code> 个触发词，另有 {} 个不在黑名单中，未能移除。".format(
                     successful, len(to_unblacklist) - successful
                 ),
                 parse_mode=ParseMode.HTML,
@@ -191,7 +190,7 @@ def unblacklist(update, context):
     else:
         send_message(
             update.effective_message,
-            "Tell me which words you would like to remove from blacklist!",
+            "请告诉我你想从黑名单中移除的词语！",
         )
 
 
@@ -213,7 +212,7 @@ def blacklist_mode(update, context):
         if update.effective_message.chat.type == "private":
             send_message(
                 update.effective_message,
-                "This command can be only used in group not in PM",
+                "此命令只能在群组中使用，不能在私聊中使用。",
             )
             return ""
         chat = update.effective_chat
@@ -222,70 +221,70 @@ def blacklist_mode(update, context):
 
     if args:
         if args[0].lower() in ["off", "nothing", "no"]:
-            settypeblacklist = "do nothing"
+            settypeblacklist = "不执行操作"
             sql.set_blacklist_strength(chat_id, 0, "0")
         elif args[0].lower() in ["del", "delete"]:
-            settypeblacklist = "delete blacklisted message"
+            settypeblacklist = "删除黑名单消息"
             sql.set_blacklist_strength(chat_id, 1, "0")
         elif args[0].lower() == "warn":
-            settypeblacklist = "warn the sender"
+            settypeblacklist = "警告发送者"
             sql.set_blacklist_strength(chat_id, 2, "0")
         elif args[0].lower() == "mute":
-            settypeblacklist = "mute the sender"
+            settypeblacklist = "禁言发送者"
             sql.set_blacklist_strength(chat_id, 3, "0")
         elif args[0].lower() == "kick":
-            settypeblacklist = "kick the sender"
+            settypeblacklist = "踢出发送者"
             sql.set_blacklist_strength(chat_id, 4, "0")
         elif args[0].lower() == "ban":
-            settypeblacklist = "ban the sender"
+            settypeblacklist = "封禁发送者"
             sql.set_blacklist_strength(chat_id, 5, "0")
         elif args[0].lower() == "tban":
             if len(args) == 1:
-                teks = """It looks like you tried to set time value for blacklist but you didn't specified time; Try, `/blacklistmode tban <timevalue>`.
-				
-Examples of time value: 4m = 4 minutes, 3h = 3 hours, 6d = 6 days, 5w = 5 weeks."""
+                teks = """看起来你想为黑名单设置临时封禁时长，但未指定时间，请使用 `/blacklistmode tban <时间值>`。
+
+时间值示例：4m = 4分钟，3h = 3小时，6d = 6天，5w = 5周。"""
                 send_message(update.effective_message, teks, parse_mode="markdown")
                 return ""
             restime = extract_time(msg, args[1])
             if not restime:
-                teks = """Invalid time value!
-Example of time value: 4m = 4 minutes, 3h = 3 hours, 6d = 6 days, 5w = 5 weeks."""
+                teks = """时间值无效！
+时间值示例：4m = 4分钟，3h = 3小时，6d = 6天，5w = 5周。"""
                 send_message(update.effective_message, teks, parse_mode="markdown")
                 return ""
-            settypeblacklist = "temporarily ban for {}".format(args[1])
+            settypeblacklist = "临时封禁 {}".format(args[1])
             sql.set_blacklist_strength(chat_id, 6, str(args[1]))
         elif args[0].lower() == "tmute":
             if len(args) == 1:
-                teks = """It looks like you tried to set time value for blacklist but you didn't specified  time; try, `/blacklistmode tmute <timevalue>`.
+                teks = """看起来你想为黑名单设置临时禁言时长，但未指定时间，请使用 `/blacklistmode tmute <时间值>`。
 
-Examples of time value: 4m = 4 minutes, 3h = 3 hours, 6d = 6 days, 5w = 5 weeks."""
+时间值示例：4m = 4分钟，3h = 3小时，6d = 6天，5w = 5周。"""
                 send_message(update.effective_message, teks, parse_mode="markdown")
                 return ""
             restime = extract_time(msg, args[1])
             if not restime:
-                teks = """Invalid time value!
-Examples of time value: 4m = 4 minutes, 3h = 3 hours, 6d = 6 days, 5w = 5 weeks."""
+                teks = """时间值无效！
+时间值示例：4m = 4分钟，3h = 3小时，6d = 6天，5w = 5周。"""
                 send_message(update.effective_message, teks, parse_mode="markdown")
                 return ""
-            settypeblacklist = "temporarily mute for {}".format(args[1])
+            settypeblacklist = "临时禁言 {}".format(args[1])
             sql.set_blacklist_strength(chat_id, 7, str(args[1]))
         else:
             send_message(
                 update.effective_message,
-                "I only understand: off/del/warn/ban/kick/mute/tban/tmute!",
+                "仅支持以下选项：off/del/warn/ban/kick/mute/tban/tmute！",
             )
             return ""
         if conn:
-            text = "Changed blacklist mode: `{}` in *{}*!".format(
-                settypeblacklist, chat_name
+            text = "已将 *{}* 的黑名单处罚方式设为：`{}`！".format(
+                chat_name, settypeblacklist
             )
         else:
-            text = "Changed blacklist mode: `{}`!".format(settypeblacklist)
+            text = "已将黑名单处罚方式设为：`{}`！".format(settypeblacklist)
         send_message(update.effective_message, text, parse_mode="markdown")
         return (
             "<b>{}:</b>\n"
-            "<b>Admin:</b> {}\n"
-            "Changed the blacklist mode. will {}.".format(
+            "<b>管理员：</b> {}\n"
+            "已修改黑名单处罚方式，将执行：{}。".format(
                 html.escape(chat.title),
                 mention_html(user.id, html.escape(user.first_name)),
                 settypeblacklist,
@@ -294,27 +293,27 @@ Examples of time value: 4m = 4 minutes, 3h = 3 hours, 6d = 6 days, 5w = 5 weeks.
     else:
         getmode, getvalue = sql.get_blacklist_setting(chat.id)
         if getmode == 0:
-            settypeblacklist = "do nothing"
+            settypeblacklist = "不执行操作"
         elif getmode == 1:
-            settypeblacklist = "delete"
+            settypeblacklist = "删除"
         elif getmode == 2:
-            settypeblacklist = "warn"
+            settypeblacklist = "警告"
         elif getmode == 3:
-            settypeblacklist = "mute"
+            settypeblacklist = "禁言"
         elif getmode == 4:
-            settypeblacklist = "kick"
+            settypeblacklist = "踢出"
         elif getmode == 5:
-            settypeblacklist = "ban"
+            settypeblacklist = "封禁"
         elif getmode == 6:
-            settypeblacklist = "temporarily ban for {}".format(getvalue)
+            settypeblacklist = "临时封禁 {}".format(getvalue)
         elif getmode == 7:
-            settypeblacklist = "temporarily mute for {}".format(getvalue)
+            settypeblacklist = "临时禁言 {}".format(getvalue)
         if conn:
-            text = "Current blacklistmode: *{}* in *{}*.".format(
-                settypeblacklist, chat_name
+            text = "*{}* 当前黑名单处罚方式：*{}*。".format(
+                chat_name, settypeblacklist
             )
         else:
-            text = "Current blacklistmode: *{}*.".format(settypeblacklist)
+            text = "当前黑名单处罚方式：*{}*。".format(settypeblacklist)
         send_message(update.effective_message, text, parse_mode=ParseMode.MARKDOWN)
     return ""
 
@@ -359,7 +358,7 @@ def del_blacklist(update, context):
                     warn(
                         update.effective_user,
                         chat,
-                        ("Using blacklisted trigger: {}".format(trigger)),
+                        ("使用了黑名单触发词：{}".format(trigger)),
                         message,
                         update.effective_user,
                     )
@@ -373,7 +372,7 @@ def del_blacklist(update, context):
                     )
                     bot.sendMessage(
                         chat.id,
-                        f"Muted {user.first_name} for using Blacklisted word: {trigger}!",
+                        f"已禁言 {user.first_name}，原因：使用了黑名单词语：{trigger}！",
                     )
                     return
                 elif getmode == 4:
@@ -382,7 +381,7 @@ def del_blacklist(update, context):
                     if res:
                         bot.sendMessage(
                             chat.id,
-                            f"Kicked {user.first_name} for using Blacklisted word: {trigger}!",
+                            f"已踢出 {user.first_name}，原因：使用了黑名单词语：{trigger}！",
                         )
                     return
                 elif getmode == 5:
@@ -390,7 +389,7 @@ def del_blacklist(update, context):
                     chat.ban_member(user.id)
                     bot.sendMessage(
                         chat.id,
-                        f"Banned {user.first_name} for using Blacklisted word: {trigger}",
+                        f"已封禁 {user.first_name}，原因：使用了黑名单词语：{trigger}",
                     )
                     return
                 elif getmode == 6:
@@ -399,7 +398,7 @@ def del_blacklist(update, context):
                     chat.ban_member(user.id, until_date=bantime)
                     bot.sendMessage(
                         chat.id,
-                        f"Banned {user.first_name} until '{value}' for using Blacklisted word: {trigger}!",
+                        f"已临时封禁 {user.first_name} 至 '{value}'，原因：使用了黑名单词语：{trigger}！",
                     )
                     return
                 elif getmode == 7:
@@ -413,7 +412,7 @@ def del_blacklist(update, context):
                     )
                     bot.sendMessage(
                         chat.id,
-                        f"Muted {user.first_name} until '{value}' for using Blacklisted word: {trigger}!",
+                        f"已临时禁言 {user.first_name} 至 '{value}'，原因：使用了黑名单词语：{trigger}！",
                     )
                     return
             except BadRequest as excp:
@@ -435,29 +434,24 @@ def __migrate__(old_chat_id, new_chat_id):
 
 def __chat_settings__(chat_id, user_id):
     blacklisted = sql.num_blacklist_chat_filters(chat_id)
-    return "There are {} blacklisted words.".format(blacklisted)
+    return "共有 {} 个黑名单词语。".format(blacklisted)
 
 
 def __stats__():
-    return "• {} Bʟᴀᴄᴋʟɪsᴛ ᴛʀɪɢᴇʀs, ᴀᴄʀᴏss {} ᴄʜᴀᴛs.".format(
+    return "• {} 个黑名单触发词，分布在 {} 个群组中。".format(
         sql.num_blacklist_filters(), sql.num_blacklist_filter_chats()
     )
 
 
-__mod_name__ = "Bʟᴀᴄᴋʟɪsᴛ"
+__mod_name__ = "黑名单"
 
 __help__ = """
-Bʟᴀᴄᴋʟɪsᴛs ᴀʀᴇ ᴜsᴇᴅ ᴛᴏ sᴛᴏᴘ ᴄᴇʀᴛᴀɪɴ ᴛʀɪɢɢᴇʀs ғʀᴏᴍ ʙᴇɪɴɢ sᴀɪᴅ ɪɴ ᴀ ɢʀᴏᴜᴘ. Aɴʏ ᴛɪᴍᴇ ᴛʜᴇ ᴛʀɪɢɢᴇʀ ɪs ᴍᴇɴᴛɪᴏɴᴇᴅ, ᴛʜᴇ ᴍᴇssᴀɢᴇ ᴡɪʟʟ ɪᴍᴍᴇᴅɪᴀᴛᴇʟʏ ʙᴇ ᴅᴇʟᴇᴛᴇᴅ. A ɢᴏᴏᴅ ᴄᴏᴍʙᴏ ɪs sᴏᴍᴇᴛɪᴍᴇs ᴛᴏ ᴘᴀɪʀ ᴛʜɪs ᴜᴘ ᴡɪᴛʜ ᴡᴀʀɴ ғɪʟᴛᴇʀs!
+ ❍ /blacklist*:* 查看当前黑名单词语
 
-*Nᴏᴛᴇ*: Bʟᴀᴄᴋʟɪsᴛs ᴅᴏ ɴᴏᴛ ᴀғғᴇᴄᴛ ɢʀᴏᴜᴘ ᴀᴅᴍɪɴs.
-
-
- ❍ /blacklist*:* Vɪᴇᴡ ᴛʜᴇ ᴄᴜʀʀᴇɴᴛ ʙʟᴀᴄᴋʟɪsᴛᴇᴅ ᴡᴏʀᴅs.
-
-Aᴅᴍɪɴ Oɴʟʏ:
- ❍ /addblacklist <triggers>*:* ᴀᴅᴅ ᴀ ᴛʀɪɢɢᴇʀ ᴛᴏ ᴛʜᴇ ʙʟᴀᴄᴋʟɪsᴛ. ᴇᴀᴄʜ ʟɪɴᴇ ɪs ᴄᴏɴsɪᴅᴇʀᴇᴅ ᴏɴᴇ ᴛʀɪɢɢᴇʀ, sᴏ ᴜsɪɴɢ ᴅɪғғᴇʀᴇɴᴛ ʟɪɴᴇs ᴡɪʟʟ ᴀʟʟᴏᴡ ʏᴏᴜ ᴛᴏ ᴀᴅᴅ ᴍᴜʟᴛɪᴘʟᴇ ᴛʀɪɢɢᴇʀs.
- ❍ /unblacklist <triggers>*:* ʀᴇᴍᴏᴠᴇ ᴛʀɪɢɢᴇʀs ғʀᴏᴍ ᴛʜᴇ ʙʟᴀᴄᴋʟɪsᴛ. sᴀᴍᴇ ɴᴇᴡʟɪɴᴇ ʟᴏɢɪᴄ ᴀᴘᴘʟɪᴇs ʜᴇʀᴇ, sᴏ ʏᴏᴜ ᴄᴀɴ ʀᴇᴍᴏᴠᴇ ᴍᴜʟᴛɪᴘʟᴇ ᴛʀɪɢɢᴇʀs ᴀᴛ ᴏɴᴄᴇ.
- ❍ /blacklistmode <off/del/warn/ban/kick/mute/tban/tmute>*:* ᴀᴄᴛɪᴏɴ ᴛᴏ ᴘᴇʀғᴏʀᴍ ᴡʜᴇɴ sᴏᴍᴇᴏɴᴇ sᴇɴᴅs ʙʟᴀᴄᴋʟɪsᴛᴇᴅ ᴡᴏʀᴅs.
+*仅管理员:*
+ ❍ /addblacklist <触发词>*:* 将词语添加到黑名单。每行一个词。
+ ❍ /unblacklist <触发词>*:* 从黑名单中移除词语。每行一个词。
+ ❍ /blacklistmode <关闭/删除/警告/禁言/踢出/封禁/封禁贴纸>*:* 设置命中黑名单时的处罚方式。默认为删除。
 """
 
 BLACKLIST_HANDLER = DisableAbleCommandHandler(

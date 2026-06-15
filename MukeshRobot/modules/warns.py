@@ -46,7 +46,7 @@ from MukeshRobot.modules.sql import warns_sql as sql
 from MukeshRobot.modules.sql.approve_sql import is_approved
 
 WARN_HANDLER_GROUP = 9
-CURRENT_WARNING_FILTER_STRING = "<b>Current warning filters in this chat:</b>\n"
+CURRENT_WARNING_FILTER_STRING = "<b>本群当前的警告过滤器：</b>\n"
 
 
 # Not async
@@ -63,26 +63,26 @@ def warn(
 
     if user.id in TIGERS:
         if warner:
-            message.reply_text("Tigers cant be warned.")
+            message.reply_text("虎级用户不能被警告。")
         else:
             message.reply_text(
-                "Tiger triggered an auto warn filter!\n I can't warn tigers but they should avoid abusing this.",
+                "虎级用户触发了自动警告过滤器！\n我不能警告虎级用户，但他们应该避免滥用这一点。",
             )
         return
 
     if user.id in WOLVES:
         if warner:
-            message.reply_text("Wolf disasters are warn immune.")
+            message.reply_text("狼级灾害免疫警告。")
         else:
             message.reply_text(
-                "Wolf Disaster triggered an auto warn filter!\nI can't warn wolves but they should avoid abusing this.",
+                "狼级灾害触发了自动警告过滤器！\n我不能警告狼级用户，但他们应该避免滥用这一点。",
             )
         return
 
     if warner:
         warner_tag = mention_html(warner.id, warner.first_name)
     else:
-        warner_tag = "Automated warn filter."
+        warner_tag = "自动警告过滤器。"
 
     limit, soft_warn = sql.get_warn_setting(chat.id)
     num_warns, reasons = sql.warn_user(user.id, chat.id, reason)
@@ -91,17 +91,17 @@ def warn(
         if soft_warn:  # punch
             chat.unban_member(user.id)
             reply = (
-                f"<code>❕</code><b>Punch Event</b>\n"
-                f"<code> </code><b>•  User:</b> {mention_html(user.id, user.first_name)}\n"
-                f"<code> </code><b>•  Count:</b> {limit}"
+                f"<code>❕</code><b>踢出事件</b>\n"
+                f"<code> </code><b>•  用户：</b> {mention_html(user.id, user.first_name)}\n"
+                f"<code> </code><b>•  警告次数：</b> {limit}"
             )
 
         else:  # ban
             chat.kick_member(user.id)
             reply = (
-                f"<code>❕</code><b>Ban Event</b>\n"
-                f"<code> </code><b>•  User:</b> {mention_html(user.id, user.first_name)}\n"
-                f"<code> </code><b>•  Count:</b> {limit}"
+                f"<code>❕</code><b>封禁事件</b>\n"
+                f"<code> </code><b>•  用户：</b> {mention_html(user.id, user.first_name)}\n"
+                f"<code> </code><b>•  警告次数：</b> {limit}"
             )
 
         for warn_reason in reasons:
@@ -131,12 +131,12 @@ def warn(
         )
 
         reply = (
-            f"<code>❕</code><b>Warn Event</b>\n"
-            f"<code> </code><b>•  User:</b> {mention_html(user.id, user.first_name)}\n"
-            f"<code> </code><b>•  Count:</b> {num_warns}/{limit}"
+            f"<code>❕</code><b>警告事件</b>\n"
+            f"<code> </code><b>•  用户：</b> {mention_html(user.id, user.first_name)}\n"
+            f"<code> </code><b>•  警告次数：</b> {num_warns}/{limit}"
         )
         if reason:
-            reply += f"\n<code> </code><b>•  Reason:</b> {html.escape(reason)}"
+            reply += f"\n<code> </code><b>•  原因：</b> {html.escape(reason)}"
 
         log_reason = (
             f"<b>{html.escape(chat.title)}:</b>\n"
@@ -177,7 +177,7 @@ def button(update: Update, context: CallbackContext) -> str:
         res = sql.remove_warn(user_id, chat.id)
         if res:
             update.effective_message.edit_text(
-                "Warn removed by {}.".format(mention_html(user.id, user.first_name)),
+                "警告已由 {} 移除。".format(mention_html(user.id, user.first_name)),
                 parse_mode=ParseMode.HTML,
             )
             user_member = chat.get_member(user_id)
@@ -189,7 +189,7 @@ def button(update: Update, context: CallbackContext) -> str:
             )
         else:
             update.effective_message.edit_text(
-                "User already has no warns.",
+                "该用户已经没有任何警告记录。",
                 parse_mode=ParseMode.HTML,
             )
 
@@ -223,7 +223,7 @@ def warn_user(update: Update, context: CallbackContext) -> str:
         else:
             return warn(chat.get_member(user_id).user, chat, reason, message, warner)
     else:
-        message.reply_text("That looks like an invalid User ID to me.")
+        message.reply_text("这看起来是一个无效的用户 ID。")
     return ""
 
 
@@ -240,7 +240,7 @@ def reset_warns(update: Update, context: CallbackContext) -> str:
 
     if user_id:
         sql.reset_warns(user_id, chat.id)
-        message.reply_text("Warns have been reset!")
+        message.reply_text("警告次数已重置！")
         warned = chat.get_member(user_id).user
         return (
             f"<b>{html.escape(chat.title)}:</b>\n"
@@ -249,7 +249,7 @@ def reset_warns(update: Update, context: CallbackContext) -> str:
             f"<b>User:</b> {mention_html(warned.id, warned.first_name)}"
         )
     else:
-        message.reply_text("No user has been designated!")
+        message.reply_text("未指定任何用户！")
     return ""
 
 
@@ -266,7 +266,7 @@ def warns(update: Update, context: CallbackContext):
 
         if reasons:
             text = (
-                f"This user has {num_warns}/{limit} warns, for the following reasons:"
+                f"该用户有 {num_warns}/{limit} 次警告，原因如下："
             )
             for reason in reasons:
                 text += f"\n • {reason}"
@@ -276,10 +276,10 @@ def warns(update: Update, context: CallbackContext):
                 update.effective_message.reply_text(msg)
         else:
             update.effective_message.reply_text(
-                f"User has {num_warns}/{limit} warns, but no reasons for any of them.",
+                f"该用户有 {num_warns}/{limit} 次警告，但均未注明原因。",
             )
     else:
-        update.effective_message.reply_text("This user doesn't have any warns!")
+        update.effective_message.reply_text("该用户没有任何警告记录！")
 
 
 # Dispatcher handler stop - do not async
@@ -313,7 +313,7 @@ def add_warn_filter(update: Update, context: CallbackContext):
 
     sql.add_warn_filter(chat.id, keyword, content)
 
-    update.effective_message.reply_text(f"Warn handler added for '{keyword}'!")
+    update.effective_message.reply_text(f"已为关键词 '{keyword}' 添加警告触发器！")
     raise DispatcherHandlerStop
 
 
@@ -340,17 +340,17 @@ def remove_warn_filter(update: Update, context: CallbackContext):
     chat_filters = sql.get_chat_warn_triggers(chat.id)
 
     if not chat_filters:
-        msg.reply_text("No warning filters are active here!")
+        msg.reply_text("此处没有任何活跃的警告过滤器！")
         return
 
     for filt in chat_filters:
         if filt == to_remove:
             sql.remove_warn_filter(chat.id, to_remove)
-            msg.reply_text("Okay, I'll stop warning people for that.")
+            msg.reply_text("好的，我将不再对此关键词发出警告。")
             raise DispatcherHandlerStop
 
     msg.reply_text(
-        "That's not a current warning filter - run /warnlist for all active warning filters.",
+        "这不是当前的警告过滤器 - 使用 /warnlist 查看所有活跃的警告过滤器。",
     )
 
 
@@ -359,7 +359,7 @@ def list_warn_filters(update: Update, context: CallbackContext):
     all_handlers = sql.get_chat_warn_triggers(chat.id)
 
     if not all_handlers:
-        update.effective_message.reply_text("No warning filters are active here!")
+        update.effective_message.reply_text("此处没有任何活跃的警告过滤器！")
         return
 
     filter_list = CURRENT_WARNING_FILTER_STRING
@@ -413,22 +413,22 @@ def set_warn_limit(update: Update, context: CallbackContext) -> str:
     if args:
         if args[0].isdigit():
             if int(args[0]) < 3:
-                msg.reply_text("The minimum warn limit is 3!")
+                msg.reply_text("警告上限最少为 3！")
             else:
                 sql.set_warn_limit(chat.id, int(args[0]))
-                msg.reply_text("Updated the warn limit to {}".format(args[0]))
+                msg.reply_text("警告上限已更新为 {}".format(args[0]))
                 return (
                     f"<b>{html.escape(chat.title)}:</b>\n"
                     f"#SET_WARN_LIMIT\n"
                     f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
-                    f"Set the warn limit to <code>{args[0]}</code>"
+                    f"将警告上限设置为 <code>{args[0]}</code>"
                 )
         else:
-            msg.reply_text("Give me a number as an arg!")
+            msg.reply_text("请提供一个数字作为参数！")
     else:
         limit, soft_warn = sql.get_warn_setting(chat.id)
 
-        msg.reply_text("The current warn limit is {}".format(limit))
+        msg.reply_text("当前警告上限为 {}".format(limit))
     return ""
 
 
@@ -442,36 +442,36 @@ def set_warn_strength(update: Update, context: CallbackContext):
     if args:
         if args[0].lower() in ("on", "yes"):
             sql.set_warn_strength(chat.id, False)
-            msg.reply_text("Too many warns will now result in a Ban!")
+            msg.reply_text("警告次数过多将导致封禁！")
             return (
                 f"<b>{html.escape(chat.title)}:</b>\n"
                 f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
-                f"Has enabled strong warns. Users will be seriously punched.(banned)"
+                f"已启用强力警告。用户将被封禁。"
             )
 
         elif args[0].lower() in ("off", "no"):
             sql.set_warn_strength(chat.id, True)
             msg.reply_text(
-                "Too many warns will now result in a normal punch! Users will be able to join again after.",
+                "警告次数过多将导致踢出！用户之后可以重新加入。",
             )
             return (
                 f"<b>{html.escape(chat.title)}:</b>\n"
                 f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
-                f"Has disabled strong punches. I will use normal punch on users."
+                f"已禁用强力警告。将对用户使用踢出处罚。"
             )
 
         else:
-            msg.reply_text("I only understand on/yes/no/off!")
+            msg.reply_text("我只接受 on/yes/no/off！")
     else:
         limit, soft_warn = sql.get_warn_setting(chat.id)
         if soft_warn:
             msg.reply_text(
-                "Warns are currently set to *punch* users when they exceed the limits.",
+                "当前设置为超过警告上限时*踢出*用户。",
                 parse_mode=ParseMode.MARKDOWN,
             )
         else:
             msg.reply_text(
-                "Warns are currently set to *Ban* users when they exceed the limits.",
+                "当前设置为超过警告上限时*封禁*用户。",
                 parse_mode=ParseMode.MARKDOWN,
             )
     return ""
@@ -498,27 +498,25 @@ def __chat_settings__(chat_id, user_id):
     num_warn_filters = sql.num_warn_chat_filters(chat_id)
     limit, soft_warn = sql.get_warn_setting(chat_id)
     return (
-        f"This chat has `{num_warn_filters}` warn filters. "
-        f"It takes `{limit}` warns before the user gets *{'kicked' if soft_warn else 'banned'}*."
+        f"本群共有 `{num_warn_filters}` 个警告过滤器。"
+        f"用户触发 `{limit}` 次警告后将被*{'踢出' if soft_warn else '封禁'}*。"
     )
 
 
 __help__ = """
- ❍ `/ᴡᴀʀɴs <ᴜsᴇʀʜᴀɴᴅʟᴇ>`*:* ɢᴇᴛ ᴀ ᴜsᴇʀ's ɴᴜᴍʙᴇʀ, ᴀɴᴅ ʀᴇᴀsᴏɴ, ᴏғ ᴡᴀʀɴs.
- ❍ `/ᴡᴀʀɴʟɪsᴛ`*:* ʟɪsᴛ ᴏғ ᴀʟʟ ᴄᴜʀʀᴇɴᴛ ᴡᴀʀɴɪɴɢ ғɪʟᴛᴇʀs
-
-*ᴀᴅᴍɪɴs ᴏɴʟʏ:*
- ❍ `/warn <ᴜsᴇʀʜᴀɴᴅʟᴇ>`*:* ᴡᴀʀɴ ᴀ ᴜsᴇʀ. ᴀғᴛᴇʀ 3 ᴡᴀʀɴs, ᴛʜᴇ ᴜsᴇʀ ᴡɪʟʟ ʙᴇ ʙᴀɴɴᴇᴅ ғʀᴏᴍ ᴛʜᴇ ɢʀᴏᴜᴘ. ᴄᴀɴ ᴀʟsᴏ ʙᴇ ᴜsᴇᴅ ᴀs ᴀ ʀᴇᴘʟʏ.
- ❍ `/dwarn <ᴜsᴇʀʜᴀɴᴅʟᴇ>`*:* ᴡᴀʀɴ ᴀ ᴜsᴇʀ ᴀɴᴅ ᴅᴇʟᴇᴛᴇ ᴛʜᴇ ᴍᴇssᴀɢᴇ. ᴀғᴛᴇʀ 3 ᴡᴀʀɴs, ᴛʜᴇ ᴜsᴇʀ ᴡɪʟʟ ʙᴇ ʙᴀɴɴᴇᴅ ғʀᴏᴍ ᴛʜᴇ ɢʀᴏᴜᴘ. ᴄᴀɴ ᴀʟsᴏ ʙᴇ ᴜsᴇᴅ ᴀs ᴀ ʀᴇᴘʟʏ.
- ❍ `/resetwarn <ᴜsᴇʀʜᴀɴᴅʟᴇ>`*:* ʀᴇsᴇᴛ ᴛʜᴇ ᴡᴀʀɴs ғᴏʀ ᴀ ᴜsᴇʀ. ᴄᴀɴ ᴀʟsᴏ ʙᴇ ᴜsᴇᴅ ᴀs ᴀ ʀᴇᴘʟʏ.
- ❍ `/addwarn <ᴋᴇʏᴡᴏʀᴅ> <ʀᴇᴘʟʏ ᴍᴇssᴀɢᴇ>`*:* sᴇᴛ ᴀ ᴡᴀʀɴɪɴɢ ғɪʟᴛᴇʀ ᴏɴ ᴀ ᴄᴇʀᴛᴀɪɴ ᴋᴇʏᴡᴏʀᴅ. ɪғ ʏᴏᴜ ᴡᴀɴᴛ ʏᴏᴜʀ ᴋᴇʏᴡᴏʀᴅ ᴛᴏ \
-ʙᴇ ᴀ sᴇɴᴛᴇɴᴄᴇ, ᴇɴᴄᴏᴍᴘᴀss ɪᴛ ᴡɪᴛʜ ǫᴜᴏᴛᴇs, ᴀs sᴜᴄʜ: `/ᴀᴅᴅᴡᴀʀɴ "ᴠᴇʀʏ ᴀɴɢʀʏ" ᴛʜɪs ɪs ᴀɴ ᴀɴɢʀʏ ᴜsᴇʀ`.
- ❍ `/nowarn <ᴋᴇʏᴡᴏʀᴅ>`*:* sᴛᴏᴘ ᴀ ᴡᴀʀɴɪɴɢ ғɪʟᴛᴇʀ
- ❍ `/warnlimit <ɴᴜᴍ>`*:* sᴇᴛ ᴛʜᴇ ᴡᴀʀɴɪɴɢ ʟɪᴍɪᴛ
- ❍ `/strongwarn <ᴏɴ/ʏᴇs/ᴏғғ/ɴᴏ>`*:* ɪғ sᴇᴛ ᴛᴏ ᴏɴ, ᴇxᴄᴇᴇᴅɪɴɢ ᴛʜᴇ ᴡᴀʀɴ ʟɪᴍɪᴛ ᴡɪʟʟ ʀᴇsᴜʟᴛ ɪɴ ᴀ ʙᴀɴ. ᴇʟsᴇ, ᴡɪʟʟ ᴊᴜsᴛ ᴘᴜɴᴄʜ.
+*仅管理员:*
+ ❍ /warn <用户名>*:* 警告用户。累计到警告上限后将自动处罚。
+ ❍ /dwarn <用户名>*:* 警告用户并删除触发警告的消息。
+ ❍ /resetwarn <用户名>*:* 重置用户的警告次数。
+ ❍ /addwarn <关键词> <回复内容>*:* 设置触发词，命中时自动发出警告。
+ ❍ /nowarn <关键词>*:* 停止对某关键词的警告。
+ ❍ /warnlimit <数量>*:* 设置警告上限。
+ ❍ /strongwarn <开/关>*:* 开启时，超过警告上限将封禁而非踢出。
+ ❍ /warns <用户名>*:* 查看某用户的警告次数及原因。
+ ❍ /warnlist*:* 列出所有自动警告触发词。
 """
 
-__mod_name__ = "Wᴀʀɴs"
+__mod_name__ = "警告"
 
 WARN_HANDLER = CommandHandler(
     ["warn", "dwarn"], warn_user, filters=Filters.chat_type.groups, run_async=True

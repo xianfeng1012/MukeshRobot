@@ -20,15 +20,15 @@ def debug(update: Update, context: CallbackContext):
     if len(args) > 1:
         if args[1] in ("yes", "on"):
             DEBUG_MODE = True
-            message.reply_text("Debug mode is now on.")
+            message.reply_text("调试模式已开启。")
         elif args[1] in ("no", "off"):
             DEBUG_MODE = False
-            message.reply_text("Debug mode is now off.")
+            message.reply_text("调试模式已关闭。")
     else:
         if DEBUG_MODE:
-            message.reply_text("Debug mode is currently on.")
+            message.reply_text("调试模式当前处于开启状态。")
         else:
-            message.reply_text("Debug mode is currently off.")
+            message.reply_text("调试模式当前处于关闭状态。")
 
 
 @telethn.on(events.NewMessage(pattern="[/!].*"))
@@ -64,9 +64,9 @@ dispatcher.add_handler(LOG_HANDLER)
 DEBUG_HANDLER = CommandHandler("debug", debug, run_async=True)
 dispatcher.add_handler(DEBUG_HANDLER)
 
-__mod_name__ = "Dᴇʙᴜɢ"
+__mod_name__ = "调试"
 __help__ = """
-/logs    ᴛᴏ ɢᴇᴛ ʜᴇʀᴜᴋᴏ ʟᴏɢs
-/debug ᴛᴏ ᴏɴ / ᴏғғ ᴅᴇʙᴜɢ """
+/logs    获取机器人日志文件
+/debug 开启 / 关闭调试模式"""
 __command_list__ = ["debug"]
 __handlers__ = [DEBUG_HANDLER]

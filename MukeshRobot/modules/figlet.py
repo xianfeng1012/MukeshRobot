@@ -9,7 +9,7 @@ def figle(text):
     x = pyfiglet.FigletFont.getFonts()
     font = choice(x)
     figled = str(pyfiglet.figlet_format(text,font=font))
-    keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(text="ᴄʜᴀɴɢᴇ", callback_data="figlet"),InlineKeyboardButton(text="ᴄʟᴏsᴇ", callback_data="close_reply")]])
+    keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(text="换一个", callback_data="figlet"),InlineKeyboardButton(text="关闭", callback_data="close_reply")]])
     return figled, keyboard
 
 @Client.on_message(filters.command("figlet"))
@@ -18,18 +18,18 @@ async def echo(bot, message):
     try:
         text = message.text.split(' ',1)[1]
     except IndexError:
-        return await message.reply_text("Example:\n\n`/figlet Mukesh`")
+        return await message.reply_text("示例：\n\n`/figlet Mukesh`")
     kul_text, keyboard = figle(text)
-    await message.reply_text(f"ʜᴇʀᴇ ɪs ʏᴏᴜʀ ғɪɢʟᴇᴛ :\n<pre>{kul_text}</pre>", quote=True, reply_markup=keyboard)
+    await message.reply_text(f"这是你的艺术字：\n<pre>{kul_text}</pre>", quote=True, reply_markup=keyboard)
 
 @Client.on_callback_query(filters.regex("figlet"))
 async def figlet_handler(Client, query: CallbackQuery):
   try:
       kul_text, keyboard = figle(text)
-      await query.message.edit_text(f"ʜᴇʀᴇ ɪs ʏᴏᴜʀ ғɪɢʟᴇᴛ :\n<pre>{kul_text}</pre>", reply_markup=keyboard)
+      await query.message.edit_text(f"这是你的艺术字：\n<pre>{kul_text}</pre>", reply_markup=keyboard)
   except Exception as e : 
       await message.reply(e)
-__mod_name__ = "Fɪɢʟᴇᴛ" 
+__mod_name__ = "艺术字"
 __help__="""
-❍ /figlet*:* ᴍᴀᴋᴇs ғɪɢʟᴇᴛ ᴏғ ᴛʜᴇ ɢɪᴠᴇɴ ᴛᴇxᴛ
-Example:\n\n`/figlet Mukesh`"""
+❍ /figlet*：* 将给定文本生成 ASCII 艺术字
+示例：\n\n`/figlet Mukesh`"""

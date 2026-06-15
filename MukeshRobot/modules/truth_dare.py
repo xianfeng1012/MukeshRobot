@@ -18,8 +18,8 @@ async def dare_(client: Client, message: Message):
 
 
 __help__ = """
-*ᴛʀᴜᴛʜ & ᴅᴀʀᴇ*
- ❍ /truth  *:* sᴇɴᴅs ᴀ ʀᴀɴᴅᴏᴍ ᴛʀᴜᴛʜ sᴛʀɪɴɢ.
- ❍ /dare  *:* sᴇɴᴅs ᴀ ʀᴀɴᴅᴏᴍ ᴅᴀʀᴇ sᴛʀɪɴɢ.
+*真心话大冒险*
+ ❍ /truth *:* 发送一条随机真心话问题。
+ ❍ /dare *:* 发送一条随机大冒险挑战。
 """
-__mod_name__ = "Tʀᴜᴛʜ-Dᴀʀᴇ"
+__mod_name__ = "真心话大冒险"

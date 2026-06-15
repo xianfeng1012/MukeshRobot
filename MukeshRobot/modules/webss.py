@@ -45,7 +45,7 @@ async def eor(msg: Message, **kwargs):
 @app.on_message(filters.command(["webss", "ss", "webshot"]))
 async def take_ss(_, message: Message):
     if len(message.command) < 2:
-        return await eor(message, text="ɢɪᴠᴇ ᴀ ᴜʀʟ ᴛᴏ ғᴇᴛᴄʜ sᴄʀᴇᴇɴsʜᴏᴛ.")
+        return await eor(message, text="请提供一个网址以截取截图。")
 
     if len(message.command) == 2:
         url = message.text.split(None, 1)[1]
@@ -59,16 +59,16 @@ async def take_ss(_, message: Message):
             "true",
         ]
     else:
-        return await eor(message, text="ɪɴᴠᴀʟɪᴅ ᴄᴏᴍᴍᴀɴᴅ.")
+        return await eor(message, text="无效的命令。")
 
-    m = await eor(message, text="ᴄᴀᴘᴛᴜʀɪɴɢ sᴄʀᴇᴇɴsʜᴏᴛ...")
+    m = await eor(message, text="正在截取截图……")
 
     try:
         photo = await take_screenshot(url, full)
         if not photo:
-            return await m.edit("ғᴀɪʟᴇᴅ ᴛᴏ ᴛᴀᴋᴇ sᴄʀᴇᴇɴsʜᴏᴛ.")
+            return await m.edit("截图失败。")
 
-        m = await m.edit("ᴜᴘʟᴏᴀᴅɪɴɢ...")
+        m = await m.edit("正在上传……")
 
         if not full:
             await message.reply_document(photo)
@@ -80,6 +80,6 @@ async def take_ss(_, message: Message):
 
 
 __help__ = """
-» /webss *:* Sᴇɴᴅs ᴛʜᴇ sᴄʀᴇᴇɴsʜᴏᴛ ᴏғ ᴛʜᴇ ɢɪᴠᴇɴ ᴜʀʟ.
+» /webss <网址> *:* 截取指定网址的网页截图并发送。
 """
-__mod_name__ = "Wᴇʙsʜᴏᴛ"
+__mod_name__ = "网页截图"

@@ -26,7 +26,7 @@ def add_nsfw(update: Update, context: CallbackContext):
     is_nsfw = sql.is_nsfw(chat.id)
     if not is_nsfw:
         sql.set_nsfw(chat.id)
-        msg.reply_text("ᴀᴄᴛɪᴠᴀᴛɪᴏɴ ɴsғᴡ ᴍᴏᴅᴇ!")
+        msg.reply_text("NSFW 模式已激活！")
         message = (
             f"<b>{html.escape(chat.title)}:</b>\n"
             f"ᴀᴄᴛɪᴠᴀᴛᴇᴅ_ɴsғᴡ\n"
@@ -34,7 +34,7 @@ def add_nsfw(update: Update, context: CallbackContext):
         )
         return message
     else:
-        msg.reply_text("ɴsғᴡ ᴍᴏᴅᴇ ɪs ᴀʟʀᴇᴀᴅʏ ᴀᴄᴛɪᴠᴀᴛᴇᴅ ғᴏʀ ᴛʜɪs ᴄʜᴀᴛ")
+        msg.reply_text("该群组 NSFW 模式已处于激活状态")
         return ""
 
 
@@ -47,11 +47,11 @@ def rem_nsfw(update: Update, context: CallbackContext):
     user = update.effective_user
     is_nsfw = sql.is_nsfw(chat.id)
     if not is_nsfw:
-        msg.reply_text("ɴsғᴡ ᴍᴏᴅᴇ ɪs ᴀʟʀᴇᴀᴅʏ ᴅᴇᴀᴄᴛɪᴠᴀᴛᴇᴅ")
+        msg.reply_text("NSFW 模式已处于关闭状态")
         return ""
     else:
         sql.rem_nsfw(chat.id)
-        msg.reply_text("ʀᴏʟʟᴇᴅ ʙᴀᴄᴋ ᴛᴏ ɴsғᴡ ᴍᴏᴅᴇ")
+        msg.reply_text("NSFW 模式已关闭")
         message = (
             f"<b>{html.escape(chat.title)}:</b>\n"
             f"ᴅᴇᴀᴄᴛɪᴠᴀᴛᴇᴅ_ɴsғᴡ\n"
@@ -62,7 +62,7 @@ def rem_nsfw(update: Update, context: CallbackContext):
 
 def list_nsfw_chats(update: Update, context: CallbackContext):
     chats = sql.get_all_nsfw_chats()
-    text = "<b>ɴsғᴡ ᴀᴄᴛɪᴠᴀᴛᴇᴅ ᴄʜᴀᴛs</b>\n"
+    text = "<b>已启用 NSFW 的群组</b>\n"
     for chat in chats:
         try:
             x = context.bot.get_chat(int(*chat))
@@ -440,7 +440,7 @@ def keta(update, context):
     msg = update.effective_message
     target = "keta"
     if not target:
-        msg.reply_text("No URL was received from the API!")
+        msg.reply_text("未从 API 获取到图片链接！")
         return
     msg.reply_photo(nekos.img(target))
 
@@ -618,7 +618,7 @@ def dva(update, context):
     url = nsfw.get("url")
     # do shit with url if you want to
     if not url:
-        msg.reply_text("No URL was received from the API!")
+        msg.reply_text("未从 API 获取到图片链接！")
         return
     msg.reply_photo(url)
 
@@ -798,23 +798,23 @@ __handlers__ = [
     BAKA_HANDLER,
     DVA_HANDLER,
 ]
-__mod_name__ = "Nsғᴡ"
+__mod_name__ = "NSFW 检测"
 
 __help__ = """
-*ɴsғᴡ:*
-❂ /addnsfw  : ᴇɴᴀʙʟᴇ ɴsғᴡ ᴍᴏᴅᴇ
-❂ /rmnsfw  : ᴅɪsᴀʙʟᴇ ɴsғᴡ ᴍᴏᴅᴇ
- 
-*ᴀᴠᴀɪʟᴀʙʟᴇ ᴄᴏᴍᴍᴀɴᴅs:*  
-❂ /neko : sᴇɴᴅs ʀᴀɴᴅᴏᴍ sғᴡ ɴᴇᴋᴏ sᴏᴜʀᴄᴇ ɪᴍᴀɢᴇs.
-❂ /ngif : sᴇɴᴅs ʀᴀɴᴅᴏᴍ ɴᴇᴋᴏ ɢɪғs.
-❂ /tickle : sᴇɴᴅs ʀᴀɴᴅᴏᴍ ᴛɪᴄᴋʟᴇ ɢɪғs.
-❂ /feed : sᴇɴᴅs ʀᴀɴᴅᴏᴍ ғᴇᴇᴅɪɴɢ ɢɪғs.
-❂ /gasm : sᴇɴᴅs ʀᴀɴᴅᴏᴍ ᴏʀɢᴀsᴍ sᴛɪᴄᴋᴇʀs.
-❂ /kuni : sᴇɴᴅs ʀᴀɴᴅᴏᴍ ᴘᴜssʏ ʟɪᴄᴋ ɢɪғs.
-❂ /waifu : sᴇɴᴅs ʀᴀɴᴅᴏᴍ ᴡᴀɪғᴜ sᴛɪᴄᴋᴇʀs.
-❂ /kiss : sᴇɴᴅs ʀᴀɴᴅᴏᴍ ᴋɪssɪɴɢ ɢɪғs.
-❂ /erok : sᴇɴᴅs ʀᴀɴᴅᴏᴍ ᴇʀᴏ-ᴋɪᴛsᴜɴᴇ sᴏᴜʀᴄᴇ ɪᴍᴀɢᴇs.
-❂ /foxgirl : sᴇɴᴅs ʀᴀɴᴅᴏᴍ ғᴏxɢɪʀʟ sᴏᴜʀᴄᴇ ɪᴍᴀɢᴇs.
-❂ /smug : sᴇɴᴅs ʀᴀɴᴅᴏᴍ sᴍᴜɢ ɢɪғs.
+*NSFW：*
+❂ /addnsfw  : 启用 NSFW 模式
+❂ /rmnsfw  : 禁用 NSFW 模式
+
+*可用指令：*
+❂ /neko : 发送随机 SFW 猫娘图片。
+❂ /ngif : 发送随机猫娘 GIF。
+❂ /tickle : 发送随机挠痒 GIF。
+❂ /feed : 发送随机喂食 GIF。
+❂ /gasm : 发送随机贴纸。
+❂ /kuni : 发送随机 GIF。
+❂ /waifu : 发送随机老婆贴纸。
+❂ /kiss : 发送随机接吻 GIF。
+❂ /erok : 发送随机 ero-kitsune 图片。
+❂ /foxgirl : 发送随机狐狸娘图片。
+❂ /smug : 发送随机得意 GIF。
 """

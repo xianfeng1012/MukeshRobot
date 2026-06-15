@@ -36,16 +36,16 @@ async def imagine_(b, message: Message):
     else:
 
         text =message.text.split(None, 1)[1]
-    mukesh=await message.reply_text( "`Please wait...,\n\nGenerating prompt .. ...`")
+    mukesh=await message.reply_text( "`请稍候……\n\n生成中……`")
     try:
         await b.send_chat_action(message.chat.id, ChatAction.UPLOAD_PHOTO)
         x=api.ai_image(text)
         with open("mukesh.jpg", 'wb') as f:
             f.write(x)
         caption = f"""
-    💘sᴜᴄᴇssғᴜʟʟʏ ɢᴇɴᴇʀᴀᴛᴇᴅ : {text}
-    ✨ɢᴇɴᴇʀᴀᴛᴇᴅ ʙʏ : @{BOT_USERNAME}
-    🥀ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ : {message.from_user.mention}
+    💘生成成功：{text}
+    ✨生成者：@{BOT_USERNAME}
+    🥀请求者：{message.from_user.mention}
     """
         await mukesh.delete()
         await message.reply_photo("mukesh.jpg",caption=caption,quote=True)
@@ -55,7 +55,7 @@ async def imagine_(b, message: Message):
 # -----------CREDITS -----------
 # telegram : @legend_coder
 # github : noob-mukesh
-__mod_name__ = "Aɪ ɪᴍᴀɢᴇ"
+__mod_name__ = "AI 图像"
 __help__ = """
- ➻ /imagine : ɢᴇɴᴇʀᴀᴛᴇ Aɪ ɪᴍᴀɢᴇ ғʀᴏᴍ ᴛᴇxᴛ
+ ➻ /imagine <描述> : 根据文字描述生成 AI 图像
  """

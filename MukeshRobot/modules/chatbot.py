@@ -41,12 +41,12 @@ def mukeshrm(update: Update, context: CallbackContext) -> str:
             is_mukesh = sql.set_mukesh(user_id)
             return (
                 f"<b>{html.escape(chat.title)}:</b>\n"
-                f"ᴀɪ ᴅɪꜱᴀʙʟᴇᴅ\n"
-                f"<b>ᴀᴅᴍɪɴ :</b> {mention_html(user.id, html.escape(user.first_name))}\n"
+                f"AI 已禁用\n"
+                f"<b>管理员：</b> {mention_html(user.id, html.escape(user.first_name))}\n"
             )
         else:
             update.effective_message.edit_text(
-                "{} ᴄʜᴀᴛʙᴏᴛ ᴅɪsᴀʙʟᴇᴅ ʙʏ {}.".format(
+                "{} 聊天机器人已被 {} 关闭。".format(
                     dispatcher.bot.first_name, mention_html(user.id, user.first_name)
                 ),
                 parse_mode=ParseMode.HTML,
@@ -69,12 +69,12 @@ def mukeshadd(update: Update, context: CallbackContext) -> str:
             is_mukesh = sql.rem_mukesh(user_id)
             return (
                 f"<b>{html.escape(chat.title)}:</b>\n"
-                f"ᴀɪ ᴇɴᴀʙʟᴇ\n"
-                f"<b>ᴀᴅᴍɪɴ :</b> {mention_html(user.id, html.escape(user.first_name))}\n"
+                f"AI 已启用\n"
+                f"<b>管理员：</b> {mention_html(user.id, html.escape(user.first_name))}\n"
             )
         else:
             update.effective_message.edit_text(
-                "{} ᴄʜᴀᴛʙᴏᴛ ᴇɴᴀʙʟᴇᴅ ʙʏ {}.".format(
+                "{} 聊天机器人已被 {} 开启。".format(
                     dispatcher.bot.first_name, mention_html(user.id, user.first_name)
                 ),
                 parse_mode=ParseMode.HTML,
@@ -87,12 +87,12 @@ def mukeshadd(update: Update, context: CallbackContext) -> str:
 @gloggable
 def mukesh(update: Update, context: CallbackContext):
     message = update.effective_message
-    msg = "• ᴄʜᴏᴏsᴇ ᴀɴ ᴏᴩᴛɪᴏɴ ᴛᴏ ᴇɴᴀʙʟᴇ/ᴅɪsᴀʙʟᴇ ᴄʜᴀᴛʙᴏᴛ"
+    msg = "• 选择操作以开启/关闭聊天机器人"
     keyboard = InlineKeyboardMarkup(
         [
             [
-                InlineKeyboardButton(text="ᴇɴᴀʙʟᴇ", callback_data="add_chat({})"),
-                InlineKeyboardButton(text="ᴅɪsᴀʙʟᴇ", callback_data="rm_chat({})"),
+                InlineKeyboardButton(text="开启", callback_data="add_chat({})"),
+                InlineKeyboardButton(text="关闭", callback_data="rm_chat({})"),
             ],
         ]
     )

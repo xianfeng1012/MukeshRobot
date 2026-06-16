@@ -14,27 +14,42 @@ BOT_USERNAME = os.getenv('BOT_USERNAME', 'your_miniapp_bot_username')
 SHARED_API_URL = os.getenv('SHARED_API_URL', 'http://localhost:5000/api')
 API_BOT_TOKEN = os.getenv('API_BOT_TOKEN')
 
-# Mini App配置
-MINIAPP_URL = os.getenv('MINIAPP_URL', 'https://miniapp.example.com')
+# Mini App配置（/play 打开的小程序直链）
+MINIAPP_URL = os.getenv('MINIAPP_URL', 'https://t.me/llxxsv2bot/app')
 MINIAPP_SECRET = os.getenv('MINIAPP_SECRET', 'your-secret-key')
 MINIAPP_WEBHOOK_URL = os.getenv('MINIAPP_WEBHOOK_URL', 'http://localhost:8000/webhook/mini-app-event')
 MINIAPP_WEBHOOK_PORT = int(os.getenv('MINIAPP_WEBHOOK_PORT', 8000))
 
 # JWT配置
 JWT_SECRET = os.getenv('JWT_SECRET', 'jwt-secret-change-me')
+JWT_ALGORITHM = 'HS256'
 JWT_EXPIRATION_HOURS = 24
 
-# 任务配置
-TASK_DAILY_CHECKIN_POINTS = 50
-TASK_FIRST_MESSAGE_POINTS = 10
-TASK_INVITE_USER_POINTS = 100
+# yanyulou 项目 API（积分/签到/排行榜的真实数据源）
+YANYULOU_API_BASE = os.getenv('YANYULOU_API_BASE', 'https://api.ooxxooxx.dpdns.org')
+YANYULOU_API_KEY = os.getenv('YANYULOU_API_KEY', 'dev-bot-api-key')
+
+# 小程序前端（TMA）地址，用于深链到指定资料页 /girls/<id>
+YANYULOU_TMA_BASE = os.getenv('YANYULOU_TMA_BASE', 'https://ooxxooxx.dpdns.org')
+
+# 本机器人用户名（频道按钮深链 t.me/<bot>?start= 用）
+BOT_USERNAME = os.getenv('BOT_USERNAME', 'llxxsv2bot')
+
+# 资料发布 Webhook（yanyulou admin → 本机器人）
+PUBLISH_SECRET = os.getenv('TG_PUBLISH_SECRET', 'yanyulou-tg-publish-2024')
+PUBLISH_WEBHOOK_PORT = int(os.getenv('PUBLISH_WEBHOOK_PORT', 8000))
+
+# 分类 → 频道映射（精品/兼职/新生）
+CHANNEL_FEATURED = int(os.getenv('CHANNEL_FEATURED', -1002665963207))
+CHANNEL_PART_TIME = int(os.getenv('CHANNEL_PART_TIME', -1004417011478))
+CHANNEL_NEWBIE = int(os.getenv('CHANNEL_NEWBIE', -1004298729775))
 
 # 排行榜配置
 LEADERBOARD_SIZE = 10
 
 # 日志
 LOG_LEVEL = 'INFO'
-LOG_FILE = 'miniapp_bot.log'
+LOG_FILE = '/tmp/miniapp_bot.log'
 
 # 功能开关
 POINTS_SYSTEM_ENABLED = True

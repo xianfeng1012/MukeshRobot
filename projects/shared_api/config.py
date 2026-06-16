@@ -22,6 +22,7 @@ API_DEBUG = os.getenv('API_DEBUG', 'True') == 'True'
 GROUP_BOT_TOKEN = os.getenv('GROUP_BOT_TOKEN')
 MINIAPP_BOT_TOKEN = os.getenv('MINIAPP_BOT_TOKEN')
 USER_BOT_TOKEN = os.getenv('USER_BOT_TOKEN')
+API_BOT_TOKEN = os.getenv('API_BOT_TOKEN')
 
 # Mini App配置
 MINIAPP_SECRET = os.getenv('MINIAPP_SECRET', 'your-secret-key-change-me')
@@ -35,7 +36,7 @@ JWT_EXPIRATION_HOURS = 24
 
 # 日志
 LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO')
-LOG_FILE = 'shared_api.log'
+LOG_FILE = '/tmp/shared_api.log'
 
 # 数据库池配置
 MONGO_POOL_SIZE = 50

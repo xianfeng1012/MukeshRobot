@@ -16,7 +16,7 @@ import jwt
 from config import (
     MONGO_URI, MONGO_DB, REDIS_URL, API_HOST, API_PORT, API_DEBUG,
     JWT_SECRET, JWT_ALGORITHM, JWT_EXPIRATION_HOURS,
-    GROUP_BOT_TOKEN, MINIAPP_BOT_TOKEN, USER_BOT_TOKEN,
+    API_BOT_TOKEN,
     MINIAPP_SECRET, LOG_LEVEL, LOG_FILE
 )
 from models import *
@@ -26,7 +26,6 @@ logging.basicConfig(
     level=getattr(logging, LOG_LEVEL),
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler(LOG_FILE),
         logging.StreamHandler()
     ]
 )
@@ -82,9 +81,8 @@ def bot_token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         token = request.headers.get('X-Bot-Token')
-        valid_tokens = [GROUP_BOT_TOKEN, MINIAPP_BOT_TOKEN, USER_BOT_TOKEN]
 
-        if token not in valid_tokens:
+        if token != API_BOT_TOKEN:
             return jsonify({'code': 401, 'message': 'Invalid bot token'}), 401
 
         return f(*args, **kwargs)
@@ -279,6 +277,136 @@ def add_to_blacklist():
         return jsonify({'code': 200, 'message': 'success'})
     except Exception as e:
         logger.error(f"添加黑名单失败: {e}")
+        return jsonify({'code': 500, 'message': str(e)}), 500
+
+
+# ============ 群组设置接口 ============
+DEFAULT_GROUP_SETTINGS = {
+    'welcome_text': None,
+    'verify_enabled': True,
+    'spam_enabled': True,
+}
+
+
+@app.route('/api/groups/<chat_id>/settings', methods=['GET'])
+@bot_token_required
+def get_group_settings(chat_id):
+    """获取群组设置（不存在则返回默认值）"""
+    try:
+        cid = int(chat_id)
+        data = dict(DEFAULT_GROUP_SETTINGS)
+        settings = db.group_settings.find_one({'chat_id': cid})
+        if settings:
+            settings.pop('_id', None)
+            for k in DEFAULT_GROUP_SETTINGS:
+                if k in settings:
+                    data[k] = settings[k]
+        data['chat_id'] = cid
+        return jsonify({'code': 200, 'data': data})
+    except Exception as e:
+        logger.error(f"获取群组设置失败: {e}")
+        return jsonify({'code': 500, 'message': str(e)}), 500
+
+
+@app.route('/api/groups/<chat_id>/settings', methods=['POST'])
+@bot_token_required
+def update_group_settings(chat_id):
+    """更新群组设置（仅接受已知字段）"""
+    try:
+        cid = int(chat_id)
+        data = request.json or {}
+        update = {k: data[k] for k in DEFAULT_GROUP_SETTINGS if k in data}
+        if not update:
+            return jsonify({'code': 400, 'message': 'no valid fields'}), 400
+
+        update['updated_at'] = datetime.now()
+        db.group_settings.update_one(
+            {'chat_id': cid},
+            {'$set': update},
+            upsert=True
+        )
+        logger.info(f"更新群组{cid}设置: {list(update.keys())}")
+        return jsonify({'code': 200, 'message': 'success'})
+    except Exception as e:
+        logger.error(f"更新群组设置失败: {e}")
+        return jsonify({'code': 500, 'message': str(e)}), 500
+
+
+# ============ 群成员（新人观察期）接口 ============
+@app.route('/api/group-members', methods=['POST'])
+@bot_token_required
+def upsert_group_member():
+    """记录/更新群成员（首次写入时记录入群时间，默认进入观察期）"""
+    try:
+        data = request.json or {}
+        chat_id = data.get('chat_id')
+        user_id = data.get('user_id')
+        if chat_id is None or user_id is None:
+            return jsonify({'code': 400, 'message': 'chat_id and user_id required'}), 400
+
+        existing = db.group_members.find_one({'chat_id': chat_id, 'user_id': user_id})
+        doc = {'chat_id': chat_id, 'user_id': user_id}
+        if not existing:
+            doc['joined_at'] = datetime.now()
+            doc['status'] = data.get('status', 'probation')
+        elif 'status' in data:
+            doc['status'] = data['status']
+
+        db.group_members.update_one(
+            {'chat_id': chat_id, 'user_id': user_id},
+            {'$set': doc},
+            upsert=True
+        )
+        return jsonify({'code': 200, 'message': 'success'})
+    except Exception as e:
+        logger.error(f"记录群成员失败: {e}")
+        return jsonify({'code': 500, 'message': str(e)}), 500
+
+
+@app.route('/api/group-members/<chat_id>/<int:user_id>', methods=['GET'])
+@bot_token_required
+def get_group_member(chat_id, user_id: int):
+    """获取群成员状态"""
+    try:
+        member = db.group_members.find_one({'chat_id': int(chat_id), 'user_id': user_id})
+        if not member:
+            return jsonify({'code': 404, 'message': 'not found'}), 404
+        member.pop('_id', None)
+        if isinstance(member.get('joined_at'), datetime):
+            member['joined_at'] = member['joined_at'].isoformat()
+        return jsonify({'code': 200, 'data': member})
+    except Exception as e:
+        logger.error(f"获取群成员失败: {e}")
+        return jsonify({'code': 500, 'message': str(e)}), 500
+
+
+@app.route('/api/group-members/<chat_id>/<int:user_id>', methods=['DELETE'])
+@bot_token_required
+def delete_group_member(chat_id, user_id: int):
+    """删除群成员记录（如验证超时被踢）"""
+    try:
+        db.group_members.delete_one({'chat_id': int(chat_id), 'user_id': user_id})
+        return jsonify({'code': 200, 'message': 'success'})
+    except Exception as e:
+        logger.error(f"删除群成员失败: {e}")
+        return jsonify({'code': 500, 'message': str(e)}), 500
+
+
+@app.route('/api/group-members/expired', methods=['GET'])
+@bot_token_required
+def get_expired_members():
+    """返回所有仍处于观察期、且入群已满 N 天的成员"""
+    try:
+        days = int(request.args.get('days', 3))
+        cutoff = datetime.now() - timedelta(days=days)
+        members = db.group_members.find({
+            'status': 'probation',
+            'joined_at': {'$lte': cutoff}
+        })
+        result = [{'chat_id': m['chat_id'], 'user_id': m['user_id']} for m in members]
+        return jsonify({'code': 200, 'data': result})
+    except Exception as e:
+        logger.error(f"查询观察期到期成员失败: {e}")
         return jsonify({'code': 500, 'message': str(e)}), 500
 
 

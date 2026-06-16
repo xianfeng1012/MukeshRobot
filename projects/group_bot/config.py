@@ -19,23 +19,15 @@ MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017')
 MONGO_DB = 'telegram_bot_db'
 
 # 验证配置
-VERIFICATION_TIMEOUT = 120  # 秒
-VERIFICATION_TEXT = "{user}，欢迎加入！👋\n请点击下方按钮验证你是真人\n⏱️ 你有 120 秒时间"
+VERIFICATION_TIMEOUT = 300  # 秒（需私聊机器人完成数学验证，留足跳转时间）
+VERIFICATION_TEXT = "{user}，欢迎加入！👋"
 
-# 违规配置
-MAX_VIOLATIONS = 3  # 最大违规次数
-VIOLATION_TIMEOUT = 86400  # 禁言时长（秒）
-
-# 垃圾过滤配置
-SPAM_FILTER_ENABLED = True
-AD_KEYWORDS = [
-    'viagra', 'casino', 'lottery', '彩票', '赌博',
-    'crypto', 'bitcoin', '比特币', '以太坊'
-]
+# 新人观察期配置
+PROBATION_DAYS = 3  # 新成员入群满 N 天后自动解锁媒体权限
 
 # 日志
 LOG_LEVEL = 'INFO'
-LOG_FILE = 'group_bot.log'
+LOG_FILE = '/tmp/group_bot.log'
 
 # 功能开关
 WELCOME_ENABLED = True

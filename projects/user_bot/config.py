@@ -16,4 +16,4 @@ API_BOT_TOKEN = os.getenv('API_BOT_TOKEN')
 
 # 日志
 LOG_LEVEL = 'INFO'
-LOG_FILE = 'user_bot.log'
+LOG_FILE = '/tmp/user_bot.log'

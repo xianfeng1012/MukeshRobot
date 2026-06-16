@@ -4,12 +4,14 @@ MiniAppBot 主程序
 """
 import logging
 import sys
+from aiohttp import web
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
-from config import MINIAPP_BOT_TOKEN, LOG_LEVEL, LOG_FILE
+from config import MINIAPP_BOT_TOKEN, LOG_LEVEL, LOG_FILE, PUBLISH_SECRET, PUBLISH_WEBHOOK_PORT
 from handlers import (
-    cmd_points, cmd_leaderboard, cmd_play, cmd_checkin, cmd_tasks, cmd_stats
+    cmd_points, cmd_leaderboard, cmd_play, cmd_checkin, cmd_tasks, cmd_stats,
+    send_girl_teaser, publish_profile_to_channel
 )
 
 # ============ 日志配置 ============
@@ -26,7 +28,13 @@ logger = logging.getLogger(__name__)
 
 # ============ 命令处理 ============
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """开始命令"""
+    """开始命令（带 girl_<id> 参数时推送该人物资料）"""
+    args = context.args
+    if args and args[0].startswith('girl_'):
+        girl_id = args[0][len('girl_'):]
+        await send_girl_teaser(update, context, girl_id)
+        return
+
     await update.message.reply_text(
         "🎮 *小程序管理机器人*\n\n"
         "欢迎使用！我负责:\n"
@@ -61,10 +69,39 @@ async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
+# ============ 资料发布 Webhook ============
+async def _handle_publish(request: web.Request) -> web.Response:
+    """接收 yanyulou admin 的发布请求 → 发到对应频道"""
+    if request.headers.get('X-Publish-Key') != PUBLISH_SECRET:
+        return web.json_response({'success': False, 'message': 'invalid key'}, status=401)
+    try:
+        payload = await request.json()
+    except Exception:
+        return web.json_response({'success': False, 'message': 'bad json'}, status=400)
+
+    application: Application = request.app['tg_app']
+    # 同步执行并返回 messageIds（供后端记录、下次就地编辑）。发图调用已设较长超时，
+    # 单次相册请求不会触发客户端超时。
+    try:
+        result = await publish_profile_to_channel(application.bot, payload)
+        return web.json_response(result, status=200 if result.get('success') else 400)
+    except Exception as e:
+        logger.error(f"发布处理异常: {e}")
+        return web.json_response({'success': False, 'message': str(e)}, status=500)
+
+
 # ============ 应用初始化 ============
 async def post_init(application: Application) -> None:
-    """应用初始化后的回调"""
-    logger.info("MiniAppBot 已启动")
+    """应用初始化后的回调：启动发布 Webhook 服务"""
+    web_app = web.Application()
+    web_app['tg_app'] = application
+    web_app.router.add_post('/publish-profile', _handle_publish)
+    runner = web.AppRunner(web_app)
+    await runner.setup()
+    site = web.TCPSite(runner, '0.0.0.0', PUBLISH_WEBHOOK_PORT)
+    await site.start()
+    application.bot_data['_web_runner'] = runner
+    logger.info(f"MiniAppBot 已启动；发布 Webhook 监听 :{PUBLISH_WEBHOOK_PORT}/publish-profile")
 
 
 async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:

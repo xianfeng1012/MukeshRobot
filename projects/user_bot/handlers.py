@@ -4,7 +4,8 @@ UserBot 事件处理器
 import logging
 import requests
 from datetime import datetime
-from telegram import Update, ParseMode
+from telegram import Update
+from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
 from config import SHARED_API_URL, API_BOT_TOKEN

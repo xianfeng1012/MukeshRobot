@@ -5,14 +5,13 @@ GroupBot 主程序
 import logging
 import sys
 from telegram import Update
-from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, Filters, ContextTypes
+from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, ContextTypes, filters
 
-from config import (
-    GROUP_BOT_TOKEN, LOG_LEVEL, LOG_FILE,
-    WELCOME_ENABLED, VERIFICATION_ENABLED, SPAM_FILTER_ENABLED
-)
+from config import GROUP_BOT_TOKEN, LOG_LEVEL, LOG_FILE
 from handlers import (
-    handle_new_member, handle_verification_button, filter_spam, handle_member_left
+    handle_new_member, handle_verify_start, handle_math_answer, moderate_message,
+    graduate_probation_users, handle_member_left, cmd_setwelcome, cmd_toggleverify,
+    cmd_togglespam, get_group_settings, cleanup_group_command
 )
 
 # ============ 日志配置 ============
@@ -20,7 +19,6 @@ logging.basicConfig(
     level=getattr(logging, LOG_LEVEL),
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler(LOG_FILE),
         logging.StreamHandler()
     ]
 )
@@ -29,7 +27,12 @@ logger = logging.getLogger(__name__)
 
 # ============ 命令处理 ============
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """开始命令"""
+    """开始命令（带 verify_ 参数时进入私聊数学验证）"""
+    args = context.args
+    if args and args[0].startswith('verify_'):
+        await handle_verify_start(update, context, args[0])
+        return
+
     await update.message.reply_text(
         "👋 你好！我是群管理机器人\n\n"
         "我负责:\n"
@@ -66,15 +69,21 @@ async def cmd_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
         chat_obj = await context.bot.get_chat(chat.id)
         member_count = await context.bot.get_chat_member_count(chat.id)
 
+        # 读取本群设置
+        settings = await get_group_settings(chat.id)
+        verify_enabled = settings.get('verify_enabled', True)
+        spam_enabled = settings.get('spam_enabled', True)
+        has_welcome = bool(settings.get('welcome_text'))
+
         await update.message.reply_text(
             f"📊 *群组统计*\n\n"
             f"群组名: {chat_obj.title}\n"
             f"成员数: {member_count}\n"
             f"ID: `{chat.id}`\n\n"
             f"功能状态:\n"
-            f"{'✅' if WELCOME_ENABLED else '❌'} 欢迎消息\n"
-            f"{'✅' if VERIFICATION_ENABLED else '❌'} 身份验证\n"
-            f"{'✅' if SPAM_FILTER_ENABLED else '❌'} 垃圾过滤",
+            f"{'✅ 自定义' if has_welcome else '✅ 默认'} 欢迎消息\n"
+            f"{'✅' if verify_enabled else '❌'} 身份验证\n"
+            f"{'✅' if spam_enabled else '❌'} 垃圾过滤",
             parse_mode='Markdown'
         )
     except Exception as e:
@@ -108,19 +117,33 @@ def main():
     application.add_handler(CommandHandler("start", cmd_start))
     application.add_handler(CommandHandler("help", cmd_help))
     application.add_handler(CommandHandler("stats", cmd_stats))
+    # 管理命令（开关与欢迎语，按群持久化）
+    application.add_handler(CommandHandler("setwelcome", cmd_setwelcome))
+    application.add_handler(CommandHandler("toggleverify", cmd_toggleverify))
+    application.add_handler(CommandHandler("togglespam", cmd_togglespam))
 
-    # 消息处理
-    if WELCOME_ENABLED or VERIFICATION_ENABLED:
-        application.add_handler(MessageHandler(Filters.status_update.new_chat_members, handle_new_member))
-
-    if VERIFICATION_ENABLED:
-        application.add_handler(CallbackQueryHandler(handle_verification_button, pattern='^verify_'))
-
-    if SPAM_FILTER_ENABLED:
-        application.add_handler(MessageHandler(Filters.text & ~Filters.command, filter_spam))
+    # 消息处理（始终注册，运行时按群设置决定行为）
+    # 新成员：欢迎 + 可选验证
+    application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, handle_new_member))
+    # 私聊数学验证答案回调
+    application.add_handler(CallbackQueryHandler(handle_math_answer, pattern='^mv_'))
+    # 消息审查：删除非管理员的链接/转发（群内所有非命令、非系统消息）
+    application.add_handler(MessageHandler(
+        filters.ChatType.GROUPS & ~filters.COMMAND & ~filters.StatusUpdate.ALL,
+        moderate_message
+    ))
 
     # 成员离开
-    application.add_handler(MessageHandler(Filters.status_update.left_chat_member, handle_member_left))
+    application.add_handler(MessageHandler(filters.StatusUpdate.LEFT_CHAT_MEMBER, handle_member_left))
+
+    # 群内所有用户斜杠命令 2 分钟后自动删除（独立 handler group，不影响上面的命令处理）
+    application.add_handler(
+        MessageHandler(filters.COMMAND & filters.ChatType.GROUPS, cleanup_group_command),
+        group=1
+    )
+
+    # 定时任务：观察期满3天自动解锁媒体权限（每小时扫描一次）
+    application.job_queue.run_repeating(graduate_probation_users, interval=3600, first=60)
 
     # 错误处理
     application.add_error_handler(error_handler)

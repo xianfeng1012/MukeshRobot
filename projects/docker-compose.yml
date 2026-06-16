@@ -6,8 +6,6 @@ services:
     image: mongo:latest
     container_name: telegram_bot_mongodb
     restart: always
-    ports:
-      - "27017:27017"
     environment:
       MONGO_INITDB_DATABASE: telegram_bot_db
     volumes:
@@ -25,8 +23,6 @@ services:
     image: redis:alpine
     container_name: telegram_bot_redis
     restart: always
-    ports:
-      - "6379:6379"
     command: redis-server --appendonly yes
     volumes:
       - redis_data:/data
@@ -53,6 +49,7 @@ services:
       API_HOST: 0.0.0.0
       API_PORT: 5000
       API_DEBUG: "False"
+      API_BOT_TOKEN: ${API_BOT_TOKEN}
       LOG_LEVEL: INFO
     depends_on:
       mongodb:

@@ -9,9 +9,10 @@ from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQu
 
 from config import GROUP_BOT_TOKEN, LOG_LEVEL, LOG_FILE
 from handlers import (
-    handle_new_member, handle_verify_start, handle_math_answer, moderate_message,
+    handle_new_member, handle_channel_verify, moderate_message,
     graduate_probation_users, handle_member_left, cmd_setwelcome, cmd_toggleverify,
-    cmd_togglespam, get_group_settings, cleanup_group_command
+    cmd_togglespam, get_group_settings, cleanup_group_command, admin_only,
+    reply_autodel
 )
 
 # ============ 日志配置 ============
@@ -27,13 +28,9 @@ logger = logging.getLogger(__name__)
 
 # ============ 命令处理 ============
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """开始命令（带 verify_ 参数时进入私聊数学验证）"""
-    args = context.args
-    if args and args[0].startswith('verify_'):
-        await handle_verify_start(update, context, args[0])
-        return
-
-    await update.message.reply_text(
+    """开始命令"""
+    await reply_autodel(
+        update, context,
         "👋 你好！我是群管理机器人\n\n"
         "我负责:\n"
         "✅ 欢迎新成员\n"
@@ -46,7 +43,8 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """帮助命令"""
-    await update.message.reply_text(
+    await reply_autodel(
+        update, context,
         "📖 *群管理机器人帮助*\n\n"
         "*管理员命令:*\n"
         "/setwelcome - 设置欢迎消息\n"
@@ -75,7 +73,8 @@ async def cmd_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
         spam_enabled = settings.get('spam_enabled', True)
         has_welcome = bool(settings.get('welcome_text'))
 
-        await update.message.reply_text(
+        await reply_autodel(
+            update, context,
             f"📊 *群组统计*\n\n"
             f"群组名: {chat_obj.title}\n"
             f"成员数: {member_count}\n"
@@ -88,7 +87,7 @@ async def cmd_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     except Exception as e:
         logger.error(f"获取统计信息失败: {e}")
-        await update.message.reply_text(f"❌ 获取统计信息失败: {e}")
+        await reply_autodel(update, context, f"❌ 获取统计信息失败: {e}")
 
 
 # ============ 应用初始化 ============
@@ -113,20 +112,27 @@ def main():
     application = Application.builder().token(GROUP_BOT_TOKEN).build()
 
     # 注册处理器
-    # 命令处理
-    application.add_handler(CommandHandler("start", cmd_start))
-    application.add_handler(CommandHandler("help", cmd_help))
-    application.add_handler(CommandHandler("stats", cmd_stats))
-    # 管理命令（开关与欢迎语，按群持久化）
-    application.add_handler(CommandHandler("setwelcome", cmd_setwelcome))
-    application.add_handler(CommandHandler("toggleverify", cmd_toggleverify))
-    application.add_handler(CommandHandler("togglespam", cmd_togglespam))
+    # 斜杠命令：群内仅管理员有效（私聊不限制），普通群友用汉字命令
+    application.add_handler(CommandHandler("start", admin_only(cmd_start)))
+    application.add_handler(CommandHandler("help", admin_only(cmd_help)))
+    application.add_handler(CommandHandler("stats", admin_only(cmd_stats)))
+    application.add_handler(CommandHandler("setwelcome", admin_only(cmd_setwelcome)))
+    application.add_handler(CommandHandler("toggleverify", admin_only(cmd_toggleverify)))
+    application.add_handler(CommandHandler("togglespam", admin_only(cmd_togglespam)))
+
+    # 汉字命令（需在 moderate_message 之前注册，否则会被它在同一 handler group 抢先处理）
+    # 查询类所有人可用；管理类(设置欢迎/验证开关/过滤开关)内部仍校验管理员
+    application.add_handler(MessageHandler(filters.Regex(r'^\s*群帮助\s*$'), cmd_help))
+    application.add_handler(MessageHandler(filters.Regex(r'^\s*群统计\s*$'), cmd_stats))
+    application.add_handler(MessageHandler(filters.Regex(r'^设置欢迎(\s|$)'), cmd_setwelcome))
+    application.add_handler(MessageHandler(filters.Regex(r'^\s*验证开关\s*$'), cmd_toggleverify))
+    application.add_handler(MessageHandler(filters.Regex(r'^\s*过滤开关\s*$'), cmd_togglespam))
 
     # 消息处理（始终注册，运行时按群设置决定行为）
     # 新成员：欢迎 + 可选验证
     application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, handle_new_member))
-    # 私聊数学验证答案回调
-    application.add_handler(CallbackQueryHandler(handle_math_answer, pattern='^mv_'))
+    # 关注频道验证按钮回调
+    application.add_handler(CallbackQueryHandler(handle_channel_verify, pattern='^cv_'))
     # 消息审查：删除非管理员的链接/转发（群内所有非命令、非系统消息）
     application.add_handler(MessageHandler(
         filters.ChatType.GROUPS & ~filters.COMMAND & ~filters.StatusUpdate.ALL,

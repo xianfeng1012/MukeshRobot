@@ -3,7 +3,6 @@ GroupBot 事件处理器
 """
 import logging
 import time
-import random
 import asyncio
 import requests
 from datetime import datetime
@@ -13,7 +12,7 @@ from telegram.ext import ContextTypes
 
 from config import (
     SHARED_API_URL, API_BOT_TOKEN, VERIFICATION_TIMEOUT, VERIFICATION_TEXT,
-    PROBATION_DAYS
+    PROBATION_DAYS, VERIFY_CHANNEL_ID, VERIFY_CHANNEL_LINK, VERIFY_CHANNEL_NAME
 )
 
 logger = logging.getLogger(__name__)
@@ -143,54 +142,8 @@ DEFAULT_GROUP_SETTINGS = {
 _settings_cache = {}
 _SETTINGS_TTL = 30  # 秒
 
-# 待验证状态: user_id -> {'chat_id': int, 'group_msg_id': int, 'answer': int}
+# 待验证状态: user_id -> {'chat_id': int, 'group_msg_id': int}
 _pending_verifications = {}
-
-# 机器人用户名缓存（用于生成私聊验证深链接）
-_bot_username = None
-
-
-async def _get_bot_username(context: ContextTypes.DEFAULT_TYPE) -> str:
-    """获取并缓存机器人用户名"""
-    global _bot_username
-    if _bot_username is None:
-        me = await context.bot.get_me()
-        _bot_username = me.username
-    return _bot_username
-
-
-def generate_math_question():
-    """生成一道简单数学题，返回 (题面, 正确答案, 4个选项列表)"""
-    op = random.choice(['+', '-', '*'])
-    if op == '+':
-        a, b = random.randint(1, 20), random.randint(1, 20)
-        answer = a + b
-    elif op == '-':
-        a, b = random.randint(1, 20), random.randint(1, 20)
-        if b > a:
-            a, b = b, a
-        answer = a - b
-    else:
-        a, b = random.randint(2, 9), random.randint(2, 9)
-        answer = a * b
-
-    question = f"{a} {op} {b} = ?"
-
-    # 生成3个不重复的干扰项
-    options = {answer}
-    while len(options) < 4:
-        cand = answer + random.randint(-5, 5)
-        if cand != answer and cand >= 0:
-            options.add(cand)
-    options = list(options)
-    random.shuffle(options)
-    return question, answer, options
-
-
-def _build_math_keyboard(options):
-    """把4个选项排成2x2按钮"""
-    btns = [InlineKeyboardButton(str(o), callback_data=f"mv_{o}") for o in options]
-    return InlineKeyboardMarkup([btns[:2], btns[2:]])
 
 
 # ============ 群组设置 ============
@@ -249,20 +202,32 @@ async def is_user_admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> b
         return False
 
 
+def admin_only(handler):
+    """包装斜杠命令：群聊中仅管理员有效，非管理员静默忽略；私聊不限制。"""
+    async def wrapped(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        chat = update.effective_chat
+        if chat is not None and chat.type != 'private':
+            if not await is_user_admin(update, context):
+                return
+        await handler(update, context)
+    return wrapped
+
+
 # ============ 管理命令 ============
 async def cmd_setwelcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """设置欢迎消息：/setwelcome <文本>，可用 {user} 代表新成员名字"""
     chat = update.effective_chat
     if chat.type == 'private':
-        await update.message.reply_text("⚠️ 该命令只能在群组中使用")
+        await reply_autodel(update, context, "⚠️ 该命令只能在群组中使用")
         return
     if not await is_user_admin(update, context):
-        await update.message.reply_text("❌ 只有群管理员才能使用此命令")
+        await reply_autodel(update, context, "❌ 只有群管理员才能使用此命令")
         return
 
     text = update.message.text.partition(' ')[2].strip()
     if not text:
-        await update.message.reply_text(
+        await reply_autodel(
+            update, context,
             "用法：/setwelcome <欢迎语>\n"
             "可用 {user} 代表新成员名字。\n"
             "示例：/setwelcome 欢迎 {user} 加入本群！"
@@ -270,45 +235,45 @@ async def cmd_setwelcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     if await update_group_settings(chat.id, {'welcome_text': text}):
-        await update.message.reply_text("✅ 欢迎消息已设置")
+        await reply_autodel(update, context, "✅ 欢迎消息已设置")
     else:
-        await update.message.reply_text("❌ 设置失败，请稍后重试")
+        await reply_autodel(update, context, "❌ 设置失败，请稍后重试")
 
 
 async def cmd_toggleverify(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """切换进群验证功能"""
     chat = update.effective_chat
     if chat.type == 'private':
-        await update.message.reply_text("⚠️ 该命令只能在群组中使用")
+        await reply_autodel(update, context, "⚠️ 该命令只能在群组中使用")
         return
     if not await is_user_admin(update, context):
-        await update.message.reply_text("❌ 只有群管理员才能使用此命令")
+        await reply_autodel(update, context, "❌ 只有群管理员才能使用此命令")
         return
 
     settings = await get_group_settings(chat.id)
     new_val = not settings.get('verify_enabled', True)
     if await update_group_settings(chat.id, {'verify_enabled': new_val}):
-        await update.message.reply_text(f"{'✅ 已开启' if new_val else '❌ 已关闭'}进群验证功能")
+        await reply_autodel(update, context, f"{'✅ 已开启' if new_val else '❌ 已关闭'}进群验证功能")
     else:
-        await update.message.reply_text("❌ 操作失败，请稍后重试")
+        await reply_autodel(update, context, "❌ 操作失败，请稍后重试")
 
 
 async def cmd_togglespam(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """切换垃圾消息过滤功能"""
     chat = update.effective_chat
     if chat.type == 'private':
-        await update.message.reply_text("⚠️ 该命令只能在群组中使用")
+        await reply_autodel(update, context, "⚠️ 该命令只能在群组中使用")
         return
     if not await is_user_admin(update, context):
-        await update.message.reply_text("❌ 只有群管理员才能使用此命令")
+        await reply_autodel(update, context, "❌ 只有群管理员才能使用此命令")
         return
 
     settings = await get_group_settings(chat.id)
     new_val = not settings.get('spam_enabled', True)
     if await update_group_settings(chat.id, {'spam_enabled': new_val}):
-        await update.message.reply_text(f"{'✅ 已开启' if new_val else '❌ 已关闭'}垃圾消息过滤")
+        await reply_autodel(update, context, f"{'✅ 已开启' if new_val else '❌ 已关闭'}垃圾消息过滤")
     else:
-        await update.message.reply_text("❌ 操作失败，请稍后重试")
+        await reply_autodel(update, context, "❌ 操作失败，请稍后重试")
 
 
 # ============ 新成员加入处理 ============
@@ -377,19 +342,17 @@ async def handle_new_member(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 permissions=MUTED_PERMISSIONS
             )
 
-            # 5. 发送跳转私聊验证的深链接按钮
-            bot_username = await _get_bot_username(context)
-            verify_url = f"https://t.me/{bot_username}?start=verify_{chat.id}_{user_id}"
-            buttons = [[InlineKeyboardButton(
-                text="✅ 点我私聊机器人完成验证",
-                url=verify_url
-            )]]
+            # 5. 发送「关注频道 + 解禁」按钮
+            buttons = [
+                [InlineKeyboardButton(text=f"📢 点此关注频道「{VERIFY_CHANNEL_NAME}」", url=VERIFY_CHANNEL_LINK)],
+                [InlineKeyboardButton(text="✅ 我已关注，点此解禁", callback_data=f"cv_{chat.id}_{user_id}")],
+            ]
 
             verify_msg = await context.bot.send_message(
                 chat.id,
                 f"{member.mention_html()}，你已被临时禁言。\n"
-                f"请点击下方按钮，私聊机器人答对一道数学题即可解除禁言。\n"
-                f"⏱️ 请在 {VERIFICATION_TIMEOUT // 60} 分钟内完成。",
+                f"请先关注频道「{VERIFY_CHANNEL_NAME}」，再点下方「我已关注，点此解禁」即可发言。\n"
+                f"⏱️ 请在 {VERIFICATION_TIMEOUT // 60} 分钟内完成，否则将被移出群组。",
                 parse_mode=ParseMode.HTML,
                 reply_markup=InlineKeyboardMarkup(buttons)
             )
@@ -446,99 +409,72 @@ async def verify_timeout(context: ContextTypes.DEFAULT_TYPE):
         logger.error(f"验证超时处理失败: {e}")
 
 
-# ============ 私聊数学验证 ============
-async def handle_verify_start(update: Update, context: ContextTypes.DEFAULT_TYPE, payload: str):
-    """处理 /start verify_<chat_id>_<user_id> 深链接，在私聊中出题"""
-    try:
-        parts = payload.split('_')
-        chat_id = int(parts[1])
-        target_user_id = int(parts[2])
-    except (IndexError, ValueError):
-        await update.message.reply_text("⚠️ 验证链接无效。")
-        return
-
-    user_id = update.effective_user.id
-    if user_id != target_user_id:
-        await update.message.reply_text("⚠️ 这条验证链接不是发给你的。")
-        return
-
-    question, answer, options = generate_math_question()
-
-    # 保留新成员流程里记录的群消息ID（若存在）
-    pending = _pending_verifications.get(user_id, {})
-    pending['chat_id'] = chat_id
-    pending['answer'] = answer
-    _pending_verifications[user_id] = pending
-
-    await update.message.reply_text(
-        "👋 欢迎！请完成人机验证后即可在群内发言。\n\n"
-        f"🧮 请计算： {question}\n\n"
-        "请点击下方正确答案：",
-        reply_markup=_build_math_keyboard(options)
-    )
-    logger.info(f"用户{user_id}开始私聊数学验证（群{chat_id}）")
-
-
-async def handle_math_answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """处理私聊中数学题答案点击"""
+# ============ 关注频道验证 ============
+async def handle_channel_verify(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """处理群内「我已关注，点此解禁」按钮：核对是否已关注频道，已关注则解除禁言。"""
     try:
         query = update.callback_query
-        user_id = query.from_user.id
-
-        pending = _pending_verifications.get(user_id)
-        if not pending or 'answer' not in pending:
-            await query.answer("验证已过期，请重新点击群里的验证链接", show_alert=True)
+        try:
+            _, chat_id_s, user_id_s = query.data.split('_')
+            chat_id = int(chat_id_s)
+            target_user_id = int(user_id_s)
+        except (ValueError, AttributeError):
+            await query.answer("验证信息无效", show_alert=True)
             return
 
-        chosen = int(query.data.split('_')[1])
-
-        # 答错 -> 换一道新题，直到答对
-        if chosen != pending['answer']:
-            question, answer, options = generate_math_question()
-            pending['answer'] = answer
-            await query.answer("❌ 答错了，再来一题")
-            await query.edit_message_text(
-                f"❌ 答错了，再试一题：\n\n🧮 请计算： {question}\n\n请点击下方正确答案：",
-                reply_markup=_build_math_keyboard(options)
-            )
+        # 只有被验证本人能点
+        if query.from_user.id != target_user_id:
+            await query.answer("这不是你的验证按钮哦~", show_alert=True)
             return
 
-        # 答对 -> 解除禁言（开启观察期时只解锁文字，满3天再解锁媒体）
-        chat_id = pending['chat_id']
-        await update_user(user_id, {'verified': True})
+        # 核对是否已关注频道（group_bot 必须是该频道管理员）
+        try:
+            member = await context.bot.get_chat_member(VERIFY_CHANNEL_ID, target_user_id)
+            joined = member.status in ('member', 'administrator', 'creator') or \
+                getattr(member, 'is_member', False)
+        except Exception as e:
+            logger.error(f"查询频道关注状态失败 user={target_user_id}: {e}")
+            await query.answer("验证出错，请稍后再试", show_alert=True)
+            return
+
+        if not joined:
+            await query.answer(f"请先关注频道「{VERIFY_CHANNEL_NAME}」再点验证", show_alert=True)
+            return
+
+        # 已关注 -> 解除禁言（开启观察期时只解锁文字，满3天再解锁媒体）
+        await update_user(target_user_id, {'verified': True})
 
         settings = await get_group_settings(chat_id)
         if settings.get('spam_enabled', True):
             perms = PROBATION_PERMISSIONS
-            note = f"\n\n🛡️ 新成员观察期：{PROBATION_DAYS} 天内仅可发文字，之后自动解锁图片/视频。"
+            note = f"\n🛡️ 新成员观察期：{PROBATION_DAYS} 天内仅可发文字，之后自动解锁图片/视频。"
         else:
             perms = NORMAL_PERMISSIONS
             note = ""
-        await context.bot.restrict_chat_member(chat_id, user_id, permissions=perms)
-
-        # 删除群里的验证提示消息
-        group_msg_id = pending.get('group_msg_id')
-        if group_msg_id:
-            try:
-                await context.bot.delete_message(chat_id, group_msg_id)
-            except Exception:
-                pass
+        await context.bot.restrict_chat_member(chat_id, target_user_id, permissions=perms)
 
         # 取消超时任务
         try:
-            for job in context.job_queue.get_jobs_by_name(f'verify_timeout_{user_id}'):
+            for job in context.job_queue.get_jobs_by_name(f'verify_timeout_{target_user_id}'):
                 job.schedule_removal()
         except Exception:
             pass
 
-        _pending_verifications.pop(user_id, None)
+        _pending_verifications.pop(target_user_id, None)
 
         await query.answer("✅ 验证成功！")
-        await query.edit_message_text(f"✅ 验证成功！已为你解除禁言，欢迎回到群组发言！{note}")
-        logger.info(f"用户{user_id}通过数学验证")
+        # 验证消息改为成功提示，并稍后自动删除，保持群内整洁
+        try:
+            await query.edit_message_text(f"✅ 验证成功！已解除禁言，欢迎进群发言！{note}")
+            context.application.create_task(
+                _delete_message_later(context, chat_id, query.message.message_id)
+            )
+        except Exception:
+            pass
+        logger.info(f"用户{target_user_id}通过关注频道验证")
 
     except Exception as e:
-        logger.error(f"处理数学验证答案失败: {e}")
+        logger.error(f"处理关注频道验证失败: {e}")
 
 
 # ============ 消息审查（删除链接/转发） ============
@@ -593,18 +529,37 @@ async def _delete_message_later(context: ContextTypes.DEFAULT_TYPE, chat_id: int
         pass
 
 
+async def reply_autodel(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str, **kwargs):
+    """发送命令回复：群聊中机器人这条回复 2 分钟后自动删除（私聊不删，用户发言始终保留）。"""
+    sent = await update.message.reply_text(text, **kwargs)
+    chat = update.effective_chat
+    if chat is not None and chat.type != 'private':
+        context.application.create_task(
+            _delete_message_later(context, chat.id, sent.message_id)
+        )
+    return sent
+
+
 async def cleanup_group_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """群内用户发出的斜杠命令，2分钟后自动删除（私聊不处理）"""
+    """群内斜杠命令清理（私聊不处理）：
+    - 群友(非管理员)的斜杠命令无效 → 立即删除那条命令；
+    - 管理员的斜杠命令有效、用户发言保留 → 不删命令本身（其回复由各命令处理器 2 分钟后删除）。"""
     try:
         message = update.effective_message
         chat = update.effective_chat
+        user = update.effective_user
         if message is None or chat is None or chat.type == 'private':
             return
-        context.application.create_task(
-            _delete_message_later(context, chat.id, message.message_id)
-        )
+
+        admin_ids = await get_admin_ids(context, chat.id)
+        if user is not None and user.id in admin_ids:
+            return  # 管理员发言保留，回复 2 分钟后由命令处理器删除
+        try:
+            await context.bot.delete_message(chat.id, message.message_id)
+        except Exception:
+            pass
     except Exception as e:
-        logger.error(f"安排删除群命令失败: {e}")
+        logger.error(f"清理群命令失败: {e}")
 
 
 # ============ 观察期到期自动解锁 ============

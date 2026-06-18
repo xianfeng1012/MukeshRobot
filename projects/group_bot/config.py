@@ -19,8 +19,14 @@ MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017')
 MONGO_DB = 'telegram_bot_db'
 
 # 验证配置
-VERIFICATION_TIMEOUT = 300  # 秒（需私聊机器人完成数学验证，留足跳转时间）
+VERIFICATION_TIMEOUT = 300  # 秒（新人需在此时间内关注频道并点验证，超时踢出）
 VERIFICATION_TEXT = "{user}，欢迎加入！👋"
+
+# 关注频道验证：新人需关注指定频道才能解除禁言。
+# group_bot 必须是该频道的管理员，否则无法查询关注状态。
+VERIFY_CHANNEL_ID = int(os.getenv('VERIFY_CHANNEL_ID', '0'))          # 频道数字ID（-100...），用于查关注
+VERIFY_CHANNEL_LINK = os.getenv('VERIFY_CHANNEL_LINK', '')            # 频道链接，按钮跳转用
+VERIFY_CHANNEL_NAME = os.getenv('VERIFY_CHANNEL_NAME', '频道')        # 频道显示名
 
 # 新人观察期配置
 PROBATION_DAYS = 3  # 新成员入群满 N 天后自动解锁媒体权限

@@ -71,6 +71,9 @@ services:
       GROUP_BOT_TOKEN: ${GROUP_BOT_TOKEN}
       SHARED_API_URL: http://shared-api:5000/api
       API_BOT_TOKEN: ${API_BOT_TOKEN}
+      VERIFY_CHANNEL_ID: ${VERIFY_CHANNEL_ID}
+      VERIFY_CHANNEL_LINK: ${VERIFY_CHANNEL_LINK}
+      VERIFY_CHANNEL_NAME: ${VERIFY_CHANNEL_NAME}
       LOG_LEVEL: INFO
     depends_on:
       - shared-api
@@ -118,6 +121,24 @@ services:
       - bot_network
     volumes:
       - ./user_bot/user_bot.log:/app/user_bot.log
+
+  # DualBot - 双向客服转发机器人（多号共用一个客服群）
+  dual-bot:
+    build:
+      context: ./dual_bot
+    container_name: telegram_bot_dual_bot
+    restart: always
+    environment:
+      DUAL_BOT_TOKENS: ${DUAL_BOT_TOKENS}
+      SUPPORT_GROUP_ID: ${SUPPORT_GROUP_ID}
+      MONGO_URI: mongodb://mongodb:27017
+      MONGO_DB: telegram_bot_db
+      LOG_LEVEL: INFO
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - bot_network
 
 networks:
   bot_network:

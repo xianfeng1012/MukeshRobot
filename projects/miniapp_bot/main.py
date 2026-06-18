@@ -4,14 +4,17 @@ MiniAppBot 主程序
 """
 import logging
 import sys
+from datetime import time as dt_time, timezone, timedelta
+from functools import partial
 from aiohttp import web
 from telegram import Update
-from telegram.ext import Application, CommandHandler, ContextTypes
+from telegram.ext import Application, CommandHandler, MessageHandler, ContextTypes, filters
 
 from config import MINIAPP_BOT_TOKEN, LOG_LEVEL, LOG_FILE, PUBLISH_SECRET, PUBLISH_WEBHOOK_PORT
 from handlers import (
     cmd_points, cmd_leaderboard, cmd_play, cmd_checkin, cmd_tasks, cmd_stats,
-    send_girl_teaser, publish_profile_to_channel
+    cmd_schedule, publish_schedule_to_channel, send_girl_teaser,
+    publish_profile_to_channel, admin_only, text_checkin
 )
 
 # ============ 日志配置 ============
@@ -48,7 +51,8 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/leaderboard - 查看排行榜\n"
         "/checkin - 每日签到\n"
         "/tasks - 任务列表\n"
-        "/stats - 个人统计",
+        "/stats - 个人统计\n"
+        "/schedule - 今日开课老师",
         parse_mode='Markdown'
     )
 
@@ -64,6 +68,7 @@ async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/checkin - 📅 每日签到\n"
         "/tasks - 📋 查看可用任务\n"
         "/stats - 📊 查看个人统计\n"
+        "/schedule - 📋 今日开课老师（汉字「今日开课」）\n"
         "/help - ❓ 显示此帮助信息",
         parse_mode='Markdown'
     )
@@ -120,14 +125,34 @@ def main():
     application = Application.builder().token(MINIAPP_BOT_TOKEN).build()
 
     # 注册处理器
-    application.add_handler(CommandHandler("start", cmd_start))
-    application.add_handler(CommandHandler("help", cmd_help))
-    application.add_handler(CommandHandler("play", cmd_play))
-    application.add_handler(CommandHandler("points", cmd_points))
-    application.add_handler(CommandHandler("leaderboard", cmd_leaderboard))
-    application.add_handler(CommandHandler("checkin", cmd_checkin))
-    application.add_handler(CommandHandler("tasks", cmd_tasks))
-    application.add_handler(CommandHandler("stats", cmd_stats))
+    # 斜杠命令：群内仅管理员有效（私聊不限制；/start 私聊还承担 girl_ 深链接）。
+    # 普通群友在群里请用汉字命令。
+    application.add_handler(CommandHandler("start", admin_only(cmd_start)))
+    application.add_handler(CommandHandler("help", admin_only(cmd_help)))
+    application.add_handler(CommandHandler("play", admin_only(cmd_play)))
+    application.add_handler(CommandHandler("points", admin_only(cmd_points)))
+    application.add_handler(CommandHandler("leaderboard", admin_only(cmd_leaderboard)))
+    application.add_handler(CommandHandler("checkin", admin_only(cmd_checkin)))
+    application.add_handler(CommandHandler("tasks", admin_only(cmd_tasks)))
+    application.add_handler(CommandHandler("stats", admin_only(cmd_stats)))
+    application.add_handler(CommandHandler("schedule", admin_only(cmd_schedule)))
+
+    # 汉字命令：所有群友可用，均保留成员发言（不自动删除）。
+    application.add_handler(MessageHandler(filters.Regex(r'^\s*签到\s*$'), text_checkin))
+    application.add_handler(MessageHandler(filters.Regex(r'^\s*积分\s*$'), partial(cmd_points, clean=False)))
+    application.add_handler(MessageHandler(filters.Regex(r'^\s*排行榜\s*$'), partial(cmd_leaderboard, clean=False)))
+    application.add_handler(MessageHandler(filters.Regex(r'^\s*任务\s*$'), partial(cmd_tasks, clean=False)))
+    application.add_handler(MessageHandler(filters.Regex(r'^\s*我的统计\s*$'), partial(cmd_stats, clean=False)))
+    application.add_handler(MessageHandler(filters.Regex(r'^\s*小程序\s*$'), cmd_play))
+    application.add_handler(MessageHandler(filters.Regex(r'^\s*今日开课\s*$'), partial(cmd_schedule, clean=False)))
+    application.add_handler(MessageHandler(filters.Regex(r'^\s*玩法帮助\s*$'), cmd_help))
+
+    # 每日 14:00（北京时间）自动把「今日开课」发布到公示榜频道
+    application.job_queue.run_daily(
+        publish_schedule_to_channel,
+        time=dt_time(14, 0, tzinfo=timezone(timedelta(hours=8))),
+        name='daily_schedule_publish',
+    )
 
     # 错误处理
     application.add_error_handler(error_handler)

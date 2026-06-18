@@ -7,6 +7,7 @@ import logging
 import time
 import html
 import asyncio
+from datetime import datetime, timezone, timedelta
 import requests
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, WebAppInfo
 from telegram.constants import ParseMode
@@ -16,6 +17,8 @@ from config import (
     MINIAPP_URL, YANYULOU_API_BASE, YANYULOU_API_KEY, LEADERBOARD_SIZE,
     YANYULOU_TMA_BASE, BOT_USERNAME,
     CHANNEL_FEATURED, CHANNEL_PART_TIME, CHANNEL_NEWBIE,
+    CHANNEL_LINK_FEATURED, CHANNEL_LINK_PART_TIME, CHANNEL_LINK_NEWBIE,
+    SCHEDULE_CITY, SCHEDULE_CHANNEL_ID,
 )
 
 logger = logging.getLogger(__name__)
@@ -67,6 +70,34 @@ async def reply_clean(update: Update, context: ContextTypes.DEFAULT_TYPE, text: 
     sent = await update.message.reply_text(text, **kwargs)
     _schedule_delete(update, context, sent)
     return sent
+
+
+# ============ 管理员限制（斜杠命令群内仅管理员可用） ============
+async def _is_group_admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
+    chat = update.effective_chat
+    user = update.effective_user
+    try:
+        member = await context.bot.get_chat_member(chat.id, user.id)
+        return member.status in ('administrator', 'creator')
+    except Exception as e:
+        logger.warning(f"检查管理员失败: {e}")
+        return False
+
+
+def admin_only(handler):
+    """包装斜杠命令：群聊中仅管理员有效，非管理员静默忽略；私聊不限制。"""
+    async def wrapped(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        chat = update.effective_chat
+        if chat is not None and chat.type != 'private':
+            if not await _is_group_admin(update, context):
+                return  # 非管理员的斜杠命令，群内无效
+        await handler(update, context)
+    return wrapped
+
+
+async def reply_plain(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str, **kwargs):
+    """普通回复，不安排自动删除（汉字命令用，保留成员发言）"""
+    return await update.message.reply_text(text, **kwargs)
 
 
 # ============ yanyulou API 调用 ============
@@ -125,20 +156,21 @@ async def get_display_name(context: ContextTypes.DEFAULT_TYPE, user_id, fallback
 
 
 # ============ 积分查询 ============
-async def cmd_points(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def cmd_points(update: Update, context: ContextTypes.DEFAULT_TYPE, clean: bool = True):
     """查询用户积分（来自 yanyulou）"""
+    reply = reply_clean if clean else reply_plain
     try:
         user_id = update.effective_user.id
 
         data = yanyulou_api('GET', f'/api/bot/points/{user_id}')
         if data is None:
-            await reply_clean(update, context, "❌ 获取积分失败，请稍后重试")
+            await reply(update, context, "❌ 获取积分失败，请稍后重试")
             return
 
         points = data.get('points', 0)
         streak = data.get('streak', 0)
 
-        await reply_clean(
+        await reply(
             update, context,
             f"💰 *你的积分信息*\n\n"
             f"总积分: `{points}`\n"
@@ -149,20 +181,21 @@ async def cmd_points(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     except Exception as e:
         logger.error(f"查询积分失败: {e}")
-        await reply_clean(update, context, f"❌ 查询失败: {e}")
+        await reply(update, context, f"❌ 查询失败: {e}")
 
 
 # ============ 排行榜 ============
-async def cmd_leaderboard(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def cmd_leaderboard(update: Update, context: ContextTypes.DEFAULT_TYPE, clean: bool = True):
     """显示排行榜（来自 yanyulou）"""
+    reply = reply_clean if clean else reply_plain
     try:
         leaderboard = yanyulou_api('GET', f'/api/bot/rank?limit={LEADERBOARD_SIZE}')
         if not isinstance(leaderboard, list):
-            await reply_clean(update, context, "❌ 获取排行榜失败")
+            await reply(update, context, "❌ 获取排行榜失败")
             return
 
         if not leaderboard:
-            await reply_clean(update, context, "🏆 排行榜暂时还没有数据")
+            await reply(update, context, "🏆 排行榜暂时还没有数据")
             return
 
         message = "🏆 *积分排行榜 (Top 10)*\n\n"
@@ -174,11 +207,11 @@ async def cmd_leaderboard(update: Update, context: ContextTypes.DEFAULT_TYPE):
             medal_str = medal[idx - 1] if 1 <= idx <= 3 else f"{idx}."
             message += f"{medal_str} {name}: `{points}` 分\n"
 
-        await reply_clean(update, context, message, parse_mode=ParseMode.MARKDOWN)
+        await reply(update, context, message, parse_mode=ParseMode.MARKDOWN)
 
     except Exception as e:
         logger.error(f"获取排行榜失败: {e}")
-        await reply_clean(update, context, f"❌ 获取失败: {e}")
+        await reply(update, context, f"❌ 获取失败: {e}")
 
 
 # ============ 打开 Mini App ============
@@ -203,55 +236,68 @@ async def cmd_play(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 # ============ 每日签到 ============
-async def cmd_checkin(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """每日签到（调用 yanyulou 签到接口，与小程序共用同一套签到/连续天数）"""
+async def _checkin_core(update: Update, context: ContextTypes.DEFAULT_TYPE, clean: bool):
+    """签到核心逻辑。clean=True 时群内 2 分钟自动删除命令+回复；False 则保留成员发言。"""
     try:
         user_id = update.effective_user.id
-
         result = yanyulou_api('POST', '/api/bot/sign-in', {'telegramId': user_id})
         if result is None:
-            await reply_clean(update, context, "❌ 签到失败，请稍后重试")
-            return
+            text = "❌ 签到失败，请稍后重试"
+        else:
+            # yanyulou 返回的 message 已是用户友好文案（含已签到/连续天数/获得积分）
+            text = result.get('message') or ("✅ 签到成功！" if result.get('success') else "签到失败")
+            logger.info(f"用户{user_id}签到: success={result.get('success')}")
 
-        # yanyulou 返回的 message 已是用户友好文案（含已签到/连续天数/获得积分）
-        message = result.get('message') or ("✅ 签到成功！" if result.get('success') else "签到失败")
-        await reply_clean(update, context, message)
-        logger.info(f"用户{user_id}签到: success={result.get('success')}")
-
+        if clean:
+            await reply_clean(update, context, text)
+        else:
+            await update.message.reply_text(text)
     except Exception as e:
         logger.error(f"签到失败: {e}")
-        await reply_clean(update, context, f"❌ 签到失败: {e}")
+        await update.message.reply_text(f"❌ 签到失败: {e}")
+
+
+async def cmd_checkin(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """/checkin 斜杠命令（群内仅管理员，命令+回复2分钟自动删除）"""
+    await _checkin_core(update, context, clean=True)
+
+
+async def text_checkin(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """汉字「签到」（所有群友可用，保留成员发言不删除）"""
+    await _checkin_core(update, context, clean=False)
 
 
 # ============ 任务列表 ============
-async def cmd_tasks(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def cmd_tasks(update: Update, context: ContextTypes.DEFAULT_TYPE, clean: bool = True):
     """显示任务/玩法"""
+    reply = reply_clean if clean else reply_plain
     try:
         message = (
             "📋 *任务 & 玩法*\n\n"
-            "📅 *每日签到* `/checkin`\n"
+            "📅 每日签到：发送「签到」\n"
             "   首次签到 `10` 分，连续签到递增（最高 `22` 分/天）\n\n"
-            "🎮 *打开小程序* `/play`\n"
+            "🎮 打开小程序：发送「小程序」\n"
             "   更多任务、解锁、成就尽在小程序\n\n"
-            "🏆 *积分排行* `/leaderboard`\n"
-            "💰 *查看积分* `/points`"
+            "🏆 积分排行：发送「排行榜」\n"
+            "💰 查看积分：发送「积分」"
         )
-        await reply_clean(update, context, message, parse_mode=ParseMode.MARKDOWN)
+        await reply(update, context, message, parse_mode=ParseMode.MARKDOWN)
 
     except Exception as e:
         logger.error(f"获取任务列表失败: {e}")
-        await reply_clean(update, context, f"❌ 获取失败: {e}")
+        await reply(update, context, f"❌ 获取失败: {e}")
 
 
 # ============ 个人统计 ============
-async def cmd_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def cmd_stats(update: Update, context: ContextTypes.DEFAULT_TYPE, clean: bool = True):
     """查看个人统计（来自 yanyulou）"""
+    reply = reply_clean if clean else reply_plain
     try:
         user_id = update.effective_user.id
 
         data = yanyulou_api('GET', f'/api/bot/points/{user_id}')
         if data is None:
-            await reply_clean(update, context, "❌ 获取统计失败")
+            await reply(update, context, "❌ 获取统计失败")
             return
 
         points = data.get('points', 0)
@@ -264,11 +310,11 @@ async def cmd_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"🔥 连续签到: `{streak}` 天\n"
             f"📈 当前排名: `{_get_rank(user_id)}`"
         )
-        await reply_clean(update, context, message, parse_mode=ParseMode.MARKDOWN)
+        await reply(update, context, message, parse_mode=ParseMode.MARKDOWN)
 
     except Exception as e:
         logger.error(f"获取统计失败: {e}")
-        await reply_clean(update, context, f"❌ 获取失败: {e}")
+        await reply(update, context, f"❌ 获取失败: {e}")
 
 
 # ============ 频道发布：把人物资料发到对应频道 ============
@@ -432,6 +478,146 @@ async def publish_profile_to_channel(bot, p: dict) -> dict:
     logger.info(f"资料 {p['id']} 已发布到频道 {channel} {new_ids}")
     return {'success': True, 'message': '已发布到频道',
             'channelId': str(channel), 'messageIds': ','.join(map(str, new_ids))}
+
+
+# ============ 今日开课（列出在线资料） ============
+# 「今日开课」只展示「精品」和「新生」，不展示「兼职」
+SCHEDULE_CATEGORIES = [('FEATURED', '精品'), ('NEWBIE', '新生')]
+
+
+def _build_schedule_text(girls: list) -> str:
+    """把 ACTIVE 资料渲染成「今日开课」文本（HTML）。仅含本群城市、精品/新生。"""
+    def esc(s):
+        return html.escape(str(s))
+
+    # 仅保留本群城市（成都群只列成都）
+    city_girls = [g for g in girls if SCHEDULE_CITY in (g.get('city') or '')]
+
+    # 北京时间日期
+    today = datetime.now(timezone(timedelta(hours=8))).strftime('%Y/%m/%d')
+    city_name = next((g.get('city') for g in city_girls if g.get('city')), f'{SCHEDULE_CITY}市')
+
+    # 按 分类 → 位置 分组（保留接口返回顺序：createdAt desc）
+    total = 0
+    cat_blocks = []
+    for cat_key, cat_label in SCHEDULE_CATEGORIES:
+        members = [g for g in city_girls if g.get('category') == cat_key]
+        if not members:
+            continue
+        total += len(members)
+
+        loc_order = []
+        loc_map = {}
+        for g in members:
+            loc = (g.get('location') or '其他').strip() or '其他'
+            if loc not in loc_map:
+                loc_map[loc] = []
+                loc_order.append(loc)
+            link = f"https://t.me/{BOT_USERNAME}?start=girl_{g.get('id')}"
+            loc_map[loc].append(f'<a href="{link}">{esc(g.get("name", ""))}</a>')
+
+        loc_blocks = []
+        for loc in loc_order:
+            loc_blocks.append(f"📍 {esc(loc)}\n" + " | ".join(loc_map[loc]))
+        cat_blocks.append(f"<b>{cat_label}</b>\n\n" + "\n\n".join(loc_blocks))
+
+    if total == 0:
+        header = f"📋 【{esc(city_name)}】今日开课老师 ({today})"
+        return header + "\n\n🟢 暂无可开课老师，请稍后再看～"
+
+    header = f"📋 【{esc(city_name)}】今日开课老师（👆上图） ({today})"
+    body = f"🟢 可开课 ({total}位)\n\n" + "\n\n".join(cat_blocks)
+    footer = "（点击可查看详情）\n好好学习，天天向上。更多课程信息请点击👇："
+    return f"{header}\n\n{body}\n\n{footer}"
+
+
+def _collect_schedule_photos(girls: list) -> list:
+    """按 精品→新生 顺序收集本群城市 ACTIVE 资料的头像URL（兼职不取，无图跳过）。"""
+    city_girls = [g for g in girls if SCHEDULE_CITY in (g.get('city') or '')]
+    photos = []
+    for cat_key, _ in SCHEDULE_CATEGORIES:
+        for g in city_girls:
+            if g.get('category') == cat_key and g.get('photo'):
+                photos.append(g['photo'])
+    return photos
+
+
+def _schedule_keyboard() -> InlineKeyboardMarkup:
+    """今日开课底部三个榜单按钮"""
+    return InlineKeyboardMarkup([[
+        InlineKeyboardButton("精品榜", url=CHANNEL_LINK_FEATURED),
+        InlineKeyboardButton("兼职榜", url=CHANNEL_LINK_PART_TIME),
+        InlineKeyboardButton("新生榜", url=CHANNEL_LINK_NEWBIE),
+    ]])
+
+
+def _has_active_teachers(girls: list) -> bool:
+    """本群城市是否有 ACTIVE 的精品/新生老师"""
+    return any(
+        SCHEDULE_CITY in (g.get('city') or '') and g.get('category') in ('FEATURED', 'NEWBIE')
+        for g in girls
+    )
+
+
+async def _send_schedule_albums(bot, chat_id, photos: list) -> list:
+    """发送头像相册（每 10 张一组，Telegram 上限）。返回已发送的消息列表。"""
+    sent = []
+    for i in range(0, len(photos), 10):
+        chunk = photos[i:i + 10]
+        try:
+            ms = await bot.send_media_group(
+                chat_id, [InputMediaPhoto(media=u) for u in chunk],
+                read_timeout=60, write_timeout=60, connect_timeout=20,
+            )
+            sent.extend(ms)
+        except Exception as e:
+            logger.error(f"发送今日开课相册失败: {e}")
+    return sent
+
+
+async def cmd_schedule(update: Update, context: ContextTypes.DEFAULT_TYPE, clean: bool = True):
+    """今日开课：先发头像相册，再发文本（带名字超链接+榜单按钮）。仅本群城市、精品/新生。"""
+    girls = yanyulou_api('GET', '/api/bot/girls/active')
+    if not isinstance(girls, list):
+        reply = reply_clean if clean else reply_plain
+        await reply(update, context, "❌ 获取开课信息失败，请稍后重试")
+        return
+
+    chat_id = update.effective_chat.id
+    text = _build_schedule_text(girls)
+    photos = _collect_schedule_photos(girls)
+
+    sent_msgs = await _send_schedule_albums(context.bot, chat_id, photos)
+    sent = await update.message.reply_text(
+        text, parse_mode=ParseMode.HTML,
+        reply_markup=_schedule_keyboard(), disable_web_page_preview=True,
+    )
+    sent_msgs.append(sent)
+
+    # 群内 /schedule（clean=True）：相册+文本+命令一起 2 分钟后删除；汉字「今日开课」保留
+    if clean:
+        _schedule_delete(update, context, *sent_msgs)
+
+
+async def publish_schedule_to_channel(context: ContextTypes.DEFAULT_TYPE):
+    """每日定时任务：把「今日开课」同样的内容发布到公示榜频道（无 ACTIVE 老师则跳过）。"""
+    bot = context.bot
+    girls = yanyulou_api('GET', '/api/bot/girls/active')
+    if not isinstance(girls, list):
+        logger.error("定时发布：获取 active 资料失败，跳过")
+        return
+    if not _has_active_teachers(girls):
+        logger.info("定时发布：今日无 ACTIVE 老师，跳过频道发布")
+        return
+
+    text = _build_schedule_text(girls)
+    photos = _collect_schedule_photos(girls)
+    await _send_schedule_albums(bot, SCHEDULE_CHANNEL_ID, photos)
+    await bot.send_message(
+        SCHEDULE_CHANNEL_ID, text, parse_mode=ParseMode.HTML,
+        reply_markup=_schedule_keyboard(), disable_web_page_preview=True,
+    )
+    logger.info("定时发布：今日开课已发布到公示榜频道")
 
 
 async def send_girl_teaser(update: Update, context: ContextTypes.DEFAULT_TYPE, girl_id: str):

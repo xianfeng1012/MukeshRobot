@@ -44,6 +44,17 @@ CHANNEL_FEATURED = int(os.getenv('CHANNEL_FEATURED', -1002665963207))
 CHANNEL_PART_TIME = int(os.getenv('CHANNEL_PART_TIME', -1004417011478))
 CHANNEL_NEWBIE = int(os.getenv('CHANNEL_NEWBIE', -1004298729775))
 
+# 分类 → 频道公开/邀请链接（「今日开课」底部按钮跳转用，数字ID不能做URL按钮）
+CHANNEL_LINK_FEATURED = os.getenv('CHANNEL_LINK_FEATURED', 'https://t.me/+WMN56KjIDZUyNWNl')
+CHANNEL_LINK_PART_TIME = os.getenv('CHANNEL_LINK_PART_TIME', 'https://t.me/+383KB9684EUyNGZl')
+CHANNEL_LINK_NEWBIE = os.getenv('CHANNEL_LINK_NEWBIE', 'https://t.me/+eqndBOD1NdhiZWRl')
+
+# 「今日开课」只回答本群所属城市的资料（成都群只列成都；多城市群后续单独配置）
+SCHEDULE_CITY = os.getenv('SCHEDULE_CITY', '成都')
+
+# 每日定时发布「今日开课」的目标频道（公示榜）
+SCHEDULE_CHANNEL_ID = int(os.getenv('SCHEDULE_CHANNEL_ID', -1004378375166))
+
 # 排行榜配置
 LEADERBOARD_SIZE = 10
 

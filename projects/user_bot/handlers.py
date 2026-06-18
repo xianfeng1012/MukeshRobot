@@ -18,6 +18,28 @@ HEADERS = {
 }
 
 
+async def _is_group_admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
+    chat = update.effective_chat
+    user = update.effective_user
+    try:
+        member = await context.bot.get_chat_member(chat.id, user.id)
+        return member.status in ('administrator', 'creator')
+    except Exception as e:
+        logger.warning(f"检查管理员失败: {e}")
+        return False
+
+
+def admin_only(handler):
+    """包装斜杠命令：群聊中仅管理员有效，非管理员静默忽略；私聊不限制。"""
+    async def wrapped(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        chat = update.effective_chat
+        if chat is not None and chat.type != 'private':
+            if not await _is_group_admin(update, context):
+                return
+        await handler(update, context)
+    return wrapped
+
+
 # ============ 个人档案 ============
 async def cmd_profile(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """查看个人档案"""

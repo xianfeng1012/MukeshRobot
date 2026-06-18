@@ -5,11 +5,11 @@ UserBot 主程序
 import logging
 import sys
 from telegram import Update
-from telegram.ext import Application, CommandHandler, ContextTypes
+from telegram.ext import Application, CommandHandler, MessageHandler, ContextTypes, filters
 
 from config import USER_BOT_TOKEN, LOG_LEVEL, LOG_FILE
 from handlers import (
-    cmd_profile, cmd_activity, cmd_stats, cmd_privacy, cmd_achievements
+    cmd_profile, cmd_activity, cmd_stats, cmd_privacy, cmd_achievements, admin_only
 )
 
 # ============ 日志配置 ============
@@ -80,13 +80,22 @@ def main():
     application = Application.builder().token(USER_BOT_TOKEN).build()
 
     # 注册处理器
-    application.add_handler(CommandHandler("start", cmd_start))
-    application.add_handler(CommandHandler("help", cmd_help))
-    application.add_handler(CommandHandler("profile", cmd_profile))
-    application.add_handler(CommandHandler("activity", cmd_activity))
-    application.add_handler(CommandHandler("stats", cmd_stats))
-    application.add_handler(CommandHandler("achievements", cmd_achievements))
-    application.add_handler(CommandHandler("privacy", cmd_privacy))
+    # 斜杠命令：群内仅管理员有效（私聊不限制），普通群友用汉字命令
+    application.add_handler(CommandHandler("start", admin_only(cmd_start)))
+    application.add_handler(CommandHandler("help", admin_only(cmd_help)))
+    application.add_handler(CommandHandler("profile", admin_only(cmd_profile)))
+    application.add_handler(CommandHandler("activity", admin_only(cmd_activity)))
+    application.add_handler(CommandHandler("stats", admin_only(cmd_stats)))
+    application.add_handler(CommandHandler("achievements", admin_only(cmd_achievements)))
+    application.add_handler(CommandHandler("privacy", admin_only(cmd_privacy)))
+
+    # 汉字命令：所有群友可用
+    application.add_handler(MessageHandler(filters.Regex(r'^\s*资料帮助\s*$'), cmd_help))
+    application.add_handler(MessageHandler(filters.Regex(r'^\s*我的资料\s*$'), cmd_profile))
+    application.add_handler(MessageHandler(filters.Regex(r'^\s*我的活动\s*$'), cmd_activity))
+    application.add_handler(MessageHandler(filters.Regex(r'^\s*资料统计\s*$'), cmd_stats))
+    application.add_handler(MessageHandler(filters.Regex(r'^\s*我的成就\s*$'), cmd_achievements))
+    application.add_handler(MessageHandler(filters.Regex(r'^\s*隐私设置\s*$'), cmd_privacy))
 
     # 错误处理
     application.add_error_handler(error_handler)

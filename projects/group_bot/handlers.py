@@ -277,106 +277,135 @@ async def cmd_togglespam(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 # ============ 新成员加入处理 ============
+# 最近已处理的进群事件，避免 new_chat_members 与 chat_member 两种事件对同一人重复处理
+_recently_processed = {}  # (chat_id, user_id) -> ts
+_RECENT_TTL = 60
+
+
+def _already_processed(chat_id: int, user_id: int) -> bool:
+    """同一新成员 60 秒内只处理一次（两种进群事件去重）。"""
+    now = time.time()
+    for k, ts in list(_recently_processed.items()):
+        if now - ts > _RECENT_TTL:
+            _recently_processed.pop(k, None)
+    key = (chat_id, user_id)
+    if key in _recently_processed:
+        return True
+    _recently_processed[key] = now
+    return False
+
+
+async def process_new_member(context: ContextTypes.DEFAULT_TYPE, chat, member):
+    """对单个新成员执行欢迎/禁言/关注频道验证。被「手动拉入」和「自己进群」两种事件共用。"""
+    if member.is_bot:
+        return
+    user_id = member.id
+    if _already_processed(chat.id, user_id):
+        return
+
+    settings = await get_group_settings(chat.id)
+    verify_enabled = settings.get('verify_enabled', True)
+    spam_enabled = settings.get('spam_enabled', True)
+    welcome_text = settings.get('welcome_text')
+
+    # 1. 黑名单
+    if await check_blacklist(user_id):
+        await context.bot.ban_chat_member(chat.id, user_id)
+        logger.warning(f"用户{user_id}被禁止进入（黑名单）")
+        return
+
+    # 2. 创建用户档案
+    await create_user(user_id, member)
+
+    # 3. 开启观察期时，记录入群时间（作为3天解锁的起点）
+    if spam_enabled:
+        await record_member(chat.id, user_id, 'probation')
+
+    # 4. 欢迎消息（优先自定义欢迎语）
+    if welcome_text:
+        first_msg = welcome_text.replace('{user}', member.first_name)
+    elif verify_enabled:
+        first_msg = VERIFICATION_TEXT.format(user=member.first_name)
+    else:
+        first_msg = f"{member.first_name}，欢迎加入！👋"
+    await context.bot.send_message(chat.id, first_msg)
+
+    # 验证关闭时，不做关注频道验证
+    if not verify_enabled:
+        if spam_enabled:
+            await context.bot.restrict_chat_member(chat.id, user_id, permissions=PROBATION_PERMISSIONS)
+            await context.bot.send_message(
+                chat.id,
+                f"🛡️ 新成员观察期：{PROBATION_DAYS} 天内仅可发送文字，"
+                f"满 {PROBATION_DAYS} 天后自动解锁图片/视频等。"
+            )
+            logger.info(f"新成员加入(免验证·观察期): {member.first_name}({user_id})")
+        else:
+            logger.info(f"新成员加入(免验证·无限制): {member.first_name}({user_id})")
+        return
+
+    # 5. 先完全禁言
+    await context.bot.restrict_chat_member(chat.id, user_id, permissions=MUTED_PERMISSIONS)
+
+    # 6. 发送「关注频道 + 解禁」按钮
+    buttons = [
+        [InlineKeyboardButton(text=f"📢 点此关注频道「{VERIFY_CHANNEL_NAME}」", url=VERIFY_CHANNEL_LINK)],
+        [InlineKeyboardButton(text="✅ 我已关注，点此解禁", callback_data=f"cv_{chat.id}_{user_id}")],
+    ]
+    verify_msg = await context.bot.send_message(
+        chat.id,
+        f"{member.mention_html()}，你已被临时禁言。\n"
+        f"请先关注频道「{VERIFY_CHANNEL_NAME}」，再点下方「我已关注，点此解禁」即可发言。\n"
+        f"⏱️ 请在 {VERIFICATION_TIMEOUT // 60} 分钟内完成，否则将被移出群组。",
+        parse_mode=ParseMode.HTML,
+        reply_markup=InlineKeyboardMarkup(buttons)
+    )
+
+    # 7. 记录待验证状态 + 设置超时
+    _pending_verifications[user_id] = {'chat_id': chat.id, 'group_msg_id': verify_msg.message_id}
+    context.job_queue.run_once(
+        verify_timeout, VERIFICATION_TIMEOUT,
+        data={'chat_id': chat.id, 'user_id': user_id, 'message_id': verify_msg.message_id},
+        name=f'verify_timeout_{user_id}'
+    )
+    logger.info(f"新成员加入: {member.first_name}({user_id})")
+
+
 async def handle_new_member(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """处理新成员加入"""
+    """new_chat_members 服务消息（被他人手动拉入群时触发）"""
     try:
-        new_members = update.message.new_chat_members
         chat = update.effective_chat
-
-        settings = await get_group_settings(chat.id)
-        verify_enabled = settings.get('verify_enabled', True)
-        spam_enabled = settings.get('spam_enabled', True)
-        welcome_text = settings.get('welcome_text')
-
-        for member in new_members:
-            # 跳过机器人
-            if member.is_bot:
-                continue
-
-            user_id = member.id
-
-            # 1. 检查黑名单
-            is_blacklisted = await check_blacklist(user_id)
-            if is_blacklisted:
-                await context.bot.ban_chat_member(chat.id, user_id)
-                logger.warning(f"用户{user_id}被禁止进入（黑名单）")
-                continue
-
-            # 2. 创建用户档案
-            await create_user(user_id, member)
-
-            # 3. 开启观察期时，记录入群时间（作为3天解锁的起点）
-            if spam_enabled:
-                await record_member(chat.id, user_id, 'probation')
-
-            # 4. 发送欢迎消息（优先使用自定义欢迎语）
-            if welcome_text:
-                first_msg = welcome_text.replace('{user}', member.first_name)
-            elif verify_enabled:
-                first_msg = VERIFICATION_TEXT.format(user=member.first_name)
-            else:
-                first_msg = f"{member.first_name}，欢迎加入！👋"
-            await context.bot.send_message(chat.id, first_msg)
-
-            # 验证功能关闭时，不做数学验证
-            if not verify_enabled:
-                if spam_enabled:
-                    # 直接进入观察期：仅可发文字
-                    await context.bot.restrict_chat_member(
-                        chat.id, user_id, permissions=PROBATION_PERMISSIONS
-                    )
-                    await context.bot.send_message(
-                        chat.id,
-                        f"🛡️ 新成员观察期：{PROBATION_DAYS} 天内仅可发送文字，"
-                        f"满 {PROBATION_DAYS} 天后自动解锁图片/视频等。"
-                    )
-                    logger.info(f"新成员加入(免验证·观察期): {member.first_name}({user_id})")
-                else:
-                    logger.info(f"新成员加入(免验证·无限制): {member.first_name}({user_id})")
-                continue
-
-            # 4. 限制用户权限（先完全禁言）
-            await context.bot.restrict_chat_member(
-                chat.id,
-                user_id,
-                permissions=MUTED_PERMISSIONS
-            )
-
-            # 5. 发送「关注频道 + 解禁」按钮
-            buttons = [
-                [InlineKeyboardButton(text=f"📢 点此关注频道「{VERIFY_CHANNEL_NAME}」", url=VERIFY_CHANNEL_LINK)],
-                [InlineKeyboardButton(text="✅ 我已关注，点此解禁", callback_data=f"cv_{chat.id}_{user_id}")],
-            ]
-
-            verify_msg = await context.bot.send_message(
-                chat.id,
-                f"{member.mention_html()}，你已被临时禁言。\n"
-                f"请先关注频道「{VERIFY_CHANNEL_NAME}」，再点下方「我已关注，点此解禁」即可发言。\n"
-                f"⏱️ 请在 {VERIFICATION_TIMEOUT // 60} 分钟内完成，否则将被移出群组。",
-                parse_mode=ParseMode.HTML,
-                reply_markup=InlineKeyboardMarkup(buttons)
-            )
-
-            # 6. 记录待验证状态 + 设置超时
-            _pending_verifications[user_id] = {
-                'chat_id': chat.id,
-                'group_msg_id': verify_msg.message_id,
-            }
-            context.job_queue.run_once(
-                verify_timeout,
-                VERIFICATION_TIMEOUT,
-                data={
-                    'chat_id': chat.id,
-                    'user_id': user_id,
-                    'message_id': verify_msg.message_id
-                },
-                name=f'verify_timeout_{user_id}'
-            )
-
-            logger.info(f"新成员加入: {member.first_name}({user_id})")
-
+        for member in update.message.new_chat_members:
+            await process_new_member(context, chat, member)
     except Exception as e:
         logger.error(f"处理新成员加入失败: {e}")
+
+
+async def handle_chat_member_update(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """chat_member 更新（用户自己通过邀请链接/搜索进群时触发，无服务消息）"""
+    try:
+        cmu = update.chat_member
+        if cmu is None:
+            return
+        old_status = cmu.old_chat_member.status
+        new_member = cmu.new_chat_member
+        new_status = new_member.status
+
+        was_in = old_status in ('member', 'administrator', 'creator', 'restricted')
+        now_in = new_status == 'member' or (
+            new_status == 'restricted' and getattr(new_member, 'is_member', False)
+        )
+        # 仅「非成员 → 成员」算新进群（机器人自己禁言导致的 member→restricted 不算）
+        if was_in or not now_in:
+            return
+
+        logger.info(
+            f"[chat_member] 检测到进群: 用户{new_member.user.id} 群{update.effective_chat.id} "
+            f"({old_status}->{new_status})"
+        )
+        await process_new_member(context, update.effective_chat, new_member.user)
+    except Exception as e:
+        logger.error(f"处理chat_member更新失败: {e}")
 
 
 async def verify_timeout(context: ContextTypes.DEFAULT_TYPE):
@@ -486,6 +515,11 @@ async def moderate_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user = update.effective_user
 
         if message is None or user is None:
+            return
+
+        # 频道帖自动转发到讨论群（评论区锚点，发送者为 Telegram 服务号 777000）不处理，
+        # 否则会把它当"转发消息"删掉，导致频道评论区消失。
+        if getattr(message, 'is_automatic_forward', False):
             return
 
         # 按群设置判断是否开启

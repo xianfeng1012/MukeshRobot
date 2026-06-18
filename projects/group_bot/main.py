@@ -5,11 +5,14 @@ GroupBot 主程序
 import logging
 import sys
 from telegram import Update
-from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, ContextTypes, filters
+from telegram.ext import (
+    Application, CommandHandler, MessageHandler, CallbackQueryHandler,
+    ChatMemberHandler, ContextTypes, filters
+)
 
 from config import GROUP_BOT_TOKEN, LOG_LEVEL, LOG_FILE
 from handlers import (
-    handle_new_member, handle_channel_verify, moderate_message,
+    handle_new_member, handle_chat_member_update, handle_channel_verify, moderate_message,
     graduate_probation_users, handle_member_left, cmd_setwelcome, cmd_toggleverify,
     cmd_togglespam, get_group_settings, cleanup_group_command, admin_only,
     reply_autodel
@@ -130,7 +133,9 @@ def main():
 
     # 消息处理（始终注册，运行时按群设置决定行为）
     # 新成员：欢迎 + 可选验证
+    # 两种进群事件都监听：被他人拉入(new_chat_members 服务消息) + 自己点链接进群(chat_member 更新)
     application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, handle_new_member))
+    application.add_handler(ChatMemberHandler(handle_chat_member_update, ChatMemberHandler.CHAT_MEMBER))
     # 关注频道验证按钮回调
     application.add_handler(CallbackQueryHandler(handle_channel_verify, pattern='^cv_'))
     # 消息审查：删除非管理员的链接/转发（群内所有非命令、非系统消息）

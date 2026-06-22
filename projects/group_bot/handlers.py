@@ -299,6 +299,9 @@ async def process_new_member(context: ContextTypes.DEFAULT_TYPE, chat, member):
     """对单个新成员执行欢迎/禁言/关注频道验证。被「手动拉入」和「自己进群」两种事件共用。"""
     if member.is_bot:
         return
+    # 仅处理群组；频道(有人关注频道也会触发 chat_member)不发欢迎、不验证
+    if chat.type not in ('group', 'supergroup'):
+        return
     user_id = member.id
     if _already_processed(chat.id, user_id):
         return

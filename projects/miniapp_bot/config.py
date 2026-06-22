@@ -55,6 +55,10 @@ SCHEDULE_CITY = os.getenv('SCHEDULE_CITY', '成都')
 # 每日定时发布「今日开课」的目标频道（公示榜）
 SCHEDULE_CHANNEL_ID = int(os.getenv('SCHEDULE_CHANNEL_ID', -1004378375166))
 
+# 优质评价发布目标：报告频道(决定加分) + 群(尽力而为)
+REPORT_CHANNEL_ID = int(os.getenv('REPORT_CHANNEL_ID', -1004409043466))
+REPORT_GROUP_ID = int(os.getenv('REPORT_GROUP_ID', -1004379240327))
+
 # 排行榜配置
 LEADERBOARD_SIZE = 10
 

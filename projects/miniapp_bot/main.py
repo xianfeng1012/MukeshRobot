@@ -14,7 +14,7 @@ from config import MINIAPP_BOT_TOKEN, LOG_LEVEL, LOG_FILE, PUBLISH_SECRET, PUBLI
 from handlers import (
     cmd_points, cmd_leaderboard, cmd_play, cmd_checkin, cmd_tasks, cmd_stats,
     cmd_schedule, publish_schedule_to_channel, send_girl_teaser,
-    publish_profile_to_channel, admin_only, text_checkin
+    publish_profile_to_channel, publish_review, admin_only, text_checkin
 )
 
 # ============ 日志配置 ============
@@ -95,12 +95,36 @@ async def _handle_publish(request: web.Request) -> web.Response:
         return web.json_response({'success': False, 'message': str(e)}, status=500)
 
 
+async def _handle_publish_review(request: web.Request) -> web.Response:
+    """接收 yanyulou admin 的优质评价发布请求 → 发到报告频道+群"""
+    if request.headers.get('X-Publish-Key') != PUBLISH_SECRET:
+        return web.json_response({'success': False, 'message': 'invalid key'}, status=401)
+    try:
+        payload = await request.json()
+    except Exception:
+        return web.json_response({'success': False, 'message': 'bad json'}, status=400)
+
+    username = (payload.get('username') or '').strip() or '群友'
+    content = (payload.get('content') or '').strip()
+    if not content:
+        return web.json_response({'success': False, 'message': '评论内容为空'}, status=400)
+
+    application: Application = request.app['tg_app']
+    try:
+        result = await publish_review(application.bot, username, content)
+        return web.json_response(result, status=200 if result.get('success') else 400)
+    except Exception as e:
+        logger.error(f"优质评价发布异常: {e}")
+        return web.json_response({'success': False, 'message': str(e)}, status=500)
+
+
 # ============ 应用初始化 ============
 async def post_init(application: Application) -> None:
     """应用初始化后的回调：启动发布 Webhook 服务"""
     web_app = web.Application()
     web_app['tg_app'] = application
     web_app.router.add_post('/publish-profile', _handle_publish)
+    web_app.router.add_post('/publish-review', _handle_publish_review)
     runner = web.AppRunner(web_app)
     await runner.setup()
     site = web.TCPSite(runner, '0.0.0.0', PUBLISH_WEBHOOK_PORT)

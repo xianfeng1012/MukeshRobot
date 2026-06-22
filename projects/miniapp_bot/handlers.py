@@ -19,6 +19,7 @@ from config import (
     CHANNEL_FEATURED, CHANNEL_PART_TIME, CHANNEL_NEWBIE,
     CHANNEL_LINK_FEATURED, CHANNEL_LINK_PART_TIME, CHANNEL_LINK_NEWBIE,
     SCHEDULE_CITY, SCHEDULE_CHANNEL_ID,
+    REPORT_CHANNEL_ID, REPORT_GROUP_ID,
 )
 
 logger = logging.getLogger(__name__)
@@ -618,6 +619,24 @@ async def publish_schedule_to_channel(context: ContextTypes.DEFAULT_TYPE):
         reply_markup=_schedule_keyboard(), disable_web_page_preview=True,
     )
     logger.info("定时发布：今日开课已发布到公示榜频道")
+
+
+# ============ 优质评价发布 ============
+async def publish_review(bot, username: str, content: str) -> dict:
+    """把优质评价发到报告频道(必须成功，决定后端是否加分) + 群(尽力而为)。"""
+    text = (
+        f"群友 ({username}) 的课程评价被列为优质评价，奖励 100 积分。\n\n"
+        f"{content}"
+    )
+    timeouts = dict(read_timeout=30, write_timeout=30, connect_timeout=20)
+    # 报告频道：失败则抛出 → webhook 返回失败 → 后端不加分
+    await bot.send_message(REPORT_CHANNEL_ID, text, **timeouts)
+    # 群：尽力而为，失败不影响加分
+    try:
+        await bot.send_message(REPORT_GROUP_ID, text, **timeouts)
+    except Exception as e:
+        logger.warning(f"优质评价发到群 {REPORT_GROUP_ID} 失败(忽略): {e}")
+    return {'success': True, 'message': '已发布'}
 
 
 async def send_girl_teaser(update: Update, context: ContextTypes.DEFAULT_TYPE, girl_id: str):

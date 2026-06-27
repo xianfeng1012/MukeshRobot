@@ -211,11 +211,11 @@ police_ani = [
 @run_async
 def brainanimation(update: Update, context: CallbackContext):
     bot, args = context.bot, context.args
-    msg = update.effective_message.reply_text("PROCESSING...")
+    msg = update.effective_message.reply_text("处理中...")
     for x in range(EDIT_TIMES):
         msg.edit_text(brain_chain[x % 14])
         time.sleep(EDIT_SLEEP)
-    msg.edit_text("YOU PUT BRAIN IN DUSTBIN")
+    msg.edit_text("你把脑子放在垃圾桶里了")
 
 
 @user_admin
@@ -234,11 +234,11 @@ def clockanimation(update: Update, context: CallbackContext):
 @run_async
 def policeanimation(update: Update, context: CallbackContext):
     bot, args = context.bot, context.args
-    msg = update.effective_message.reply_text("CALL TIANA POLICE")
+    msg = update.effective_message.reply_text("呼叫警察")
     for x in range(EDIT_TIMES):
         msg.edit_text(police_ani[x % 11])
         time.sleep(EDIT_SLEEP)
-    msg.edit_text("Mastermind POLICE IS HERE")
+    msg.edit_text("天才警察来了")
 
 
 @user_admin
@@ -260,19 +260,19 @@ def bombs(update: Update, context: CallbackContext):
     for x in range(EDIT_TIMES):
         msg.edit_text(bomb_ettu[x % 9])
         time.sleep(EDIT_SLEEP)
-    msg.edit_text("RIP PLOX...")
+    msg.edit_text("安息吧...")
 
 
 @user_admin
 @run_async
 def hack(update: Update, context: CallbackContext):
     bot, args = context.bot, context.args
-    msg = update.effective_message.reply_text("Target selected")
+    msg = update.effective_message.reply_text("已选定目标")
     for x in range(EDIT_TIMES):
         msg.edit_text(hack_you[x % 18])
         time.sleep(EDIT_SLEEP)
     msg.edit_text(
-        "`pdf created click link below to download data\n\n😂 Don't worry only i can open this 😎😎.. If u don't Believe try to download` 🙂\n\nhttps://drive.google.com/file/d/1hPUfr27UtU0XjtC20lXjY9G3D9jR5imj/view?usp=sharing"
+        "`PDF 已创建，点击下方链接下载数据\n\n😂 别担心，只有我能打开 😎😎……不信的话可以试着下载` 🙂\n\nhttps://drive.google.com/file/d/1hPUfr27UtU0XjtC20lXjY9G3D9jR5imj/view?usp=sharing"
     )
 
 
@@ -280,11 +280,11 @@ def hack(update: Update, context: CallbackContext):
 @run_async
 def love(update: Update, context: CallbackContext):
     bot, args = context.bot, context.args
-    msg = update.effective_message.reply_text("Wait For Magic")
+    msg = update.effective_message.reply_text("等待魔法发生")
     for x in range(EDIT_TIMES):
         msg.edit_text(love_siren[x % 35])
         time.sleep(EDIT_SLEEP)
-    msg.edit_text("True Love💞")
+    msg.edit_text("真爱💞")
 
 
 @user_admin
@@ -317,12 +317,12 @@ dispatcher.add_handler(BRAINANIMATION_HANDLER)
 
 __help__ = """
 
-*ғᴀᴋᴇ ᴀɴɪᴍᴀᴛɪᴏɴ ᴄᴏᴍᴍᴀɴᴅ*
- ❍ /love - ᴜsᴇ ɪᴛ ɪғ ᴜ ʜᴀᴠᴇ ɢɪʀʟғʀɪᴇɴᴅ
- ❍ /hack -  ᴛᴏ ʜᴀᴄᴋ ᴀɴʏ ᴜsᴇʀ ᴛᴇʟᴇɢʀᴀᴍ ɪᴅ
- ❍ /moon    - ᴛᴏ ᴡɪsʜ ɢɴ ᴛᴏ ᴜʀ ʟᴏᴠᴇ
- ❍ /kill  -  ᴛᴏ ᴋɪʟʟ  ᴜʀ ɢғ ᴅᴀᴅ
- ❍ /bombs -  ᴛᴏ sᴜᴄɪᴅᴇ ᴜʀsᴇʟғ
- ❍ /police - ᴛᴏ ᴄᴀʟʟ ᴍᴀsᴛᴇʀᴍɪɴᴅ ᴘᴏʟɪᴄᴇ
+*动图动画命令*
+ ❍ /love - 发送爱心动画
+ ❍ /hack - 模拟黑客攻击动画
+ ❍ /moon - 发送月亮动画，向心爱之人道晚安
+ ❍ /kill - 发送击杀动画
+ ❍ /bombs - 发送爆炸动画
+ ❍ /police - 召唤警察动画
 """
-__mod_name__ = "Gᴀᴍᴇ"
+__mod_name__ = "动图"

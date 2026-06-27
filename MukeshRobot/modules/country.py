@@ -16,7 +16,7 @@ async def msg(event):
     try:
         a = country.info()
     except:
-        await event.reply("Country Not Available Currently")
+        await event.reply("暂时无法获取该国家的信息。")
     name = a.get("name")
     bb = a.get("altSpellings")
     hu = ""
@@ -76,29 +76,29 @@ async def msg(event):
 
     wiki = a.get("wiki")
 
-    caption = f"""<b><u>ɪɴғᴏʀᴍᴀᴛɪᴏɴ ɢᴀᴛʜᴇʀᴇᴅ sᴜᴄᴇssғᴜʟʟʏ </b></u>
+    caption = f"""<b><u>国家信息查询成功</b></u>
 
-<b>ᴄᴏᴜɴᴛʀʏ ɴᴀᴍᴇ :</b> {name}
-<b>ᴀʟᴛᴇʀɴᴀᴛɪᴠᴇ sᴘᴇʟʟɪɴɢs :</b> {hu}
-<b>ᴄᴏᴜɴᴛʀʏ ᴀʀᴇᴀ :</b> {area} square kilometers
-<b>ʙᴏʀᴅᴇʀs :</b> {borders}
-<b>ᴄᴀʟʟɪɴɢ ᴄᴏᴅᴇs  :</b> {call}
-<b>ᴄᴏᴜɴᴛʀʏ's ᴄᴀᴘɪᴛᴀʟ :</b> {capital}
-<b>ᴄᴏᴜɴᴛʀʏ's ᴄᴜʀʀᴇɴᴄʏ :</b> {currencies}
-<b>ᴄᴏᴜɴᴛʀʏ's ғʟᴀɢ :</b> {okie}
-<b>ᴅᴇᴍᴏʏᴍ:</b> {HmM}
-<b>ᴄᴏᴜɴᴛʀʏ ᴛʏᴘᴇ :</b> {EsCoBaR}
-<b>ɪsᴏ ɴᴀᴍᴇs :</b> {iso}
-<b>ʟᴀɴɢᴜᴀɢᴇs :</b> {lMAO}
-<b>ɴᴀᴛɪᴠᴇ ɴᴀᴍᴇs :</b> {nonive}
-<b>ᴘᴏᴘᴜʟᴀᴛɪᴏɴs :</b> {waste}
-<b>ʀᴇɢɪᴏɴ :</b> {reg}
-<b>sᴜʙ ʀᴇɢɪᴏɴ :</b> {sub}
-<b>ᴛɪᴍᴇ ᴢᴏɴᴇs :</b> {tom}
-<b>ᴛᴏᴛᴀʟ ʟᴇᴠᴇʟ ᴅᴏᴍᴀɪɴ :</b> {lanester}
-<b>ᴡɪᴋɪᴘᴇᴅɪᴀ:</b> {wiki}
+<b>国家名称：</b> {name}
+<b>别名拼写：</b> {hu}
+<b>国土面积：</b> {area} 平方公里
+<b>接壤国家：</b> {borders}
+<b>国际拨号码：</b> {call}
+<b>首都：</b> {capital}
+<b>货币：</b> {currencies}
+<b>国旗：</b> {okie}
+<b>国民名称：</b> {HmM}
+<b>国家类型：</b> {EsCoBaR}
+<b>ISO 代码：</b> {iso}
+<b>官方语言：</b> {lMAO}
+<b>本地名称：</b> {nonive}
+<b>人口：</b> {waste}
+<b>所属地区：</b> {reg}
+<b>次级地区：</b> {sub}
+<b>时区：</b> {tom}
+<b>顶级域名：</b> {lanester}
+<b>维基百科：</b> {wiki}
 
-<u>ɪɴғᴏʀᴍᴀᴛɪᴏɴ ɢᴀᴛʜᴇʀᴇᴅ ʙʏ @{BOT_USERNAME}</u>
+<u>信息由 @{BOT_USERNAME} 提供</u>
 """
 
     await borg.send_message(
@@ -110,9 +110,9 @@ async def msg(event):
 
 
 __help__ = """
-ɪ ᴡɪʟʟ ɢɪᴠᴇ ɪɴғᴏʀᴍᴀᴛɪᴏɴ ᴀʙᴏᴜᴛ ᴀ ᴄᴏᴜɴᴛʀʏ
+查询指定国家的详细信息
 
- ❍ /country <ᴄᴏᴜɴᴛʀʏ ɴᴀᴍᴇ>*:* ɢᴀᴛʜᴇʀɪɴɢ ɪɴғᴏ ᴀʙᴏᴜᴛ ɢɪᴠᴇɴ ᴄᴏᴜɴᴛʀʏ
+ ❍ /country <国家名称> *:* 查询指定国家的详细信息
 """
 
-__mod_name__ = "Cᴏᴜɴᴛʀʏ"
+__mod_name__ = "国家信息"

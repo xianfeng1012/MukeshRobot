@@ -43,7 +43,7 @@ async def upvote(_, message):
         return
     if message.reply_to_message.from_user.id == OWNER_ID:
         await message.reply_text(
-            "ᴡᴇʟʟ, ʜᴇ's ᴍʏ ᴏᴡɴᴇʀ. sᴏ ʏᴇᴀʜ, ʜᴇ ɪs ᴀʟᴡᴀʏs ʀɪɢʜᴛ ᴀɴᴅ ᴇᴠᴇʀʏᴏɴᴇ ᴋɴᴏᴡs ʜᴇ ɪs ᴀ ɢᴏᴏᴅ ᴘᴇʀsᴏɴ ᴛᴏᴏ."
+            "他是我的主人，所以他总是对的，大家都知道他也是个好人。"
         )
         return
     if message.reply_to_message.from_user.id == message.from_user.id:
@@ -60,7 +60,7 @@ async def upvote(_, message):
     new_karma = {"karma": karma}
     await update_karma(chat_id, await int_to_alpha(user_id), new_karma)
     await message.reply_text(
-        f"ɪɴᴄʀᴇᴍᴇɴᴛᴇᴅ ᴋᴀʀᴍᴀ ᴏғ {user_mention} ʙʏ 1.\n**ᴛᴏᴛᴀʟ ᴩᴏɪɴᴛs :** {karma}"
+        f"{user_mention} 的声望 +1。\n**总积分：** {karma}"
     )
 
 
@@ -83,7 +83,7 @@ async def downvote(_, message):
         return
     if message.reply_to_message.from_user.id == OWNER_ID:
         await message.reply_text(
-            "ᴡᴛғ !, ʏᴏᴜ ᴅᴏɴ'ᴛ ᴀɢʀᴇᴇ ᴡɪᴛʜ ᴍʏ ᴏᴡɴᴇʀ. ʟᴏᴏᴋs ʟɪᴋᴇ ʏᴏᴜ'ʀᴇ ɴᴏᴛ ᴀɴ ɢᴏᴏᴅ ᴩᴇʀsᴏɴ."
+            "你不同意我主人的观点，看来你不是个好人。"
         )
         return
     if message.reply_to_message.from_user.id == message.from_user.id:
@@ -100,7 +100,7 @@ async def downvote(_, message):
     new_karma = {"karma": karma}
     await update_karma(chat_id, await int_to_alpha(user_id), new_karma)
     await message.reply_text(
-        f"ᴅᴇᴄʀᴇᴍᴇɴᴛᴇᴅ ᴋᴀʀᴍᴀ ᴏғ {user_mention} ʙʏ 1.\n**ᴛᴏᴛᴀʟ ᴩᴏɪɴᴛs :** {karma}"
+        f"{user_mention} 的声望 -1。\n**总积分：** {karma}"
     )
 
 
@@ -109,12 +109,12 @@ async def downvote(_, message):
 async def karma(_, message):
     chat_id = message.chat.id
     if not message.reply_to_message:
-        m = await message.reply_text("Analyzing Karma...Will Take 10 Seconds")
+        m = await message.reply_text("分析声望中……预计需要 10 秒")
         karma = await get_karmas(chat_id)
         if not karma:
-            await m.edit("No karma in DB for this chat.")
+            await m.edit("该群组数据库中暂无声望记录。")
             return
-        msg = f"**Karma list of {message.chat.title}:- **\n"
+        msg = f"**{message.chat.title} 的声望排行：**\n"
         limit = 0
         karma_dicc = {}
         for i in karma:
@@ -125,7 +125,7 @@ async def karma(_, message):
                 sorted(karma_dicc.items(), key=lambda item: item[1], reverse=True)
             )
         if not karma_dicc:
-            await m.edit("No karma in DB for this chat.")
+            await m.edit("该群组数据库中暂无声望记录。")
             return
         for user_idd, karma_count in karma_arranged.items():
             if limit > 9:
@@ -146,22 +146,22 @@ async def karma(_, message):
         user_id = message.reply_to_message.from_user.id
         karma = await get_karma(chat_id, await int_to_alpha(user_id))
         karma = karma["karma"] if karma else 0
-        await message.reply_text(f"**ᴛᴏᴛᴀʟ ᴩᴏɪɴᴛs :** {karma}")
+        await message.reply_text(f"**总积分：** {karma}")
 
 
 @pbot.on_message(filters.command("karma") & ~filters.private)
 @can_change_info
 async def captcha_state(_, message):
-    usage = "**Usage:**\n/karma [ON|OFF]"
+    usage = "**用法：**\n/karma [ON|OFF]"
     if len(message.command) != 2:
         return await message.reply_text(usage)
     state = message.text.split(None, 1)[1].strip()
     state = state.lower()
     if state == "on":
         await karma_on(message.chat.id)
-        await message.reply_text("Enabled karma system.")
+        await message.reply_text("声望系统已启用。")
     elif state == "off":
         await karma_off(message.chat.id)
-        await message.reply_text("Disabled karma system.")
+        await message.reply_text("声望系统已禁用。")
     else:
         await message.reply_text(usage)

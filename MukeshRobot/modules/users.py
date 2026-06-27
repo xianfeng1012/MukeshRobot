@@ -62,10 +62,10 @@ async def broadcast_handler(bot: Client, m: Message):
     all_chats = get_served_chats() or []
     await bot.send_message(
         OWNER_ID,
-        f"{m.from_user.mention} or {m.from_user.id} Iꜱ ꜱᴛᴀʀᴛᴇᴅ ᴛʜᴇ Bʀᴏᴀᴅᴄᴀꜱᴛ......",
+        f"{m.from_user.mention} 或 {m.from_user.id} 已开始广播……",
     )
     broadcast_msg = m.reply_to_message
-    sts_msg = await m.reply_text(f"broadcasting ..")
+    sts_msg = await m.reply_text(f"正在广播……")
     done = 0
     failed = 0
     success = 0
@@ -84,11 +84,11 @@ async def broadcast_handler(bot: Client, m: Message):
         done += 1
         if not done % 20:
             await sts_msg.edit(
-                f"Bʀᴏᴀᴅᴄᴀꜱᴛ Iɴ Pʀᴏɢʀᴇꜱꜱ: \nTᴏᴛᴀʟ ᴄʜᴀᴛꜱ  {total_chats} \nCᴏᴍᴩʟᴇᴛᴇᴅ: {done} / {total_chats}\nSᴜᴄᴄᴇꜱꜱ: {success}\nFᴀɪʟᴇᴅ: {failed}"
+                f"广播进行中：\n总群组数：{total_chats}\n已完成：{done} / {total_chats}\n成功：{success}\n失败：{failed}"
             )
     completed_in = datetime.timedelta(seconds=int(time.time() - start_time))
     await sts_msg.edit(
-        f"Bʀᴏᴀᴅᴄᴀꜱᴛ Cᴏᴍᴩʟᴇᴛᴇᴅ: \nCᴏᴍᴩʟᴇᴛᴇᴅ Iɴ {completed_in}.\n\nTᴏᴛᴀʟ ᴄʜᴀᴛꜱ {total_chats}\nCᴏᴍᴩʟᴇᴛᴇᴅ: {done} / {total_chats}\nSᴜᴄᴄᴇꜱꜱ: {success}\nFᴀɪʟᴇᴅ: {failed}"
+        f"广播已完成：\n用时：{completed_in}\n\n总群组数：{total_chats}\n已完成：{done} / {total_chats}\n成功：{success}\n失败：{failed}"
     )
 
 
@@ -124,10 +124,10 @@ async def broadcast_handler(bot: Client, m: Message):
     all_users = get_served_users()
     await bot.send_message(
         OWNER_ID,
-        f"{m.from_user.mention} or {m.from_user.id} Iꜱ ꜱᴛᴀʀᴛᴇᴅ ᴛʜᴇ Bʀᴏᴀᴅᴄᴀꜱᴛ......",
+        f"{m.from_user.mention} 或 {m.from_user.id} 已开始广播……",
     )
     broadcast_msg = m.reply_to_message
-    sts_msg = await m.reply_text(f"broadcasting ..")
+    sts_msg = await m.reply_text(f"正在广播……")
     done = 0
     failed = 0
     success = 0
@@ -144,11 +144,11 @@ async def broadcast_handler(bot: Client, m: Message):
         done += 1
         if not done % 20:
             await sts_msg.edit(
-                f"Bʀᴏᴀᴅᴄᴀꜱᴛ Iɴ Pʀᴏɢʀᴇꜱꜱ: \nTᴏᴛᴀʟ Uꜱᴇʀꜱ {total_users} \nCᴏᴍᴩʟᴇᴛᴇᴅ: {done} / {total_users}\nSᴜᴄᴄᴇꜱꜱ: {success}\nFᴀɪʟᴇᴅ: {failed}"
+                f"广播进行中：\n总用户数：{total_users}\n已完成：{done} / {total_users}\n成功：{success}\n失败：{failed}"
             )
     completed_in = datetime.timedelta(seconds=int(time.time() - start_time))
     await sts_msg.edit(
-        f"Bʀᴏᴀᴅᴄᴀꜱᴛ Cᴏᴍᴩʟᴇᴛᴇᴅ: \nCᴏᴍᴩʟᴇᴛᴇᴅ Iɴ {completed_in}.\n\nTᴏᴛᴀʟ Uꜱᴇʀꜱ {total_users}\nCᴏᴍᴩʟᴇᴛᴇᴅ: {done} / {total_users}\nSᴜᴄᴄᴇꜱꜱ: {success}\nFᴀɪʟᴇᴅ: {failed}"
+        f"广播已完成：\n用时：{completed_in}\n\n总用户数：{total_users}\n已完成：{done} / {total_users}\n成功：{success}\n失败：{failed}"
     )
 
 

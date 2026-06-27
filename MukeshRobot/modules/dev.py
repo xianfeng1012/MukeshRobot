@@ -17,16 +17,16 @@ from MukeshRobot.modules.helper_funcs.chat_status import dev_plus
 def allow_groups(update: Update, context: CallbackContext):
     args = context.args
     if not args:
-        update.effective_message.reply_text(f"Current state: {MukeshRobot.ALLOW_CHATS}")
+        update.effective_message.reply_text(f"当前状态：{MukeshRobot.ALLOW_CHATS}")
         return
     if args[0].lower() in ["off", "no"]:
         MukeshRobot.ALLOW_CHATS = True
     elif args[0].lower() in ["yes", "on"]:
         MukeshRobot.ALLOW_CHATS = False
     else:
-        update.effective_message.reply_text("Format: /lockdown Yes/No or Off/On")
+        update.effective_message.reply_text("格式：/lockdown Yes/No 或 Off/On")
         return
-    update.effective_message.reply_text("Done! Lockdown value toggled.")
+    update.effective_message.reply_text("完成！锁定状态已切换。")
 
 
 @dev_plus
@@ -39,29 +39,29 @@ def leave(update: Update, context: CallbackContext):
             bot.leave_chat(int(chat_id))
         except TelegramError:
             update.effective_message.reply_text(
-                "Beep boop, I could not leave that group(dunno why tho)."
+                "哔哔，我无法退出该群组（原因未知）。"
             )
             return
         with suppress(Unauthorized):
-            update.effective_message.reply_text("Beep boop, I left that soup!.")
+            update.effective_message.reply_text("哔哔，已退出该群组！")
     else:
-        update.effective_message.reply_text("Send a valid chat ID")
+        update.effective_message.reply_text("请提供有效的群组 ID")
 
 
 @dev_plus
 def gitpull(update: Update, context: CallbackContext):
     sent_msg = update.effective_message.reply_text(
-        "Pulling all changes from remote and then attempting to restart."
+        "正在从远程拉取所有变更，随后尝试重启。"
     )
     subprocess.Popen("git pull", stdout=subprocess.PIPE, shell=True)
 
-    sent_msg_text = sent_msg.text + "\n\nChanges pulled...I guess.. Restarting in "
+    sent_msg_text = sent_msg.text + "\n\n变更已拉取……重启倒计时："
 
     for i in reversed(range(5)):
         sent_msg.edit_text(sent_msg_text + str(i + 1))
         sleep(1)
 
-    sent_msg.edit_text("Restarted.")
+    sent_msg.edit_text("已重启。")
 
     os.system("restart.bat")
     os.execv("start.bat", sys.argv)
@@ -70,7 +70,7 @@ def gitpull(update: Update, context: CallbackContext):
 @dev_plus
 def restart(update: Update, context: CallbackContext):
     update.effective_message.reply_text(
-        "Starting a new instance and shutting down this one"
+        "正在启动新实例并关闭当前实例……"
     )
 
     os.system("restart.bat")

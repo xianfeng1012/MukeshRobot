@@ -71,7 +71,7 @@ def sed(update: Update, context: CallbackContext):
         repl, repl_with, flags = sed_result
         if not repl:
             update.effective_message.reply_to_message.reply_text(
-                "You're trying to replace... " "nothing with something?"
+                "你在尝试把……空内容替换成其他内容？"
             )
             return
 
@@ -82,14 +82,12 @@ def sed(update: Update, context: CallbackContext):
                 return
             if check and check.group(0).lower() == to_fix.lower():
                 update.effective_message.reply_to_message.reply_text(
-                    "Hey everyone, {} is trying to make "
-                    "me say stuff I don't wanna "
-                    "say!".format(update.effective_user.first_name)
+                    "大家注意！{} 正在试图让我说一些我不想说的话！".format(update.effective_user.first_name)
                 )
                 return
             if infinite_loop_check(repl):
                 update.effective_message.reply_text(
-                    "I'm afraid I can't run that regex."
+                    "抱歉，无法执行该正则表达式。"
                 )
                 return
             if "i" in flags and "g" in flags:
@@ -105,25 +103,24 @@ def sed(update: Update, context: CallbackContext):
             else:
                 text = regex.sub(repl, repl_with, to_fix, count=1, timeout=3).strip()
         except TimeoutError:
-            update.effective_message.reply_text("Timeout")
+            update.effective_message.reply_text("执行超时")
             return
         except sre_constants.error:
             LOGGER.warning(update.effective_message.text)
             LOGGER.exception("SRE constant error")
-            update.effective_message.reply_text("Do you even sed? Apparently not.")
+            update.effective_message.reply_text("你真的会用 sed 吗？看来不会。")
             return
 
         # empty string errors -_-
         if len(text) >= telegram.MAX_MESSAGE_LENGTH:
             update.effective_message.reply_text(
-                "The result of the sed command was too long for \
-                                                 telegram!"
+                "sed 命令的输出结果太长，无法在 Telegram 中发送！"
             )
         elif text:
             update.effective_message.reply_to_message.reply_text(text)
 
 
-__mod_name__ = "Sᴇᴅ"
+__mod_name__ = "文本替换"
 
 SED_HANDLER = DisableAbleMessageHandler(
     Filters.regex(r"s([{}]).*?\1.*".format("".join(DELIMITERS))),

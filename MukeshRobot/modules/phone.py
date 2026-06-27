@@ -7,9 +7,9 @@ from MukeshRobot import dispatcher
 from MukeshRobot.modules.helper_funcs.alternate import send_message
 from MukeshRobot.modules.helper_funcs.chat_status import user_admin
 
-__mod_name__ = "Pʜᴏɴᴇ"
+__mod_name__ = "手机号查询"
 __help__ = """
-» /phone ꜰɪʟʟ ᴀɴʏ ᴍᴏʙɪʟᴇ ɴᴜᴍʙᴇʀ ᴛᴏ ᴄʜᴇᴄᴋ ɪɴꜰᴏ.
+» /phone <手机号> : 查询任意手机号的归属信息。
 """
 
 
@@ -37,13 +37,13 @@ def phone(update, context):
     carrier = obj["carrier"]
     line_type = obj["line_type"]
     validornot = obj["valid"]
-    aa = "Valid: " + str(validornot)
-    a = "Phone number: " + str(number)
-    b = "Country: " + str(country_code)
-    c = "Country Name: " + str(country_name)
-    d = "Location: " + str(location)
-    e = "Carrier: " + str(carrier)
-    f = "Device: " + str(line_type)
+    aa = "是否有效: " + str(validornot)
+    a = "手机号: " + str(number)
+    b = "国家代码: " + str(country_code)
+    c = "国家名称: " + str(country_name)
+    d = "归属地: " + str(location)
+    e = "运营商: " + str(carrier)
+    f = "设备类型: " + str(line_type)
     g = f"{aa}\n{a}\n{b}\n{c}\n{d}\n{e}\n{f}"
     send_message(update.effective_message, g)
 

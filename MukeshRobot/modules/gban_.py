@@ -15,7 +15,7 @@ async def  banuser(b,message):
         reason+=r
         u=is_user_ingbanned(user)
         if u:
-            return await message.reply_text("User is already gbanned")
+            return await message.reply_text("该用户已被全局封禁")
     elif not message.reply_to_message and len(message.command) != 1:
         user = message.text.split(None, 1)[1].split()[0]
         r= " ".join(message.command[2:]) if len(message.command) > 2 else None
@@ -33,16 +33,16 @@ async def  banuser(b,message):
                 success += 1
             except Exception as e:
                 print(e)
-        await message.reply_text(f"gbanned from {success} chats \n user :> {hm.mention()} reason {reason}")
+        await message.reply_text(f"已从 {success} 个群组全局封禁\n用户：{hm.mention()} 原因：{reason}")
     except Exception as e:
-        await message.reply_text(f"failed due to {e}")
+        await message.reply_text(f"操作失败：{e}")
 @Mukesh.on_message(filters.command("ungban") & filters.user(OWNER_ID) & ( filters.group | filters.channel) )
 async def  unbanuser(b,message):
     if message.reply_to_message:
         user = message.reply_to_message.from_user.id
         u=is_user_ingbanned(user)
         if not u:
-            return await message.reply_text("User is not gbanned yet")
+            return await message.reply_text("该用户尚未被全局封禁")
     elif not message.reply_to_message and len(message.command) != 1:
         user = message.text.split(None, 1)[1]
        
@@ -58,15 +58,15 @@ async def  unbanuser(b,message):
                 success += 1
             except Exception as e:
                 print(e)
-        await message.reply_text(f"ungbanned from {success} chats \n user :> {hm.mention()}")
+        await message.reply_text(f"已从 {success} 个群组解除全局封禁\n用户：{hm.mention()}")
     except Exception as e:
-        await message.reply_text(f"failed due to {e}")
+        await message.reply_text(f"操作失败：{e}")
 @Mukesh.on_message(filters.command("gbanlist") & filters.user(OWNER_ID))
 async def get_gban_listss(_,m)  :
     banned=get_gban_list()
     if len(get_gban_list())==0:
-        return await m.reply_text("No users are gbanned")
-    text="Gbanned Users:\n"
+        return await m.reply_text("暂无被全局封禁的用户")
+    text="全局封禁用户列表：\n"
     for user in banned :
         text+=f"• {user['user_id']} - {user['gban_reason']}\n"
     if len(text) > 4096:
@@ -82,5 +82,5 @@ async def get_gban_listss(_,m)  :
     
          
 def __stats__():
-    return f"• {len(get_gban_list())} ɢʙᴀɴɴᴇᴅ ᴜsᴇʀs."
-__mod_name__ = "Gʙᴀɴ​"
+    return f"• {len(get_gban_list())} 名被全局封禁的用户。"
+__mod_name__ = "全局封禁"

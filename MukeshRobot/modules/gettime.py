@@ -43,14 +43,14 @@ def generate_time(to_find: str, findtype: List[str]) -> str:
 
     try:
         result = (
-            f"<b>Country:</b> <code>{country_name}</code>\n"
-            f"<b>Zone Name:</b> <code>{country_zone}</code>\n"
-            f"<b>Country Code:</b> <code>{country_code}</code>\n"
-            f"<b>Daylight saving:</b> <code>{daylight_saving}</code>\n"
-            f"<b>Day:</b> <code>{current_day}</code>\n"
-            f"<b>Current Time:</b> <code>{current_time}</code>\n"
-            f"<b>Current Date:</b> <code>{current_date}</code>\n"
-            '<b>Timezones:</b> <a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones">List here</a>'
+            f"<b>国家：</b> <code>{country_name}</code>\n"
+            f"<b>时区名称：</b> <code>{country_zone}</code>\n"
+            f"<b>国家代码：</b> <code>{country_code}</code>\n"
+            f"<b>夏令时：</b> <code>{daylight_saving}</code>\n"
+            f"<b>星期：</b> <code>{current_day}</code>\n"
+            f"<b>当前时间：</b> <code>{current_time}</code>\n"
+            f"<b>当前日期：</b> <code>{current_date}</code>\n"
+            '<b>时区列表：</b> <a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones">点击查看</a>'
         )
     except:
         result = None
@@ -64,10 +64,10 @@ def gettime(update: Update, context: CallbackContext):
     try:
         query = message.text.strip().split(" ", 1)[1]
     except:
-        message.reply_text("Provide a country name/abbreviation/timezone to find.")
+        message.reply_text("请提供国家名称、缩写或时区名称。")
         return
     send_message = message.reply_text(
-        f"Finding timezone info for <b>{query}</b>", parse_mode=ParseMode.HTML
+        f"正在查询 <b>{query}</b> 的时区信息……", parse_mode=ParseMode.HTML
     )
 
     query_timezone = query.lower()
@@ -78,8 +78,8 @@ def gettime(update: Update, context: CallbackContext):
 
     if not result:
         send_message.edit_text(
-            f"Timezone info not available for <b>{query}</b>\n"
-            '<b>All Timezones:</b> <a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones">List here</a>',
+            f"未找到 <b>{query}</b> 的时区信息\n"
+            '<b>所有时区：</b> <a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones">点击查看</a>',
             parse_mode=ParseMode.HTML,
             disable_web_page_preview=True,
         )
@@ -91,18 +91,18 @@ def gettime(update: Update, context: CallbackContext):
 
 
 __help__ = """
- ❍ /time <ǫᴜᴇʀʏ>*:* ɢɪᴠᴇs ɪɴғᴏʀᴍᴀᴛɪᴏɴ ᴀʙᴏᴜᴛ ᴀ ᴛɪᴍᴇᴢᴏɴᴇ.
-*ᴀᴠᴀɪʟᴀʙʟᴇ ǫᴜᴇʀɪᴇs:* ᴄᴏᴜɴᴛʀʏ ᴄᴏᴅᴇ/ᴄᴏᴜɴᴛʀʏ ɴᴀᴍᴇ/ᴛɪᴍᴇᴢᴏɴᴇ ɴᴀᴍᴇ
+ ❍ /time <查询内容>*:* 获取某个时区的详细信息。
+*可用查询方式：* 国家代码/国家名称/时区名称
 
- ❍ ⏰ [ᴛɪᴍᴇᴢᴏɴᴇs ʟɪsᴛ](ʜᴛᴛᴘs://ᴇɴ.ᴡɪᴋɪᴘᴇᴅɪᴀ.ᴏʀɢ/ᴡɪᴋɪ/ʟɪsᴛ_ᴏғ_ᴛᴢ_ᴅᴀᴛᴀʙᴀsᴇ_ᴛɪᴍᴇ_ᴢᴏɴᴇs)
+ ❍ ⏰ [时区列表](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
 
-💡 ᴇx:- /time ɪɴ *:* ɪᴛ ᴡɪʟʟ sʜᴏᴡs ɪɴᴅɪᴀɴ ᴄᴜʀʀᴇɴᴛ ᴛɪᴍᴇ ᴀɴᴅ ᴅᴀᴛᴇ..
+💡 示例：/time CN *:* 将显示中国的当前时间和日期。
 """
 
 TIME_HANDLER = DisableAbleCommandHandler("time", gettime, run_async=True)
 
 dispatcher.add_handler(TIME_HANDLER)
 
-__mod_name__ = "Tɪᴍᴇ"
+__mod_name__ = "时间查询"
 __command_list__ = ["time"]
 __handlers__ = [TIME_HANDLER]

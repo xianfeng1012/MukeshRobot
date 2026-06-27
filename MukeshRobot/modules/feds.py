@@ -75,13 +75,13 @@ def new_fed(update: Update, context: CallbackContext):
     message = update.effective_message
     if chat.type != "private":
         update.effective_message.reply_text(
-            "Federations can only be created by privately messaging me.",
+            "联邦只能通过私信我来创建。",
         )
         return
     if len(message.text) == 1:
         send_message(
             update.effective_message,
-            "Please write the name of the federation!",
+            "请输入联邦的名称！",
         )
         return
     fednam = message.text.split(None, 1)[1]
@@ -97,29 +97,29 @@ def new_fed(update: Update, context: CallbackContext):
         x = sql.new_fed(user.id, fed_name, fed_id)
         if not x:
             update.effective_message.reply_text(
-                f"Can't federate! Please contact @{SUPPORT_CHAT} if the problem persist.",
+                f"创建联邦失败！如果问题持续，请联系 @{SUPPORT_CHAT}。",
             )
             return
 
         update.effective_message.reply_text(
-            "*You have succeeded in creating a new federation!*"
-            "\nName: `{}`"
+            "*您已成功创建新联邦！*"
+            "\n名称: `{}`"
             "\nID: `{}`"
-            "\n\nUse the command below to join the federation:"
+            "\n\n使用以下命令加入联邦："
             "\n`/joinfed {}`".format(fed_name, fed_id, fed_id),
             parse_mode=ParseMode.MARKDOWN,
         )
         try:
             bot.send_message(
                 EVENT_LOGS,
-                "New Federation: <b>{}</b>\nID: <pre>{}</pre>".format(fed_name, fed_id),
+                "新联邦: <b>{}</b>\nID: <pre>{}</pre>".format(fed_name, fed_id),
                 parse_mode=ParseMode.HTML,
             )
         except:
             LOGGER.warning("Cannot send a message to EVENT_LOGS")
     else:
         update.effective_message.reply_text(
-            "Please write down the name of the federation",
+            "请输入联邦的名称",
         )
 
 
@@ -129,41 +129,41 @@ def del_fed(update: Update, context: CallbackContext):
     user = update.effective_user
     if chat.type != "private":
         update.effective_message.reply_text(
-            "Federations can only be deleted by privately messaging me.",
+            "联邦只能通过私信我来删除。",
         )
         return
     if args:
         is_fed_id = args[0]
         getinfo = sql.get_fed_info(is_fed_id)
         if getinfo is False:
-            update.effective_message.reply_text("This federation does not exist.")
+            update.effective_message.reply_text("该联邦不存在。")
             return
         if int(getinfo["owner"]) == int(user.id) or int(user.id) == OWNER_ID:
             fed_id = is_fed_id
         else:
-            update.effective_message.reply_text("Only federation owners can do this!")
+            update.effective_message.reply_text("只有联邦创建者才能执行此操作！")
             return
     else:
-        update.effective_message.reply_text("What should I delete?")
+        update.effective_message.reply_text("请告诉我要删除什么？")
         return
 
     if is_user_fed_owner(fed_id, user.id) is False:
-        update.effective_message.reply_text("Only federation owners can do this!")
+        update.effective_message.reply_text("只有联邦创建者才能执行此操作！")
         return
 
     update.effective_message.reply_text(
-        "You sure you want to delete your federation? This cannot be reverted, you will lose your entire ban list, and '{}' will be permanently lost.".format(
+        "您确定要删除您的联邦吗？此操作无法撤销，您将失去所有封禁列表，并且 '{}' 将被永久删除。".format(
             getinfo["fname"],
         ),
         reply_markup=InlineKeyboardMarkup(
             [
                 [
                     InlineKeyboardButton(
-                        text="⚠️ Delete Federation ⚠️",
+                        text="⚠️ 删除联邦 ⚠️",
                         callback_data="rmfed_{}".format(fed_id),
                     ),
                 ],
-                [InlineKeyboardButton(text="Cancel", callback_data="rmfed_cancel")],
+                [InlineKeyboardButton(text="取消", callback_data="rmfed_cancel")],
             ],
         ),
     )
@@ -175,19 +175,19 @@ def rename_fed(update, context):
     args = msg.text.split(None, 2)
 
     if len(args) < 3:
-        return msg.reply_text("usage: /renamefed <fed_id> <newname>")
+        return msg.reply_text("用法: /renamefed <联邦ID> <新名称>")
 
     fed_id, newname = args[1], args[2]
     verify_fed = sql.get_fed_info(fed_id)
 
     if not verify_fed:
-        return msg.reply_text("This fed not exist in my database!")
+        return msg.reply_text("该联邦不在我的数据库中！")
 
     if is_user_fed_owner(fed_id, user.id):
         sql.rename_fed(fed_id, user.id, newname)
-        msg.reply_text(f"Successfully renamed your fed name to {newname}!")
+        msg.reply_text(f"已成功将联邦名称重命名为 {newname}！")
     else:
-        msg.reply_text("Only federation owner can do this!")
+        msg.reply_text("只有联邦创建者才能执行此操作！")
 
 
 def fed_chat(update: Update, context: CallbackContext):
@@ -199,19 +199,19 @@ def fed_chat(update: Update, context: CallbackContext):
     user_id = update.effective_message.from_user.id
     if not is_user_admin(update.effective_chat, user_id):
         update.effective_message.reply_text(
-            "You must be an admin to execute this command",
+            "您必须是管理员才能执行此命令",
         )
         return
 
     if not fed_id:
-        update.effective_message.reply_text("This group is not in any federation!")
+        update.effective_message.reply_text("该群组不属于任何联邦！")
         return
 
     update.effective_user
     chat = update.effective_chat
     info = sql.get_fed_info(fed_id)
 
-    text = "This group is part of the following federation:"
+    text = "该群组属于以下联邦："
     text += "\n{} (ID: <code>{}</code>)".format(info["fname"], fed_id)
 
     update.effective_message.reply_text(text, parse_mode=ParseMode.HTML)
@@ -225,7 +225,7 @@ def join_fed(update: Update, context: CallbackContext):
     if chat.type == "private":
         send_message(
             update.effective_message,
-            "This command is specific to the group, not to our pm!",
+            "此命令仅适用于群组，不适用于私聊！",
         )
         return
 
@@ -243,23 +243,23 @@ def join_fed(update: Update, context: CallbackContext):
                     pass
                 else:
                     update.effective_message.reply_text(
-                        "Only group creators can use this command!",
+                        "只有群主才能使用此命令！",
                     )
                     return
     if fed_id:
-        message.reply_text("You cannot join two federations from one chat")
+        message.reply_text("一个群组不能同时加入两个联邦")
         return
 
     if len(args) >= 1:
         getfed = sql.search_fed_by_id(args[0])
         if getfed is False:
-            message.reply_text("Please enter a valid federation ID")
+            message.reply_text("请输入有效的联邦ID")
             return
 
         x = sql.chat_join_fed(args[0], chat.title, chat.id)
         if not x:
             message.reply_text(
-                f"Failed to join federation! Please contact @{SUPPORT_CHAT} should this problem persist!",
+                f"加入联邦失败！如果问题持续，请联系 @{SUPPORT_CHAT}！",
             )
             return
 
@@ -268,7 +268,7 @@ def join_fed(update: Update, context: CallbackContext):
             if ast.literal_eval(get_fedlog):
                 bot.send_message(
                     get_fedlog,
-                    "Chat *{}* has joined the federation *{}*".format(
+                    "群组 *{}* 已加入联邦 *{}*".format(
                         chat.title,
                         getfed["fname"],
                     ),
@@ -276,7 +276,7 @@ def join_fed(update: Update, context: CallbackContext):
                 )
 
         message.reply_text(
-            "This group has joined the federation: {}!".format(getfed["fname"]),
+            "该群组已加入联邦：{}！".format(getfed["fname"]),
         )
 
 
@@ -288,7 +288,7 @@ def leave_fed(update: Update, context: CallbackContext):
     if chat.type == "private":
         send_message(
             update.effective_message,
-            "This command is specific to the group, not to our PM!",
+            "此命令仅适用于群组，不适用于私聊！",
         )
         return
 
@@ -304,7 +304,7 @@ def leave_fed(update: Update, context: CallbackContext):
                 if ast.literal_eval(get_fedlog):
                     bot.send_message(
                         get_fedlog,
-                        "Chat *{}* has left the federation *{}*".format(
+                        "群组 *{}* 已退出联邦 *{}*".format(
                             chat.title,
                             fed_info["fname"],
                         ),
@@ -312,14 +312,14 @@ def leave_fed(update: Update, context: CallbackContext):
                     )
             send_message(
                 update.effective_message,
-                "This group has left the federation {}!".format(fed_info["fname"]),
+                "该群组已退出联邦 {}！".format(fed_info["fname"]),
             )
         else:
             update.effective_message.reply_text(
-                "How can you leave a federation that you never joined?!",
+                "您怎么能退出一个从未加入过的联邦呢？！",
             )
     else:
-        update.effective_message.reply_text("Only group creators can use this command!")
+        update.effective_message.reply_text("只有群主才能使用此命令！")
 
 
 def user_join_fed(update: Update, context: CallbackContext):
@@ -331,7 +331,7 @@ def user_join_fed(update: Update, context: CallbackContext):
     if chat.type == "private":
         send_message(
             update.effective_message,
-            "This command is specific to the group, not to our pm!",
+            "此命令仅适用于群组，不适用于私聊！",
         )
         return
 
@@ -352,7 +352,7 @@ def user_join_fed(update: Update, context: CallbackContext):
                 and not msg.parse_entities([MessageEntity.TEXT_MENTION])
             )
         ):
-            msg.reply_text("I cannot extract user from this message")
+            msg.reply_text("无法从此消息中提取用户")
             return
         else:
             LOGGER.warning("error")
@@ -363,26 +363,26 @@ def user_join_fed(update: Update, context: CallbackContext):
         get_owner = bot.get_chat(get_owner).id
         if user_id == get_owner:
             update.effective_message.reply_text(
-                "You do know that the user is the federation owner, right? RIGHT?",
+                "您知道该用户是联邦创建者，对吧？对吧？",
             )
             return
         if getuser:
             update.effective_message.reply_text(
-                "I cannot promote users who are already federation admins! Can remove them if you want!",
+                "无法晋升已经是联邦管理员的用户！如果需要可以移除他们！",
             )
             return
         if user_id == bot.id:
             update.effective_message.reply_text(
-                "I already am a federation admin in all federations!",
+                "我已经是所有联邦的管理员了！",
             )
             return
         res = sql.user_join_fed(fed_id, user_id)
         if res:
-            update.effective_message.reply_text("Successfully Promoted!")
+            update.effective_message.reply_text("晋升成功！")
         else:
-            update.effective_message.reply_text("Failed to promote!")
+            update.effective_message.reply_text("晋升失败！")
     else:
-        update.effective_message.reply_text("Only federation owners can do this!")
+        update.effective_message.reply_text("只有联邦创建者才能执行此操作！")
 
 
 def user_demote_fed(update: Update, context: CallbackContext):
@@ -393,7 +393,7 @@ def user_demote_fed(update: Update, context: CallbackContext):
     if chat.type == "private":
         send_message(
             update.effective_message,
-            "This command is specific to the group, not to our pm!",
+            "此命令仅适用于群组，不适用于私聊！",
         )
         return
 
@@ -417,30 +417,30 @@ def user_demote_fed(update: Update, context: CallbackContext):
                 and not msg.parse_entities([MessageEntity.TEXT_MENTION])
             )
         ):
-            msg.reply_text("I cannot extract user from this message")
+            msg.reply_text("无法从此消息中提取用户")
             return
         else:
             LOGGER.warning("error")
 
         if user_id == bot.id:
             update.effective_message.reply_text(
-                "The thing you are trying to demote me from will fail to work without me! Just saying.",
+                "您尝试降级我，但没有我这个功能将无法正常运行！仅供参考。",
             )
             return
 
         if sql.search_user_in_fed(fed_id, user_id) is False:
             update.effective_message.reply_text(
-                "I cannot demote people who are not federation admins!",
+                "无法降级不是联邦管理员的用户！",
             )
             return
 
         res = sql.user_demote_fed(fed_id, user_id)
         if res is True:
-            update.effective_message.reply_text("Demoted from a Fed Admin!")
+            update.effective_message.reply_text("已从联邦管理员降级！")
         else:
-            update.effective_message.reply_text("Demotion failed!")
+            update.effective_message.reply_text("降级失败！")
     else:
-        update.effective_message.reply_text("Only federation owners can do this!")
+        update.effective_message.reply_text("只有联邦创建者才能执行此操作！")
         return
 
 
@@ -455,20 +455,20 @@ def fed_info(update: Update, context: CallbackContext):
         if chat.type == "private":
             send_message(
                 update.effective_message,
-                "You need to provide me a fedid to check fedinfo in my pm.",
+                "请提供联邦ID以在私聊中查看联邦信息。",
             )
             return
         fed_id = sql.get_fed_id(chat.id)
         if not fed_id:
             send_message(
                 update.effective_message,
-                "This group is not in any federation!",
+                "该群组不属于任何联邦！",
             )
             return
         info = sql.get_fed_info(fed_id)
 
     if is_user_fed_admin(fed_id, user.id) is False:
-        update.effective_message.reply_text("Only a federation admin can do this!")
+        update.effective_message.reply_text("只有联邦管理员才能执行此操作！")
         return
 
     owner = bot.get_chat(info["owner"])
@@ -483,15 +483,15 @@ def fed_info(update: Update, context: CallbackContext):
     chat = update.effective_chat
     info = sql.get_fed_info(fed_id)
 
-    text = "<b>ℹ️ Federation Information:</b>"
-    text += "\nFedID: <code>{}</code>".format(fed_id)
-    text += "\nName: {}".format(info["fname"])
-    text += "\nCreator: {}".format(mention_html(owner.id, owner_name))
-    text += "\nAll Admins: <code>{}</code>".format(TotalAdminFed)
+    text = "<b>ℹ️ 联邦信息：</b>"
+    text += "\n联邦ID: <code>{}</code>".format(fed_id)
+    text += "\n名称: {}".format(info["fname"])
+    text += "\n创建者: {}".format(mention_html(owner.id, owner_name))
+    text += "\n所有管理员: <code>{}</code>".format(TotalAdminFed)
     getfban = sql.get_all_fban_users(fed_id)
-    text += "\nTotal banned users: <code>{}</code>".format(len(getfban))
+    text += "\n封禁用户总数: <code>{}</code>".format(len(getfban))
     getfchat = sql.all_fed_chats(fed_id)
-    text += "\nNumber of groups in this federation: <code>{}</code>".format(
+    text += "\n联邦内群组数量: <code>{}</code>".format(
         len(getfchat),
     )
 
@@ -506,26 +506,26 @@ def fed_admin(update: Update, context: CallbackContext):
     if chat.type == "private":
         send_message(
             update.effective_message,
-            "This command is specific to the group, not to our pm!",
+            "此命令仅适用于群组，不适用于私聊！",
         )
         return
 
     fed_id = sql.get_fed_id(chat.id)
 
     if not fed_id:
-        update.effective_message.reply_text("This group is not in any federation!")
+        update.effective_message.reply_text("该群组不属于任何联邦！")
         return
 
     if is_user_fed_admin(fed_id, user.id) is False:
-        update.effective_message.reply_text("Only federation admins can do this!")
+        update.effective_message.reply_text("只有联邦管理员才能执行此操作！")
         return
 
     user = update.effective_user
     chat = update.effective_chat
     info = sql.get_fed_info(fed_id)
 
-    text = "<b>Federation Admin {}:</b>\n\n".format(info["fname"])
-    text += "👑 Owner:\n"
+    text = "<b>联邦管理员 {}：</b>\n\n".format(info["fname"])
+    text += "👑 创建者：\n"
     owner = bot.get_chat(info["owner"])
     try:
         owner_name = owner.first_name + " " + owner.last_name
@@ -535,9 +535,9 @@ def fed_admin(update: Update, context: CallbackContext):
 
     members = sql.all_fed_members(fed_id)
     if len(members) == 0:
-        text += "\n🔱 There are no admins in this federation"
+        text += "\n🔱 该联邦暂无管理员"
     else:
-        text += "\n🔱 Admin:\n"
+        text += "\n🔱 管理员：\n"
         for x in members:
             user = bot.get_chat(x)
             text += " • {}\n".format(mention_html(user.id, user.first_name))
@@ -553,7 +553,7 @@ def fed_ban(update: Update, context: CallbackContext):
     if chat.type == "private":
         send_message(
             update.effective_message,
-            "This command is specific to the group, not to our pm!",
+            "此命令仅适用于群组，不适用于私聊！",
         )
         return
 
@@ -561,7 +561,7 @@ def fed_ban(update: Update, context: CallbackContext):
 
     if not fed_id:
         update.effective_message.reply_text(
-            "This group is not a part of any federation!",
+            "该群组不属于任何联邦！",
         )
         return
 
@@ -569,7 +569,7 @@ def fed_ban(update: Update, context: CallbackContext):
     getfednotif = sql.user_feds_report(info["owner"])
 
     if is_user_fed_admin(fed_id, user.id) is False:
-        update.effective_message.reply_text("Only federation admins can do this!")
+        update.effective_message.reply_text("只有联邦管理员才能执行此操作！")
         return
 
     message = update.effective_message
@@ -579,41 +579,41 @@ def fed_ban(update: Update, context: CallbackContext):
     fban, fbanreason, fbantime = sql.get_fban_user(fed_id, user_id)
 
     if not user_id:
-        message.reply_text("You don't seem to be referring to a user")
+        message.reply_text("您似乎没有指定用户")
         return
 
     if user_id == bot.id:
         message.reply_text(
-            "What is funnier than kicking the group creator? Self sacrifice.",
+            "比踢出群组创建者更有趣的是什么？自我牺牲。",
         )
         return
 
     if is_user_fed_owner(fed_id, user_id) is True:
-        message.reply_text("Why did you try the federation fban?")
+        message.reply_text("您为什么要尝试对联邦创建者进行联邦封禁？")
         return
 
     if is_user_fed_admin(fed_id, user_id) is True:
-        message.reply_text("He is a federation admin, I can't fban him.")
+        message.reply_text("他是联邦管理员，我无法封禁他。")
         return
 
     if user_id == OWNER_ID:
-        message.reply_text("Disaster level God cannot be fed banned!")
+        message.reply_text("灾难级别的神无法被联邦封禁！")
         return
 
     if int(user_id) in DRAGONS:
-        message.reply_text("Dragons cannot be fed banned!")
+        message.reply_text("龙级用户无法被联邦封禁！")
         return
 
     if int(user_id) in TIGERS:
-        message.reply_text("Tigers cannot be fed banned!")
+        message.reply_text("虎级用户无法被联邦封禁！")
         return
 
     if int(user_id) in WOLVES:
-        message.reply_text("Wolves cannot be fed banned!")
+        message.reply_text("狼级用户无法被联邦封禁！")
         return
 
     if user_id in [777000, 1087968824]:
-        message.reply_text("Fool! You can't attack Telegram's native tech!")
+        message.reply_text("傻瓜！您不能攻击 Telegram 的原生技术！")
         return
 
     try:
@@ -628,7 +628,7 @@ def fed_ban(update: Update, context: CallbackContext):
             send_message(update.effective_message, excp.message)
             return
         if len(str(user_id)) != 9:
-            send_message(update.effective_message, "That's so not a user!")
+            send_message(update.effective_message, "这不是一个有效的用户！")
             return
         isvalid = False
         fban_user_id = int(user_id)
@@ -637,7 +637,7 @@ def fed_ban(update: Update, context: CallbackContext):
         fban_user_uname = None
 
     if isvalid and user_chat.type != "private":
-        send_message(update.effective_message, "That's so not a user!")
+        send_message(update.effective_message, "这不是一个有效的用户！")
         return
 
     if isvalid:
@@ -651,7 +651,7 @@ def fed_ban(update: Update, context: CallbackContext):
 
         temp = sql.un_fban_user(fed_id, fban_user_id)
         if not temp:
-            message.reply_text("Failed to update the reason for fedban!")
+            message.reply_text("更新联邦封禁原因失败！")
             return
         x = sql.fban_user(
             fed_id,
@@ -664,7 +664,7 @@ def fed_ban(update: Update, context: CallbackContext):
         )
         if not x:
             message.reply_text(
-                f"Failed to ban from the federation! If this problem continues, contact @{SUPPORT_CHAT}.",
+                f"联邦封禁失败！如果问题持续，请联系 @{SUPPORT_CHAT}。",
             )
             return
 
@@ -672,12 +672,12 @@ def fed_ban(update: Update, context: CallbackContext):
         # Will send to current chat
         bot.send_message(
             chat.id,
-            "<b>FedBan reason updated</b>"
-            "\n<b>Federation:</b> {}"
-            "\n<b>Federation Admin:</b> {}"
-            "\n<b>User:</b> {}"
-            "\n<b>User ID:</b> <code>{}</code>"
-            "\n<b>Reason:</b> {}".format(
+            "<b>联邦封禁原因已更新</b>"
+            "\n<b>联邦：</b> {}"
+            "\n<b>联邦管理员：</b> {}"
+            "\n<b>用户：</b> {}"
+            "\n<b>用户ID：</b> <code>{}</code>"
+            "\n<b>原因：</b> {}".format(
                 fed_name,
                 mention_html(user.id, user.first_name),
                 user_target,
@@ -690,12 +690,12 @@ def fed_ban(update: Update, context: CallbackContext):
         if getfednotif:
             bot.send_message(
                 info["owner"],
-                "<b>FedBan reason updated</b>"
-                "\n<b>Federation:</b> {}"
-                "\n<b>Federation Admin:</b> {}"
-                "\n<b>User:</b> {}"
-                "\n<b>User ID:</b> <code>{}</code>"
-                "\n<b>Reason:</b> {}".format(
+                "<b>联邦封禁原因已更新</b>"
+                "\n<b>联邦：</b> {}"
+                "\n<b>联邦管理员：</b> {}"
+                "\n<b>用户：</b> {}"
+                "\n<b>用户ID：</b> <code>{}</code>"
+                "\n<b>原因：</b> {}".format(
                     fed_name,
                     mention_html(user.id, user.first_name),
                     user_target,
@@ -710,12 +710,12 @@ def fed_ban(update: Update, context: CallbackContext):
             if int(get_fedlog) != int(chat.id):
                 bot.send_message(
                     get_fedlog,
-                    "<b>FedBan reason updated</b>"
-                    "\n<b>Federation:</b> {}"
-                    "\n<b>Federation Admin:</b> {}"
-                    "\n<b>User:</b> {}"
-                    "\n<b>User ID:</b> <code>{}</code>"
-                    "\n<b>Reason:</b> {}".format(
+                    "<b>联邦封禁原因已更新</b>"
+                    "\n<b>联邦：</b> {}"
+                    "\n<b>联邦管理员：</b> {}"
+                    "\n<b>用户：</b> {}"
+                    "\n<b>用户ID：</b> <code>{}</code>"
+                    "\n<b>原因：</b> {}".format(
                         fed_name,
                         mention_html(user.id, user.first_name),
                         user_target,
@@ -819,7 +819,7 @@ def fed_ban(update: Update, context: CallbackContext):
     )
     if not x:
         message.reply_text(
-            f"Failed to ban from the federation! If this problem continues, contact @{SUPPORT_CHAT}.",
+            f"联邦封禁失败！如果问题持续，请联系 @{SUPPORT_CHAT}。",
         )
         return
 
@@ -827,12 +827,12 @@ def fed_ban(update: Update, context: CallbackContext):
     # Will send to current chat
     bot.send_message(
         chat.id,
-        "<b>New FedBan</b>"
-        "\n<b>Federation:</b> {}"
-        "\n<b>Federation Admin:</b> {}"
-        "\n<b>User:</b> {}"
-        "\n<b>User ID:</b> <code>{}</code>"
-        "\n<b>Reason:</b> {}".format(
+        "<b>新联邦封禁</b>"
+        "\n<b>联邦：</b> {}"
+        "\n<b>联邦管理员：</b> {}"
+        "\n<b>用户：</b> {}"
+        "\n<b>用户ID：</b> <code>{}</code>"
+        "\n<b>原因：</b> {}".format(
             fed_name,
             mention_html(user.id, user.first_name),
             user_target,
@@ -845,12 +845,12 @@ def fed_ban(update: Update, context: CallbackContext):
     if getfednotif:
         bot.send_message(
             info["owner"],
-            "<b>New FedBan</b>"
-            "\n<b>Federation:</b> {}"
-            "\n<b>Federation Admin:</b> {}"
-            "\n<b>User:</b> {}"
-            "\n<b>User ID:</b> <code>{}</code>"
-            "\n<b>Reason:</b> {}".format(
+            "<b>新联邦封禁</b>"
+            "\n<b>联邦：</b> {}"
+            "\n<b>联邦管理员：</b> {}"
+            "\n<b>用户：</b> {}"
+            "\n<b>用户ID：</b> <code>{}</code>"
+            "\n<b>原因：</b> {}".format(
                 fed_name,
                 mention_html(user.id, user.first_name),
                 user_target,
@@ -865,12 +865,12 @@ def fed_ban(update: Update, context: CallbackContext):
         if int(get_fedlog) != int(chat.id):
             bot.send_message(
                 get_fedlog,
-                "<b>New FedBan</b>"
-                "\n<b>Federation:</b> {}"
-                "\n<b>Federation Admin:</b> {}"
-                "\n<b>User:</b> {}"
-                "\n<b>User ID:</b> <code>{}</code>"
-                "\n<b>Reason:</b> {}".format(
+                "<b>新联邦封禁</b>"
+                "\n<b>联邦：</b> {}"
+                "\n<b>联邦管理员：</b> {}"
+                "\n<b>用户：</b> {}"
+                "\n<b>用户ID：</b> <code>{}</code>"
+                "\n<b>原因：</b> {}".format(
                     fed_name,
                     mention_html(user.id, user.first_name),
                     user_target,
@@ -966,7 +966,7 @@ def unfban(update: Update, context: CallbackContext):
     if chat.type == "private":
         send_message(
             update.effective_message,
-            "This command is specific to the group, not to our pm!",
+            "此命令仅适用于群组，不适用于私聊！",
         )
         return
 
@@ -974,7 +974,7 @@ def unfban(update: Update, context: CallbackContext):
 
     if not fed_id:
         update.effective_message.reply_text(
-            "This group is not a part of any federation!",
+            "该群组不属于任何联邦！",
         )
         return
 
@@ -982,12 +982,12 @@ def unfban(update: Update, context: CallbackContext):
     getfednotif = sql.user_feds_report(info["owner"])
 
     if is_user_fed_admin(fed_id, user.id) is False:
-        update.effective_message.reply_text("Only federation admins can do this!")
+        update.effective_message.reply_text("只有联邦管理员才能执行此操作！")
         return
 
     user_id = extract_user_fban(message, args)
     if not user_id:
-        message.reply_text("You do not seem to be referring to a user.")
+        message.reply_text("您似乎没有指定用户。")
         return
 
     try:
@@ -1002,14 +1002,14 @@ def unfban(update: Update, context: CallbackContext):
             send_message(update.effective_message, excp.message)
             return
         if len(str(user_id)) != 9:
-            send_message(update.effective_message, "That's so not a user!")
+            send_message(update.effective_message, "这不是一个有效的用户！")
             return
         isvalid = False
         fban_user_id = int(user_id)
         fban_user_name = "user({})".format(user_id)
 
     if isvalid and user_chat.type != "private":
-        message.reply_text("That's so not a user!")
+        message.reply_text("这不是一个有效的用户！")
         return
 
     if isvalid:
@@ -1019,7 +1019,7 @@ def unfban(update: Update, context: CallbackContext):
 
     fban, fbanreason, fbantime = sql.get_fban_user(fed_id, fban_user_id)
     if fban is False:
-        message.reply_text("This user is not fbanned!")
+        message.reply_text("该用户未被联邦封禁！")
         return
 
     update.effective_user
@@ -1030,11 +1030,11 @@ def unfban(update: Update, context: CallbackContext):
     # Will send to current chat
     bot.send_message(
         chat.id,
-        "<b>Un-FedBan</b>"
-        "\n<b>Federation:</b> {}"
-        "\n<b>Federation Admin:</b> {}"
-        "\n<b>User:</b> {}"
-        "\n<b>User ID:</b> <code>{}</code>".format(
+        "<b>解除联邦封禁</b>"
+        "\n<b>联邦：</b> {}"
+        "\n<b>联邦管理员：</b> {}"
+        "\n<b>用户：</b> {}"
+        "\n<b>用户ID：</b> <code>{}</code>".format(
             info["fname"],
             mention_html(user.id, user.first_name),
             user_target,
@@ -1046,11 +1046,11 @@ def unfban(update: Update, context: CallbackContext):
     if getfednotif:
         bot.send_message(
             info["owner"],
-            "<b>Un-FedBan</b>"
-            "\n<b>Federation:</b> {}"
-            "\n<b>Federation Admin:</b> {}"
-            "\n<b>User:</b> {}"
-            "\n<b>User ID:</b> <code>{}</code>".format(
+            "<b>解除联邦封禁</b>"
+            "\n<b>联邦：</b> {}"
+            "\n<b>联邦管理员：</b> {}"
+            "\n<b>用户：</b> {}"
+            "\n<b>用户ID：</b> <code>{}</code>".format(
                 info["fname"],
                 mention_html(user.id, user.first_name),
                 user_target,
@@ -1064,11 +1064,11 @@ def unfban(update: Update, context: CallbackContext):
         if int(get_fedlog) != int(chat.id):
             bot.send_message(
                 get_fedlog,
-                "<b>Un-FedBan</b>"
-                "\n<b>Federation:</b> {}"
-                "\n<b>Federation Admin:</b> {}"
-                "\n<b>User:</b> {}"
-                "\n<b>User ID:</b> <code>{}</code>".format(
+                "<b>解除联邦封禁</b>"
+                "\n<b>联邦：</b> {}"
+                "\n<b>联邦管理员：</b> {}"
+                "\n<b>用户：</b> {}"
+                "\n<b>用户ID：</b> <code>{}</code>".format(
                     info["fname"],
                     mention_html(user.id, user.first_name),
                     user_target,
@@ -1108,7 +1108,7 @@ def unfban(update: Update, context: CallbackContext):
         if not x:
             send_message(
                 update.effective_message,
-                "Un-fban failed, this user may already be un-fedbanned!",
+                "解封失败，该用户可能已经被解封了！",
             )
             return
     except:
@@ -1151,12 +1151,12 @@ def unfban(update: Update, context: CallbackContext):
     if unfbanned_in_chats == 0:
         send_message(
             update.effective_message,
-            "This person has been un-fbanned in 0 chats.",
+            "该用户已在 0 个群组中解除联邦封禁。",
         )
     if unfbanned_in_chats > 0:
         send_message(
             update.effective_message,
-            "This person has been un-fbanned in {} chats.".format(unfbanned_in_chats),
+            "该用户已在 {} 个群组中解除联邦封禁。".format(unfbanned_in_chats),
         )
     # Also do not spamming all fed admins
     """
@@ -1185,18 +1185,18 @@ def set_frules(update: Update, context: CallbackContext):
     if chat.type == "private":
         send_message(
             update.effective_message,
-            "This command is specific to the group, not to our pm!",
+            "此命令仅适用于群组，不适用于私聊！",
         )
         return
 
     fed_id = sql.get_fed_id(chat.id)
 
     if not fed_id:
-        update.effective_message.reply_text("This group is not in any federation!")
+        update.effective_message.reply_text("该群组不属于任何联邦！")
         return
 
     if is_user_fed_admin(fed_id, user.id) is False:
-        update.effective_message.reply_text("Only fed admins can do this!")
+        update.effective_message.reply_text("只有联邦管理员才能执行此操作！")
         return
 
     if len(args) >= 1:
@@ -1214,7 +1214,7 @@ def set_frules(update: Update, context: CallbackContext):
         x = sql.set_frules(fed_id, markdown_rules)
         if not x:
             update.effective_message.reply_text(
-                f"Whoa! There was an error while setting federation rules! If you wondered why please ask it in @{SUPPORT_CHAT}!",
+                f"哇！设置联邦规则时出错！如有疑问请在 @{SUPPORT_CHAT} 中询问！",
             )
             return
 
@@ -1225,15 +1225,15 @@ def set_frules(update: Update, context: CallbackContext):
             if ast.literal_eval(get_fedlog):
                 bot.send_message(
                     get_fedlog,
-                    "*{}* has updated federation rules for fed *{}*".format(
+                    "*{}* 已更新联邦 *{}* 的规则".format(
                         user.first_name,
                         getfed["fname"],
                     ),
                     parse_mode="markdown",
                 )
-        update.effective_message.reply_text(f"Rules have been changed to :\n{rules}!")
+        update.effective_message.reply_text(f"规则已更改为：\n{rules}！")
     else:
-        update.effective_message.reply_text("Please write rules to set this up!")
+        update.effective_message.reply_text("请输入要设置的规则！")
 
 
 def get_frules(update: Update, context: CallbackContext):
@@ -1243,17 +1243,17 @@ def get_frules(update: Update, context: CallbackContext):
     if chat.type == "private":
         send_message(
             update.effective_message,
-            "This command is specific to the group, not to our pm!",
+            "此命令仅适用于群组，不适用于私聊！",
         )
         return
 
     fed_id = sql.get_fed_id(chat.id)
     if not fed_id:
-        update.effective_message.reply_text("This group is not in any federation!")
+        update.effective_message.reply_text("该群组不属于任何联邦！")
         return
 
     rules = sql.get_frules(fed_id)
-    text = "*Rules in this fed:*\n"
+    text = "*本联邦规则：*\n"
     text += rules
     update.effective_message.reply_text(text, parse_mode=ParseMode.MARKDOWN)
 
@@ -1267,7 +1267,7 @@ def fed_broadcast(update: Update, context: CallbackContext):
     if chat.type == "private":
         send_message(
             update.effective_message,
-            "This command is specific to the group, not to our pm!",
+            "此命令仅适用于群组，不适用于私聊！",
         )
         return
 
@@ -1276,7 +1276,7 @@ def fed_broadcast(update: Update, context: CallbackContext):
         fed_id = sql.get_fed_id(chat.id)
         fedinfo = sql.get_fed_info(fed_id)
         if is_user_fed_owner(fed_id, user.id) is False:
-            update.effective_message.reply_text("Only federation owners can do this!")
+            update.effective_message.reply_text("只有联邦创建者才能执行此操作！")
             return
         # Parsing md
         raw_text = msg.text
@@ -1293,7 +1293,7 @@ def fed_broadcast(update: Update, context: CallbackContext):
         chat_list = sql.all_fed_chats(fed_id)
         failed = 0
         for chat in chat_list:
-            title = "*New broadcast from Fed {}*\n".format(fedinfo["fname"])
+            title = "*来自联邦 {} 的新广播*\n".format(fedinfo["fname"])
             try:
                 bot.sendMessage(chat, title + text, parse_mode="markdown")
             except TelegramError:
@@ -1312,9 +1312,9 @@ def fed_broadcast(update: Update, context: CallbackContext):
                 failed += 1
                 LOGGER.warning("Couldn't send broadcast to {}".format(str(chat)))
 
-        send_text = "The federation broadcast is complete"
+        send_text = "联邦广播已完成"
         if failed >= 1:
-            send_text += "{} the group failed to receive the message, probably because it left the Federation.".format(
+            send_text += "，{} 个群组未能收到消息，可能是因为它们已退出联邦。".format(
                 failed,
             )
         update.effective_message.reply_text(send_text)
@@ -1328,7 +1328,7 @@ def fed_ban_list(update: Update, context: CallbackContext):
     if chat.type == "private":
         send_message(
             update.effective_message,
-            "This command is specific to the group, not to our pm!",
+            "此命令仅适用于群组，不适用于私聊！",
         )
         return
 
@@ -1337,12 +1337,12 @@ def fed_ban_list(update: Update, context: CallbackContext):
 
     if not fed_id:
         update.effective_message.reply_text(
-            "This group is not a part of any federation!",
+            "该群组不属于任何联邦！",
         )
         return
 
     if is_user_fed_owner(fed_id, user.id) is False:
-        update.effective_message.reply_text("Only Federation owners can do this!")
+        update.effective_message.reply_text("只有联邦创建者才能执行此操作！")
         return
 
     user = update.effective_user
@@ -1350,7 +1350,7 @@ def fed_ban_list(update: Update, context: CallbackContext):
     getfban = sql.get_all_fban_users(fed_id)
     if len(getfban) == 0:
         update.effective_message.reply_text(
-            "The federation ban list of {} is empty".format(info["fname"]),
+            "{} 的联邦封禁列表为空".format(info["fname"]),
             parse_mode=ParseMode.HTML,
         )
         return
@@ -1367,7 +1367,7 @@ def fed_ban_list(update: Update, context: CallbackContext):
                         time.localtime(cek.get("value")),
                     )
                     update.effective_message.reply_text(
-                        "You can backup your data once every 30 minutes!\nYou can back up data again at `{}`".format(
+                        "每30分钟只能备份一次数据！\n您可以在 `{}` 后再次备份数据".format(
                             waktu,
                         ),
                         parse_mode=ParseMode.MARKDOWN,
@@ -1395,9 +1395,9 @@ def fed_ban_list(update: Update, context: CallbackContext):
                 update.effective_message.reply_document(
                     document=output,
                     filename="saitama_fbanned_users.json",
-                    caption="Total {} User are blocked by the Federation {}.".format(
-                        len(getfban),
+                    caption="联邦 {} 共封禁了 {} 名用户。".format(
                         info["fname"],
+                        len(getfban),
                     ),
                 )
             return
@@ -1412,7 +1412,7 @@ def fed_ban_list(update: Update, context: CallbackContext):
                         time.localtime(cek.get("value")),
                     )
                     update.effective_message.reply_text(
-                        "You can back up data once every 30 minutes!\nYou can back up data again at `{}`".format(
+                        "每30分钟只能备份一次数据！\n您可以在 `{}` 后再次备份数据".format(
                             waktu,
                         ),
                         parse_mode=ParseMode.MARKDOWN,
@@ -1441,21 +1441,21 @@ def fed_ban_list(update: Update, context: CallbackContext):
                 update.effective_message.reply_document(
                     document=output,
                     filename="saitama_fbanned_users.csv",
-                    caption="Total {} User are blocked by Federation {}.".format(
-                        len(getfban),
+                    caption="联邦 {} 共封禁了 {} 名用户。".format(
                         info["fname"],
+                        len(getfban),
                     ),
                 )
             return
 
-    text = "<b>{} users have been banned from the federation {}:</b>\n".format(
-        len(getfban),
+    text = "<b>联邦 {} 中已封禁 {} 名用户：</b>\n".format(
         info["fname"],
+        len(getfban),
     )
     for users in getfban:
         getuserinfo = sql.get_all_fban_users_target(fed_id, users)
         if getuserinfo is False:
-            text = "There are no users banned from the federation {}".format(
+            text = "联邦 {} 中没有被封禁的用户".format(
                 info["fname"],
             )
             break
@@ -1480,7 +1480,7 @@ def fed_ban_list(update: Update, context: CallbackContext):
                     time.localtime(cek.get("value")),
                 )
                 update.effective_message.reply_text(
-                    "You can back up data once every 30 minutes!\nYou can back up data again at `{}`".format(
+                    "每30分钟只能备份一次数据！\n您可以在 `{}` 后再次备份数据".format(
                         waktu,
                     ),
                     parse_mode=ParseMode.MARKDOWN,
@@ -1498,7 +1498,7 @@ def fed_ban_list(update: Update, context: CallbackContext):
             update.effective_message.reply_document(
                 document=output,
                 filename="fbanlist.txt",
-                caption="The following is a list of users who are currently fbanned in the Federation {}.".format(
+                caption="以下是联邦 {} 中当前被封禁的用户列表。".format(
                     info["fname"],
                 ),
             )
@@ -1513,7 +1513,7 @@ def fed_notif(update: Update, context: CallbackContext):
 
     if not fed_id:
         update.effective_message.reply_text(
-            "This group is not a part of any federation!",
+            "该群组不属于任何联邦！",
         )
         return
 
@@ -1521,19 +1521,19 @@ def fed_notif(update: Update, context: CallbackContext):
         if args[0] in ("yes", "on"):
             sql.set_feds_setting(user.id, True)
             msg.reply_text(
-                "Reporting Federation back up! Every user who is fban / unfban you will be notified via PM.",
+                "联邦通知已开启！每当有用户被联邦封禁/解封时，您将通过私信收到通知。",
             )
         elif args[0] in ("no", "off"):
             sql.set_feds_setting(user.id, False)
             msg.reply_text(
-                "Reporting Federation has stopped! Every user who is fban / unfban you will not be notified via PM.",
+                "联邦通知已关闭！每当有用户被联邦封禁/解封时，您将不会通过私信收到通知。",
             )
         else:
-            msg.reply_text("Please enter `on`/`off`", parse_mode="markdown")
+            msg.reply_text("请输入 `on`/`off`", parse_mode="markdown")
     else:
         getreport = sql.user_feds_report(user.id)
         msg.reply_text(
-            "Your current Federation report preferences: `{}`".format(getreport),
+            "您当前的联邦通知偏好设置：`{}`".format(getreport),
             parse_mode="markdown",
         )
 
@@ -1546,7 +1546,7 @@ def fed_chats(update: Update, context: CallbackContext):
     if chat.type == "private":
         send_message(
             update.effective_message,
-            "This command is specific to the group, not to our pm!",
+            "此命令仅适用于群组，不适用于私聊！",
         )
         return
 
@@ -1555,23 +1555,23 @@ def fed_chats(update: Update, context: CallbackContext):
 
     if not fed_id:
         update.effective_message.reply_text(
-            "This group is not a part of any federation!",
+            "该群组不属于任何联邦！",
         )
         return
 
     if is_user_fed_admin(fed_id, user.id) is False:
-        update.effective_message.reply_text("Only federation admins can do this!")
+        update.effective_message.reply_text("只有联邦管理员才能执行此操作！")
         return
 
     getlist = sql.all_fed_chats(fed_id)
     if len(getlist) == 0:
         update.effective_message.reply_text(
-            "No users are fbanned from the federation {}".format(info["fname"]),
+            "联邦 {} 中没有被封禁的用户".format(info["fname"]),
             parse_mode=ParseMode.HTML,
         )
         return
 
-    text = "<b>New chat joined the federation {}:</b>\n".format(info["fname"])
+    text = "<b>已加入联邦 {} 的群组：</b>\n".format(info["fname"])
     for chats in getlist:
         try:
             chat_name = dispatcher.bot.getChat(chats).title
@@ -1596,7 +1596,7 @@ def fed_chats(update: Update, context: CallbackContext):
             update.effective_message.reply_document(
                 document=output,
                 filename="fedchats.txt",
-                caption="Here is a list of all the chats that joined the federation {}.".format(
+                caption="以下是已加入联邦 {} 的所有群组列表。".format(
                     info["fname"],
                 ),
             )
@@ -1611,7 +1611,7 @@ def fed_import_bans(update: Update, context: CallbackContext):
     if chat.type == "private":
         send_message(
             update.effective_message,
-            "This command is specific to the group, not to our pm!",
+            "此命令仅适用于群组，不适用于私聊！",
         )
         return
 
@@ -1621,12 +1621,12 @@ def fed_import_bans(update: Update, context: CallbackContext):
 
     if not fed_id:
         update.effective_message.reply_text(
-            "This group is not a part of any federation!",
+            "该群组不属于任何联邦！",
         )
         return
 
     if is_user_fed_owner(fed_id, user.id) is False:
-        update.effective_message.reply_text("Only Federation owners can do this!")
+        update.effective_message.reply_text("只有联邦创建者才能执行此操作！")
         return
 
     if msg.reply_to_message and msg.reply_to_message.document:
@@ -1640,7 +1640,7 @@ def fed_import_bans(update: Update, context: CallbackContext):
                     time.localtime(cek.get("value")),
                 )
                 update.effective_message.reply_text(
-                    "You can get your data once every 30 minutes!\nYou can get data again at `{}`".format(
+                    "每30分钟只能获取一次数据！\n您可以在 `{}` 后再次获取数据".format(
                         waktu,
                     ),
                     parse_mode=ParseMode.MARKDOWN,
@@ -1660,7 +1660,7 @@ def fed_import_bans(update: Update, context: CallbackContext):
             file_info = bot.get_file(msg.reply_to_message.document.file_id)
         except BadRequest:
             msg.reply_text(
-                "Try downloading and re-uploading the file, this one seems broken!",
+                "请尝试重新下载并上传文件，这个文件似乎已损坏！",
             )
             return
         fileformat = msg.reply_to_message.document.file_name.split(".")[-1]
@@ -1730,20 +1730,20 @@ def fed_import_bans(update: Update, context: CallbackContext):
                     multi_import_username,
                     multi_import_reason,
                 )
-            text = "Blocks were successfully imported. {} people are blocked.".format(
+            text = "封禁数据导入成功。已封禁 {} 名用户。".format(
                 success,
             )
             if failed >= 1:
-                text += " {} Failed to import.".format(failed)
+                text += " {} 条导入失败。".format(failed)
             get_fedlog = sql.get_fed_log(fed_id)
             if get_fedlog:
                 if ast.literal_eval(get_fedlog):
-                    teks = "Fed *{}* has successfully imported data. {} banned.".format(
+                    teks = "联邦 *{}* 已成功导入数据。已封禁 {} 名用户。".format(
                         getfed["fname"],
                         success,
                     )
                     if failed >= 1:
-                        teks += " {} Failed to import.".format(failed)
+                        teks += " {} 条导入失败。".format(failed)
                     bot.send_message(get_fedlog, teks, parse_mode="markdown")
         elif fileformat == "csv":
             multi_fed_id = []
@@ -1812,21 +1812,21 @@ def fed_import_bans(update: Update, context: CallbackContext):
                 )
             csvFile.close()
             os.remove("fban_{}.csv".format(msg.reply_to_message.document.file_id))
-            text = "Files were imported successfully. {} people banned.".format(success)
+            text = "文件导入成功。已封禁 {} 名用户。".format(success)
             if failed >= 1:
-                text += " {} Failed to import.".format(failed)
+                text += " {} 条导入失败。".format(failed)
             get_fedlog = sql.get_fed_log(fed_id)
             if get_fedlog:
                 if ast.literal_eval(get_fedlog):
-                    teks = "Fed *{}* has successfully imported data. {} banned.".format(
+                    teks = "联邦 *{}* 已成功导入数据。已封禁 {} 名用户。".format(
                         getfed["fname"],
                         success,
                     )
                     if failed >= 1:
-                        teks += " {} Failed to import.".format(failed)
+                        teks += " {} 条导入失败。".format(failed)
                     bot.send_message(get_fedlog, teks, parse_mode="markdown")
         else:
-            send_message(update.effective_message, "This file is not supported.")
+            send_message(update.effective_message, "不支持此文件格式。")
             return
         send_message(update.effective_message, text)
 
@@ -1837,7 +1837,7 @@ def del_fed_button(update: Update, context: CallbackContext):
     fed_id = query.data.split("_")[1]
 
     if fed_id == "cancel":
-        query.message.edit_text("Federation deletion cancelled")
+        query.message.edit_text("联邦删除已取消")
         return
 
     getfed = sql.get_fed_info(fed_id)
@@ -1845,7 +1845,7 @@ def del_fed_button(update: Update, context: CallbackContext):
         delete = sql.del_fed(fed_id)
         if delete:
             query.message.edit_text(
-                "You have removed your Federation! Now all the Groups that are connected with `{}` do not have a Federation.".format(
+                "您已删除您的联邦！现在所有与 `{}` 相关联的群组都不再属于任何联邦。".format(
                     getfed["fname"],
                 ),
                 parse_mode="markdown",
@@ -1873,23 +1873,23 @@ def fed_stat_user(update: Update, context: CallbackContext):
             if fbantime:
                 fbantime = time.strftime("%d/%m/%Y", time.localtime(fbantime))
             else:
-                fbantime = "Unavaiable"
+                fbantime = "不可用"
             if user_name is False:
                 send_message(
                     update.effective_message,
-                    "Fed {} not found!".format(fed_id),
+                    "联邦 {} 未找到！".format(fed_id),
                     parse_mode="markdown",
                 )
                 return
             if user_name == "" or user_name is None:
-                user_name = "He/she"
+                user_name = "该用户"
             if not reason:
                 send_message(
                     update.effective_message,
-                    "{} is not banned in this federation!".format(user_name),
+                    "{} 未在此联邦中被封禁！".format(user_name),
                 )
             else:
-                teks = "{} banned in this federation because:\n`{}`\n*Banned at:* `{}`".format(
+                teks = "{} 在此联邦中被封禁，原因：\n`{}`\n*封禁时间：* `{}`".format(
                     user_name,
                     reason,
                     fbantime,
@@ -1901,19 +1901,19 @@ def fed_stat_user(update: Update, context: CallbackContext):
             try:
                 user_name = bot.get_chat(user_id).first_name
             except BadRequest:
-                user_name = "He/she"
+                user_name = "该用户"
             if user_name == "" or user_name is None:
-                user_name = "He/she"
+                user_name = "该用户"
         if len(fbanlist) == 0:
             send_message(
                 update.effective_message,
-                "{} is not banned in any federation!".format(user_name),
+                "{} 未在任何联邦中被封禁！".format(user_name),
             )
             return
-        teks = "{} has been banned in this federation:\n".format(user_name)
+        teks = "{} 已在以下联邦中被封禁：\n".format(user_name)
         for x in fbanlist:
             teks += "- `{}`: {}\n".format(x[0], x[1][:20])
-        teks += "\nIf you want to find out more about the reasons for Fedban specifically, use /fbanstat <FedID>"
+        teks += "\n如需了解特定联邦的封禁原因，请使用 /fbanstat <联邦ID>"
         send_message(update.effective_message, teks, parse_mode="markdown")
 
     elif not msg.reply_to_message and not args:
@@ -1924,37 +1924,37 @@ def fed_stat_user(update: Update, context: CallbackContext):
         if len(fbanlist) == 0:
             send_message(
                 update.effective_message,
-                "{} is not banned in any federation!".format(user_name),
+                "{} 未在任何联邦中被封禁！".format(user_name),
             )
         else:
-            teks = "{} has been banned in this federation:\n".format(user_name)
+            teks = "{} 已在以下联邦中被封禁：\n".format(user_name)
             for x in fbanlist:
                 teks += "- `{}`: {}\n".format(x[0], x[1][:20])
-            teks += "\nIf you want to find out more about the reasons for Fedban specifically, use /fbanstat <FedID>"
+            teks += "\n如需了解特定联邦的封禁原因，请使用 /fbanstat <联邦ID>"
             send_message(update.effective_message, teks, parse_mode="markdown")
 
     else:
         fed_id = args[0]
         fedinfo = sql.get_fed_info(fed_id)
         if not fedinfo:
-            send_message(update.effective_message, "Fed {} not found!".format(fed_id))
+            send_message(update.effective_message, "联邦 {} 未找到！".format(fed_id))
             return
         name, reason, fbantime = sql.get_user_fban(fed_id, msg.from_user.id)
         if fbantime:
             fbantime = time.strftime("%d/%m/%Y", time.localtime(fbantime))
         else:
-            fbantime = "Unavaiable"
+            fbantime = "不可用"
         if not name:
             name = msg.from_user.first_name
         if not reason:
             send_message(
                 update.effective_message,
-                "{} is not banned in this federation".format(name),
+                "{} 未在此联邦中被封禁".format(name),
             )
             return
         send_message(
             update.effective_message,
-            "{} banned in this federation because:\n`{}`\n*Banned at:* `{}`".format(
+            "{} 在此联邦中被封禁，原因：\n`{}`\n*封禁时间：* `{}`".format(
                 name,
                 reason,
                 fbantime,
@@ -1972,27 +1972,27 @@ def set_fed_log(update: Update, context: CallbackContext):
     if chat.type == "private":
         send_message(
             update.effective_message,
-            "This command is specific to the group, not to our pm!",
+            "此命令仅适用于群组，不适用于私聊！",
         )
         return
 
     if args:
         fedinfo = sql.get_fed_info(args[0])
         if not fedinfo:
-            send_message(update.effective_message, "This Federation does not exist!")
+            send_message(update.effective_message, "该联邦不存在！")
             return
         isowner = is_user_fed_owner(args[0], user.id)
         if not isowner:
             send_message(
                 update.effective_message,
-                "Only federation creator can set federation logs.",
+                "只有联邦创建者才能设置联邦日志。",
             )
             return
         setlog = sql.set_fed_log(args[0], chat.id)
         if setlog:
             send_message(
                 update.effective_message,
-                "Federation log `{}` has been set to {}".format(
+                "联邦 `{}` 的日志已设置到 {}".format(
                     fedinfo["fname"],
                     chat.title,
                 ),
@@ -2001,7 +2001,7 @@ def set_fed_log(update: Update, context: CallbackContext):
     else:
         send_message(
             update.effective_message,
-            "You have not provided your federated ID!",
+            "您尚未提供联邦ID！",
         )
 
 
@@ -2014,27 +2014,27 @@ def unset_fed_log(update: Update, context: CallbackContext):
     if chat.type == "private":
         send_message(
             update.effective_message,
-            "This command is specific to the group, not to our pm!",
+            "此命令仅适用于群组，不适用于私聊！",
         )
         return
 
     if args:
         fedinfo = sql.get_fed_info(args[0])
         if not fedinfo:
-            send_message(update.effective_message, "This Federation does not exist!")
+            send_message(update.effective_message, "该联邦不存在！")
             return
         isowner = is_user_fed_owner(args[0], user.id)
         if not isowner:
             send_message(
                 update.effective_message,
-                "Only federation creator can set federation logs.",
+                "只有联邦创建者才能设置联邦日志。",
             )
             return
         setlog = sql.set_fed_log(args[0], None)
         if setlog:
             send_message(
                 update.effective_message,
-                "Federation log `{}` has been revoked on {}".format(
+                "联邦 `{}` 在 {} 的日志已撤销".format(
                     fedinfo["fname"],
                     chat.title,
                 ),
@@ -2043,7 +2043,7 @@ def unset_fed_log(update: Update, context: CallbackContext):
     else:
         send_message(
             update.effective_message,
-            "You have not provided your federated ID!",
+            "您尚未提供联邦ID！",
         )
 
 
@@ -2056,7 +2056,7 @@ def subs_feds(update: Update, context: CallbackContext):
     if chat.type == "private":
         send_message(
             update.effective_message,
-            "This command is specific to the group, not to our pm!",
+            "此命令仅适用于群组，不适用于私聊！",
         )
         return
 
@@ -2064,11 +2064,11 @@ def subs_feds(update: Update, context: CallbackContext):
     fedinfo = sql.get_fed_info(fed_id)
 
     if not fed_id:
-        send_message(update.effective_message, "This group is not in any federation!")
+        send_message(update.effective_message, "该群组不属于任何联邦！")
         return
 
     if is_user_fed_owner(fed_id, user.id) is False:
-        send_message(update.effective_message, "Only fed owner can do this!")
+        send_message(update.effective_message, "只有联邦创建者才能执行此操作！")
         return
 
     if args:
@@ -2076,14 +2076,14 @@ def subs_feds(update: Update, context: CallbackContext):
         if getfed is False:
             send_message(
                 update.effective_message,
-                "Please enter a valid federation id.",
+                "请输入有效的联邦ID。",
             )
             return
         subfed = sql.subs_fed(args[0], fed_id)
         if subfed:
             send_message(
                 update.effective_message,
-                "Federation `{}` has subscribe the federation `{}`. Every time there is a Fedban from that federation, this federation will also banned that user.".format(
+                "联邦 `{}` 已订阅联邦 `{}`。每当该联邦有联邦封禁时，本联邦也会同样封禁该用户。".format(
                     fedinfo["fname"],
                     getfed["fname"],
                 ),
@@ -2094,7 +2094,7 @@ def subs_feds(update: Update, context: CallbackContext):
                 if int(get_fedlog) != int(chat.id):
                     bot.send_message(
                         get_fedlog,
-                        "Federation `{}` has subscribe the federation `{}`".format(
+                        "联邦 `{}` 已订阅联邦 `{}`".format(
                             fedinfo["fname"],
                             getfed["fname"],
                         ),
@@ -2103,7 +2103,7 @@ def subs_feds(update: Update, context: CallbackContext):
         else:
             send_message(
                 update.effective_message,
-                "Federation `{}` already subscribe the federation `{}`.".format(
+                "联邦 `{}` 已经订阅了联邦 `{}`。".format(
                     fedinfo["fname"],
                     getfed["fname"],
                 ),
@@ -2112,7 +2112,7 @@ def subs_feds(update: Update, context: CallbackContext):
     else:
         send_message(
             update.effective_message,
-            "You have not provided your federated ID!",
+            "您尚未提供联邦ID！",
         )
 
 
@@ -2125,7 +2125,7 @@ def unsubs_feds(update: Update, context: CallbackContext):
     if chat.type == "private":
         send_message(
             update.effective_message,
-            "This command is specific to the group, not to our pm!",
+            "此命令仅适用于群组，不适用于私聊！",
         )
         return
 
@@ -2133,11 +2133,11 @@ def unsubs_feds(update: Update, context: CallbackContext):
     fedinfo = sql.get_fed_info(fed_id)
 
     if not fed_id:
-        send_message(update.effective_message, "This group is not in any federation!")
+        send_message(update.effective_message, "该群组不属于任何联邦！")
         return
 
     if is_user_fed_owner(fed_id, user.id) is False:
-        send_message(update.effective_message, "Only fed owner can do this!")
+        send_message(update.effective_message, "只有联邦创建者才能执行此操作！")
         return
 
     if args:
@@ -2145,14 +2145,14 @@ def unsubs_feds(update: Update, context: CallbackContext):
         if getfed is False:
             send_message(
                 update.effective_message,
-                "Please enter a valid federation id.",
+                "请输入有效的联邦ID。",
             )
             return
         subfed = sql.unsubs_fed(args[0], fed_id)
         if subfed:
             send_message(
                 update.effective_message,
-                "Federation `{}` now unsubscribe fed `{}`.".format(
+                "联邦 `{}` 已取消订阅联邦 `{}`。".format(
                     fedinfo["fname"],
                     getfed["fname"],
                 ),
@@ -2163,7 +2163,7 @@ def unsubs_feds(update: Update, context: CallbackContext):
                 if int(get_fedlog) != int(chat.id):
                     bot.send_message(
                         get_fedlog,
-                        "Federation `{}` has unsubscribe fed `{}`.".format(
+                        "联邦 `{}` 已取消订阅联邦 `{}`。".format(
                             fedinfo["fname"],
                             getfed["fname"],
                         ),
@@ -2172,7 +2172,7 @@ def unsubs_feds(update: Update, context: CallbackContext):
         else:
             send_message(
                 update.effective_message,
-                "Federation `{}` is not subscribing `{}`.".format(
+                "联邦 `{}` 未订阅 `{}`。".format(
                     fedinfo["fname"],
                     getfed["fname"],
                 ),
@@ -2181,7 +2181,7 @@ def unsubs_feds(update: Update, context: CallbackContext):
     else:
         send_message(
             update.effective_message,
-            "You have not provided your federated ID!",
+            "您尚未提供联邦ID！",
         )
 
 
@@ -2194,7 +2194,7 @@ def get_myfedsubs(update: Update, context: CallbackContext):
     if chat.type == "private":
         send_message(
             update.effective_message,
-            "This command is specific to the group, not to our pm!",
+            "此命令仅适用于群组，不适用于私聊！",
         )
         return
 
@@ -2202,11 +2202,11 @@ def get_myfedsubs(update: Update, context: CallbackContext):
     fedinfo = sql.get_fed_info(fed_id)
 
     if not fed_id:
-        send_message(update.effective_message, "This group is not in any federation!")
+        send_message(update.effective_message, "该群组不属于任何联邦！")
         return
 
     if is_user_fed_owner(fed_id, user.id) is False:
-        send_message(update.effective_message, "Only fed owner can do this!")
+        send_message(update.effective_message, "只有联邦创建者才能执行此操作！")
         return
 
     try:
@@ -2217,19 +2217,19 @@ def get_myfedsubs(update: Update, context: CallbackContext):
     if len(getmy) == 0:
         send_message(
             update.effective_message,
-            "Federation `{}` is not subscribing any federation.".format(
+            "联邦 `{}` 未订阅任何联邦。".format(
                 fedinfo["fname"],
             ),
             parse_mode="markdown",
         )
         return
-    listfed = "Federation `{}` is subscribing federation:\n".format(
+    listfed = "联邦 `{}` 正在订阅以下联邦：\n".format(
         fedinfo["fname"],
     )
     for x in getmy:
         listfed += "- `{}`\n".format(x)
     listfed += (
-        "\nTo get fed info `/fedinfo <fedid>`. To unsubscribe `/unsubfed <fedid>`."
+        "\n查看联邦信息：`/fedinfo <联邦ID>`。取消订阅：`/unsubfed <联邦ID>`。"
     )
     send_message(update.effective_message, listfed, parse_mode="markdown")
 
@@ -2241,11 +2241,11 @@ def get_myfeds_list(update: Update, context: CallbackContext):
 
     fedowner = sql.get_user_owner_fed_full(user.id)
     if fedowner:
-        text = "*You are owner of feds:\n*"
+        text = "*您拥有以下联邦：\n*"
         for f in fedowner:
             text += "- `{}`: *{}*\n".format(f["fed_id"], f["fed"]["fname"])
     else:
-        text = "*You are not have any feds!*"
+        text = "*您尚未拥有任何联邦！*"
     send_message(update.effective_message, text, parse_mode="markdown")
 
 
@@ -2276,7 +2276,7 @@ def welcome_fed(update: Update, context: CallbackContext):
     fban, fbanreason, fbantime = sql.get_fban_user(fed_id, user.id)
     if fban:
         update.effective_message.reply_text(
-            "This user is banned in current federation! I will remove him.",
+            "该用户在当前联邦中被封禁！我将移除他。",
         )
         bot.kick_chat_member(chat.id, user.id)
         return True
@@ -2286,7 +2286,7 @@ def welcome_fed(update: Update, context: CallbackContext):
 def __stats__():
     all_fbanned = sql.get_all_fban_users_global()
     all_feds = sql.get_all_feds_users_global()
-    return "× {} Bᴀɴɴᴇᴅ Usᴇʀs Aᴄʀᴏss {} Fᴇᴅʀᴀᴛɪᴏɴs".format(
+    return "× {} 个用户被封禁，分布于 {} 个联邦".format(
         len(all_fbanned),
         len(all_feds),
     )
@@ -2300,15 +2300,15 @@ def __user_info__(user_id, chat_id):
         infoname = info["fname"]
 
         if int(info["owner"]) == user_id:
-            text = "Federation owner of: <b>{}</b>.".format(infoname)
+            text = "联邦创建者：<b>{}</b>。".format(infoname)
         elif is_user_fed_admin(fed_id, user_id):
-            text = "Federation admin of: <b>{}</b>.".format(infoname)
+            text = "联邦管理员：<b>{}</b>。".format(infoname)
 
         elif fban:
-            text = "Federation banned: <b>Yes</b>"
-            text += "\n<b>Reason:</b> {}".format(fbanreason)
+            text = "联邦封禁：<b>是</b>"
+            text += "\n<b>原因：</b> {}".format(fbanreason)
         else:
-            text = "Federation banned: <b>No</b>"
+            text = "联邦封禁：<b>否</b>"
     else:
         text = ""
     return text
@@ -2335,70 +2335,69 @@ def get_chat(chat_id, chat_data):
 
 def fed_owner_help(update: Update, context: CallbackContext):
     update.effective_message.reply_text(
-        """*👑 Fed Owner Only:*
- • `/newfed <fed_name>`*:* Creates a Federation, One allowed per user
- • `/renamefed <fed_id> <new_fed_name>`*:* Renames the fed id to a new name
- • `/delfed <fed_id>`*:* Delete a Federation, and any information related to it. Will not cancel blocked users
- • `/fpromote <user>`*:* Assigns the user as a federation admin. Enables all commands for the user under `Fed Admins`
- • `/fdemote <user>`*:* Drops the User from the admin Federation to a normal User
- • `/subfed <fed_id>`*:* Subscribes to a given fed ID, bans from that subscribed fed will also happen in your fed
- • `/unsubfed <fed_id>`*:* Unsubscribes to a given fed ID
- • `/setfedlog <fed_id>`*:* Sets the group as a fed log report base for the federation
- • `/unsetfedlog <fed_id>`*:* Removed the group as a fed log report base for the federation
- • `/fbroadcast <message>`*:* Broadcasts a messages to all groups that have joined your fed
- • `/fedsubs`*:* Shows the feds your group is subscribed to `(broken rn)`""",
+        """*👑 仅限联邦创建者：*
+ • `/newfed <联邦名称>`*:* 创建联邦，每个用户只允许创建一个
+ • `/renamefed <联邦ID> <新名称>`*:* 将联邦重命名为新名称
+ • `/delfed <联邦ID>`*:* 删除联邦及其所有相关信息，不会取消已封禁用户的封禁
+ • `/fpromote <用户>`*:* 将用户晋升为联邦管理员，启用 `联邦管理员` 下的所有命令
+ • `/fdemote <用户>`*:* 将用户从联邦管理员降级为普通用户
+ • `/subfed <联邦ID>`*:* 订阅指定联邦ID，该联邦的封禁也会在您的联邦中生效
+ • `/unsubfed <联邦ID>`*:* 取消订阅指定联邦ID
+ • `/setfedlog <联邦ID>`*:* 将本群设置为该联邦的日志报告群
+ • `/unsetfedlog <联邦ID>`*:* 取消本群作为联邦日志报告群
+ • `/fbroadcast <消息>`*:* 向加入您联邦的所有群组广播消息
+ • `/fedsubs`*:* 显示您的群组订阅的联邦 `（功能暂不可用）`""",
         parse_mode=ParseMode.MARKDOWN,
     )
 
 
 def fed_admin_help(update: Update, context: CallbackContext):
     update.effective_message.reply_text(
-        """*🔱 Fed Admins:*
- • `/fban <user> <reason>`*:* Fed bans a user
- • `/unfban <user> <reason>`*:* Removes a user from a fed ban
- • `/fedinfo <fed_id>`*:* Information about the specified Federation
- • `/joinfed <fed_id>`*:* Join the current chat to the Federation. Only chat owners can do this. Every chat can only be in one Federation
- • `/leavefed <fed_id>`*:* Leave the Federation given. Only chat owners can do this
- • `/setfrules <rules>`*:* Arrange Federation rules
- • `/fedadmins`*:* Show Federation admin
- • `/fbanlist`*:* Displays all users who are victimized at the Federation at this time
- • `/fedchats`*:* Get all the chats that are connected in the Federation
- • `/chatfed `*:* See the Federation in the current chat\n""",
+        """*🔱 联邦管理员：*
+ • `/fban <用户> <原因>`*:* 在联邦内封禁用户
+ • `/unfban <用户> <原因>`*:* 解除用户的联邦封禁
+ • `/fedinfo <联邦ID>`*:* 查看指定联邦的信息
+ • `/joinfed <联邦ID>`*:* 将本群加入联邦（仅限群主，每个群只能加入一个联邦）
+ • `/leavefed <联邦ID>`*:* 将本群退出联邦（仅限群主）
+ • `/setfrules <规则>`*:* 设置联邦规则
+ • `/fedadmins`*:* 查看联邦管理员列表
+ • `/fbanlist`*:* 显示当前联邦中所有被封禁的用户
+ • `/fedchats`*:* 查看联邦内的所有群组
+ • `/chatfed `*:* 查看本群所属联邦\n""",
         parse_mode=ParseMode.MARKDOWN,
     )
 
 
 def fed_user_help(update: Update, context: CallbackContext):
     update.effective_message.reply_text(
-        """*🎩 Any user:*
+        """*🎩 所有用户：*
 
-❂ /fbanstat*:* Shows if you/or the user you are replying to or their username is fbanned somewhere or not
-❂ /fednotif <on/off>*:* Federation settings not in PM when there are users who are fbaned/unfbanned
-❂ /frules*:* See Federation regulations\n""",
+❂ /fbanstat*:* 查看您/您回复的用户是否在某个联邦中被封禁
+❂ /fednotif <on/off>*:* 开启/关闭联邦封禁/解封的私信通知
+❂ /frules*:* 查看联邦规则\n""",
         parse_mode=ParseMode.MARKDOWN,
     )
 
 
-__mod_name__ = "Fᴇᴅ"
-__help__ = """ ғᴇᴅᴇʀᴀᴛɪᴏɴ
-ᴇᴠᴇʀʏᴛʜɪɴɢ ɪs ғᴜɴ, ᴜɴᴛɪʟ ᴀ sᴘᴀᴍᴍᴇʀ sᴛᴀʀᴛs ᴇɴᴛᴇʀɪɴɢ ʏᴏᴜʀ ɢʀᴏᴜᴘ, ᴀɴᴅ ʏᴏᴜ ʜᴀᴠᴇ ᴛᴏ ʙʟᴏᴄᴋ ɪᴛ. ᴛʜᴇɴ ʏᴏᴜ ɴᴇᴇᴅ ᴛᴏ sᴛᴀʀᴛ ʙᴀɴɴɪɴɢ ᴍᴏʀᴇ, ᴀɴᴅ ᴍᴏʀᴇ, ᴀɴᴅ ɪᴛ ʜᴜʀᴛs.
-ʙᴜᴛ ᴛʜᴇɴ ʏᴏᴜ ʜᴀᴠᴇ ᴍᴀɴʏ ɢʀᴏᴜᴘs, ᴀɴᴅ ʏᴏᴜ ᴅᴏɴ'ᴛ  ᴡᴀɴᴛ ᴛʜɪs sᴘᴀᴍᴍᴇʀ ᴛᴏ ʙᴇ ɪɴ ᴏɴᴇ ᴏғ ʏᴏᴜʀ ɢʀᴏᴜᴘs - ʜᴏᴡ ᴄᴀɴ ʏᴏᴜ ᴅᴇᴀʟ? ᴅᴏ ʏᴏᴜ ʜᴀᴠᴇ ᴛᴏ ᴍᴀɴᴜᴀʟʟʏ ʙʟᴏᴄᴋ ɪᴛ, in ᴀʟʟ ʏᴏᴜʀ groups?
+__mod_name__ = "联邦"
+__help__ = """ 联邦管理
+一切都很愉快，直到垃圾信息发送者开始进入您的群组，您不得不封禁他们。然后需要封禁越来越多，这很烦人。
+但当您管理多个群组时，不希望这些垃圾信息发送者出现在任何一个群组中——怎么办？难道要手动在每个群组中封禁吗？
+
+不再需要了！有了联邦功能，您只需在一个群组中封禁，即可同步到联邦内所有群组。
+
+您甚至可以指定联邦管理员，让您信任的管理员帮助封禁所有您想保护的群组中的垃圾信息发送者。
 
 
-ɴᴏ ʟᴏɴɢᴇʀ! ᴡɪᴛʜ ғᴇᴅᴇʀᴀᴛɪᴏɴ, ʏᴏᴜ ᴄᴀɴ ᴍᴀᴋᴇ ᴀ ʙᴀɴ ɪɴ ᴏɴᴇ ᴄʜᴀᴛ ᴏᴠᴇʀʟᴀᴘ ᴡɪᴛʜ ᴀʟʟ ᴏᴛʜᴇʀ ᴄʜᴀᴛs.
+命令：
 
-ʏᴏᴜ ᴄᴀɴ ᴇᴠᴇɴ ᴅᴇsɪɢɴᴀᴛᴇ ғᴇᴅᴇʀᴀᴛɪᴏɴ ᴀᴅᴍɪɴs, sᴏ ʏᴏᴜʀ ᴛʀᴜsᴛᴇᴅ ᴀᴅᴍɪɴ ᴄᴀɴ ʙᴀɴ ᴀʟʟ ᴛʜᴇ sᴘᴀᴍᴍᴇʀs ғʀᴏᴍ ᴄʜᴀᴛs ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ᴘʀᴏᴛᴇᴄᴛ.
+联邦命令现在分为 3 个部分，方便您使用。
 
+•➥ /fedownerhelp：提供联邦创建和仅限创建者使用的命令帮助
 
-ᴄᴏᴍᴍᴀɴᴅs:
+•➥ /fedadminhelp：提供联邦管理员命令帮助
 
-ғᴇᴅs ᴀʀᴇ ɴᴏᴡ ᴅɪᴠɪᴅᴇᴅ ɪɴᴛᴏ 3 sᴇᴄᴛɪᴏɴs ғᴏʀ ʏᴏᴜʀ ᴇᴀsᴇ.
-
-•➥ /fedownerhelp : ᴘʀᴏᴠɪᴅᴇs ʜᴇʟᴘ for fed ᴄʀᴇᴀᴛɪᴏɴ ᴀɴᴅ ᴏᴡɴᴇʀ ᴏɴʟʏ ᴄᴏᴍᴍᴀɴᴅs
-
-•➥ /fedadminhelp : ᴘʀᴏᴠɪᴅᴇs ʜᴇʟᴘ for fed ᴀᴅᴍɪɴɪsᴛʀᴀᴛɪᴏɴ ᴄᴏᴍᴍᴀɴᴅs
-
-•➥ /feduserhelp : ᴘʀᴏᴠɪᴅᴇs ʜᴇʟᴘ ғᴏʀ ᴄᴏᴍᴍᴀɴᴅs ᴀɴʏᴏɴᴇ ᴄᴀɴ ᴜsᴇ """
+•➥ /feduserhelp：提供所有用户均可使用的命令帮助 """
 
 
 NEW_FED_HANDLER = CommandHandler("newfed", new_fed)

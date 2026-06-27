@@ -18,7 +18,7 @@ async def ud(client: Client, message: Message):
             try:
                 reply_text = f'*{text}*\n\n{results["list"][0]["definition"]}\n\n_{results["list"][0]["example"]}_'
             except (KeyError, IndexError):
-                reply_text = "No results found."
+                reply_text = "未找到相关结果。"
             
             await message.reply_text(reply_text, parse_mode=ParseMode.MARKDOWN)
 
@@ -29,8 +29,8 @@ async def ud_command(client: Client, message: Message):
 
 
 __help__ = """
-» /ud (text) *:* sᴇᴀʀᴄʜs ᴛʜᴇ ɢɪᴠᴇɴ ᴛᴇxᴛ ᴏɴ ᴜʀʙᴀɴ ᴅɪᴄᴛɪᴏɴᴀʀʏ ᴀɴᴅ sᴇɴᴅs ʏᴏᴜ ᴛʜᴇ ɪɴғᴏʀᴍᴀᴛɪᴏɴ.
+» /ud <词语> *:* 在 Urban Dictionary 中查询词语释义并发送结果。
 """
-__mod_name__ = "Uʀʙᴀɴ"
+__mod_name__ = "词典"
 
 

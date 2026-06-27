@@ -183,7 +183,7 @@ def airing(update: Update, context: CallbackContext):
     search_str = extract_arg(message)
     if not search_str:
         update.effective_message.reply_text(
-            "Tell Anime Name :) ( /airing <anime name>)"
+            "请输入动漫名称（/airing <动漫名称>）"
         )
         return
     variables = {"search": search_str}
@@ -205,22 +205,22 @@ def anime(update: Update, context: CallbackContext):
     message = update.effective_message
     search = extract_arg(message)
     if not search:
-        update.effective_message.reply_text("Format : /anime < anime name >")
+        update.effective_message.reply_text("格式：/anime <动漫名称>")
         return
     variables = {"search": search}
     json = requests.post(
         url, json={"query": anime_query, "variables": variables}
     ).json()
     if "errors" in json.keys():
-        update.effective_message.reply_text("Anime not found")
+        update.effective_message.reply_text("未找到该动漫")
         return
     if json:
         json = json["data"]["Media"]
-        msg = f"*{json['title']['romaji']}*(`{json['title']['native']}`)\n*Type*: {json['format']}\n*Status*: {json['status']}\n*Episodes*: {json.get('episodes', 'N/A')}\n*Duration*: {json.get('duration', 'N/A')} Per Ep.\n*Score*: {json['averageScore']}\n*Genres*: `"
+        msg = f"*{json['title']['romaji']}*(`{json['title']['native']}`)\n*类型*：{json['format']}\n*状态*：{json['status']}\n*集数*：{json.get('episodes', 'N/A')}\n*时长*：{json.get('duration', 'N/A')} 分钟/集\n*评分*：{json['averageScore']}\n*类别*：`"
         for x in json["genres"]:
             msg += f"{x}, "
         msg = msg[:-2] + "`\n"
-        msg += "*Studios*: `"
+        msg += "*制作公司*：`"
         for x in json["studios"]["nodes"]:
             msg += f"{x['name']}, "
         msg = msg[:-2] + "`\n"
@@ -243,12 +243,12 @@ def anime(update: Update, context: CallbackContext):
         if trailer:
             buttons = [
                 [
-                    InlineKeyboardButton("ᴍᴏʀᴇ ɪɴғᴏ", url=info),
-                    InlineKeyboardButton("ᴛʀᴀɪʟᴇʀ", url=trailer),
+                    InlineKeyboardButton("更多信息", url=info),
+                    InlineKeyboardButton("预告片", url=trailer),
                 ]
             ]
         else:
-            buttons = [[InlineKeyboardButton("ᴍᴏʀᴇ ɪɴғᴏ", url=info)]]
+            buttons = [[InlineKeyboardButton("更多信息", url=info)]]
         if image:
             try:
                 update.effective_message.reply_photo(
@@ -277,14 +277,14 @@ def character(update: Update, context: CallbackContext):
     message = update.effective_message
     search = extract_arg(message)
     if not search:
-        update.effective_message.reply_text("Format : /character < character name >")
+        update.effective_message.reply_text("格式：/character <角色名称>")
         return
     variables = {"query": search}
     json = requests.post(
         url, json={"query": character_query, "variables": variables}
     ).json()
     if "errors" in json.keys():
-        update.effective_message.reply_text("Character not found")
+        update.effective_message.reply_text("未找到该角色")
         return
     if json:
         json = json["data"]["Character"]
@@ -311,7 +311,7 @@ def manga(update: Update, context: CallbackContext):
     message = update.effective_message
     search = extract_arg(message)
     if not search:
-        update.effective_message.reply_text("Format : /manga < manga name >")
+        update.effective_message.reply_text("格式：/manga <漫画名称>")
         return
     variables = {"search": search}
     json = requests.post(
@@ -319,7 +319,7 @@ def manga(update: Update, context: CallbackContext):
     ).json()
     msg = ""
     if "errors" in json.keys():
-        update.effective_message.reply_text("Manga not found")
+        update.effective_message.reply_text("未找到该漫画")
         return
     if json:
         json = json["data"]["Media"]
@@ -336,17 +336,17 @@ def manga(update: Update, context: CallbackContext):
             if title_native:
                 msg += f"(`{title_native}`)"
         if start_date:
-            msg += f"\n*Start Date* - `{start_date}`"
+            msg += f"\n*开始日期* - `{start_date}`"
         if status:
-            msg += f"\n*Status* - `{status}`"
+            msg += f"\n*状态* - `{status}`"
         if score:
-            msg += f"\n*Score* - `{score}`"
-        msg += "\n*Genres* - "
+            msg += f"\n*评分* - `{score}`"
+        msg += "\n*类别* - "
         for x in json.get("genres", []):
             msg += f"{x}, "
         msg = msg[:-2]
         info = json["siteUrl"]
-        buttons = [[InlineKeyboardButton("More Info", url=info)]]
+        buttons = [[InlineKeyboardButton("更多信息", url=info)]]
         image = json.get("bannerImage", False)
         msg += f"_{json.get('description', None)}_"
         if image:
@@ -378,7 +378,7 @@ def user(update: Update, context: CallbackContext):
     search_query = extract_arg(message)
 
     if not search_query:
-        update.effective_message.reply_text("Format : /user <username>")
+        update.effective_message.reply_text("格式：/user <用户名>")
         return
 
     jikan = jikanpy.jikan.Jikan()
@@ -386,10 +386,10 @@ def user(update: Update, context: CallbackContext):
     try:
         us = jikan.user(search_query)
     except jikanpy.APIException:
-        update.effective_message.reply_text("Username not found.")
+        update.effective_message.reply_text("未找到该用户。")
         return
 
-    progress_message = update.effective_message.reply_text("Searching.... ")
+    progress_message = update.effective_message.reply_text("搜索中……")
 
     date_format = "%Y-%m-%d"
     if us["image_url"] is None:
@@ -424,24 +424,24 @@ def user(update: Update, context: CallbackContext):
 
     caption += textwrap.dedent(
         f"""
-    *ᴜsᴇʀɴᴀᴍᴇ*: [{us['username']}]({us['url']})
+    *用户名*：[{us['username']}]({us['url']})
 
-    *ɢᴇɴᴅᴇʀ*: `{us['gender']}`
-    *ʙɪʀᴛʜᴅᴀʏ*: `{user_birthday_formatted}`
-    *ᴊᴏɪɴᴇᴅ*: `{user_joined_date_formatted}`
-    *ᴅᴀʏs ᴡᴀsᴛᴇᴅ ᴡᴀᴛᴄʜɪɴɢ ᴀɴɪᴍᴇ*: `{us['anime_stats']['days_watched']}`
-    *ᴅᴀʏs ᴡᴀsᴛᴇᴅ ʀᴇᴀᴅɪɴɢ ᴍᴀɴɢᴀ*: `{us['manga_stats']['days_read']}`
+    *性别*：`{us['gender']}`
+    *生日*：`{user_birthday_formatted}`
+    *加入时间*：`{user_joined_date_formatted}`
+    *看动漫消耗天数*：`{us['anime_stats']['days_watched']}`
+    *看漫画消耗天数*：`{us['manga_stats']['days_read']}`
 
     """
     )
 
-    caption += f"*ᴀʙᴏᴜᴛ*: {about_string}"
+    caption += f"*简介*：{about_string}"
 
     buttons = [
-        [InlineKeyboardButton(info_btn, url=us["url"])],
+        [InlineKeyboardButton("更多信息", url=us["url"])],
         [
             InlineKeyboardButton(
-                close_btn, callback_data=f"anime_close, {message.from_user.id}"
+                "关闭 ❌", callback_data=f"anime_close, {message.from_user.id}"
             )
         ],
     ]
@@ -478,7 +478,7 @@ def site_search(update: Update, context: CallbackContext, site: str):
     more_results = True
 
     if not search_query:
-        message.reply_text("Give something to search")
+        message.reply_text("请输入搜索内容")
         return
 
     if site == "kaizoku":
@@ -488,14 +488,14 @@ def site_search(update: Update, context: CallbackContext, site: str):
         search_result = soup.find_all("h2", {"class": "post-title"})
 
         if search_result:
-            result = f"<b>Search results for</b> <code>{html.escape(search_query)}</code>  \n"
+            result = f"<b>搜索结果：</b> <code>{html.escape(search_query)}</code>  \n"
             for entry in search_result:
                 post_link = "https://animekaizoku.com/" + entry.a["href"]
                 post_name = html.escape(entry.text)
                 result += f"• <a href='{post_link}'>{post_name}</a>\n"
         else:
             more_results = False
-            result = f"<b>No result found for</b> <code>{html.escape(search_query)}</code>"
+            result = f"<b>未找到结果：</b> <code>{html.escape(search_query)}</code>"
 
     elif site == "kayo":
         search_url = f"https://animekayo.com/?s={search_query}"
@@ -503,11 +503,11 @@ def site_search(update: Update, context: CallbackContext, site: str):
         soup = bs4.BeautifulSoup(html_text, "html.parser")
         search_result = soup.find_all("h2", {"class": "title"})
 
-        result = f"<b>Search results for</b> <code>{html.escape(search_query)}</code>  \n"
+        result = f"<b>搜索结果：</b> <code>{html.escape(search_query)}</code>  \n"
         for entry in search_result:
 
             if entry.text.strip() == "Nothing Found":
-                result = f"<b>No result found for</b> <code>{html.escape(search_query)}</code> "
+                result = f"<b>未找到结果：</b> <code>{html.escape(search_query)}</code> "
                 more_results = False
                 break
 
@@ -515,7 +515,7 @@ def site_search(update: Update, context: CallbackContext, site: str):
             post_name = html.escape(entry.text.strip())
             result += f"• <a href='{post_link}'>{post_name}</a>\n"
 
-    buttons = [[InlineKeyboardButton("See all results", url=search_url)]]
+    buttons = [[InlineKeyboardButton("查看所有结果", url=search_url)]]
 
     if more_results:
         message.reply_text(
@@ -541,18 +541,18 @@ def kayo(update: Update, context: CallbackContext):
 
 
 __help__ = """
-ɢᴇᴛ ɪɴғᴏʀᴍᴀᴛɪᴏɴ ᴀʙᴏᴜᴛ ᴀɴɪᴍᴇ, ᴍᴀɴɢᴀ ᴏʀ ᴄʜᴀʀᴀᴄᴛᴇʀs ғʀᴏᴍ [ᴀɴɪʟɪsᴛ](ᴀɴɪʟɪsᴛ.ᴄᴏ).
+从 [AniList](anilist.co) 获取动漫、漫画或角色信息。
 
-*ᴀᴠᴀɪʟᴀʙʟᴇ ᴄᴏᴍᴍᴀɴᴅs:*
+*可用命令：*
 
- ❍ /anime <anime>*:* ʀᴇᴛᴜʀɴs ɪɴғᴏʀᴍᴀᴛɪᴏɴ ᴀʙᴏᴜᴛ ᴛʜᴇ ᴀɴɪᴍᴇ.
- ❍ /character <ᴄʜᴀʀᴀᴄᴛᴇʀ>*:* ʀᴇᴛᴜʀɴs ɪɴғᴏʀᴍᴀᴛɪᴏɴ ᴀʙᴏᴜᴛ ᴛʜᴇ ᴄʜᴀʀᴀᴄᴛᴇʀ.
- ❍ /manga <ᴍᴀɴɢᴀ>*:* ʀᴇᴛᴜʀɴs ɪɴғᴏʀᴍᴀᴛɪᴏɴ ᴀʙᴏᴜᴛ ᴛʜᴇ ᴍᴀɴɢᴀ.
- ❍ /user  <ᴜsᴇʀ>*:* ʀᴇᴛᴜʀɴs ɪɴғᴏʀᴍᴀᴛɪᴏɴ ᴀʙᴏᴜᴛ ᴀ ᴍʏᴀɴɪᴍᴇʟɪsᴛ ᴜsᴇʀ.
- ❍ /upcoming *:* ʀᴇᴛᴜʀɴs ᴀ ʟɪsᴛ ᴏғ ɴᴇᴡ ᴀɴɪᴍᴇ ɪɴ ᴛʜᴇ ᴜᴘᴄᴏᴍɪɴɢ sᴇᴀsᴏɴs.
- ❍ /kaizoku <ᴀɴɪᴍᴇ>*:* sᴇᴀʀᴄʜ ᴀɴ ᴀɴɪᴍᴇ ᴏɴ ᴀɴɪᴍᴇᴋᴀɪᴢᴏᴋᴜ.ᴄᴏᴍ
- ❍ /kayo <ᴀɴɪᴍᴇ>*:* sᴇᴀʀᴄʜ ᴀɴ ᴀɴɪᴍᴇ ᴏɴ ᴀɴɪᴍᴇᴋᴀʏᴏ.ᴄᴏᴍ
- ❍ /airing <ᴀɴɪᴍᴇ>*:* ʀᴇᴛᴜʀɴs ᴀɴɪᴍᴇ ᴀɪʀɪɴɢ ɪɴғᴏ.
+ ❍ /anime <动漫>*:* 返回动漫相关信息。
+ ❍ /character <角色>*:* 返回角色相关信息。
+ ❍ /manga <漫画>*:* 返回漫画相关信息。
+ ❍ /user <用户>*:* 返回 MyAnimeList 用户信息。
+ ❍ /upcoming *:* 返回即将播出的新动漫列表。
+ ❍ /kaizoku <动漫>*:* 在 animekaizoku.com 上搜索动漫。
+ ❍ /kayo <动漫>*:* 在 animekayo.com 上搜索动漫。
+ ❍ /airing <动漫>*:* 返回动漫播出信息。
 
 """
 
@@ -574,7 +574,7 @@ dispatcher.add_handler(KAIZOKU_SEARCH_HANDLER)
 dispatcher.add_handler(KAYO_SEARCH_HANDLER)
 dispatcher.add_handler(UPCOMING_HANDLER)
 
-__mod_name__ = "Aɴɪᴍᴇ"
+__mod_name__ = "动漫搜索"
 __command_list__ = [
     "anime",
     "manga",

@@ -31,29 +31,29 @@ async def github(_, message):
                 following = result["following"]
                 global Mukesh
                 Mukesh = [[
-            InlineKeyboardButton(text="ᴘʀᴏғɪʟᴇ ʟɪɴᴋ", url=url),
-            InlineKeyboardButton("Cʟᴏsᴇ",callback_data="close_reply")
-            ]]     
-                caption = f"""**Iɴғᴏ Oғ {name}**
-**ᴜsᴇʀɴᴀᴍᴇ :** `{username}`
-**ʙɪᴏ :** `{bio}`
-**ᴄᴏᴍᴘᴀɴʏ :** `{company}`
-**ᴄʀᴇᴀᴛᴇᴅ ᴏɴ:** `{created_at}`
-**ʀᴇᴘᴏsɪᴛᴏʀɪᴇs :** `{repositories}`
-**ʙʟᴏɢ :** `{blog}`
-**ʟᴏᴄᴀᴛɪᴏɴ :** `{location}`
-**ғᴏʟʟᴏᴡᴇʀs  :** `{followers}`
-**ғᴏʟʟᴏᴡɪɴɢ :** `{following}`"""
+            InlineKeyboardButton(text="个人主页", url=url),
+            InlineKeyboardButton("关闭",callback_data="close_reply")
+            ]]
+                caption = f"""**{name} 的 GitHub 信息**
+**用户名：** `{username}`
+**简介：** `{bio}`
+**公司：** `{company}`
+**注册时间：** `{created_at}`
+**仓库数：** `{repositories}`
+**博客：** `{blog}`
+**位置：** `{location}`
+**粉丝数：** `{followers}`
+**关注数：** `{following}`"""
             except Exception as e:
                 await message.reply(f"#ERROR {e}")
                   
     await message.reply_photo(photo=avatar_url, caption=caption,reply_markup=InlineKeyboardMarkup(Mukesh))
 
 
-__mod_name__ = "Gɪᴛʜᴜʙ"
+__mod_name__ = "Git 信息"
 
 __help__ = """
-ᴘʀᴏᴠɪᴅᴇs ʏᴏᴜ ɪɴғᴏʀᴍᴀᴛɪᴏɴ ᴀʙᴏᴜᴛ ᴀ ɢɪᴛʜᴜʙ ᴘʀᴏғɪʟᴇ. 
+查询 GitHub 用户的个人资料信息。
 
- ❍ /github <ᴜsᴇʀɴᴀᴍᴇ> *:* ɢᴇᴛ ɪɴғᴏʀᴍᴀᴛɪᴏɴ ᴀʙᴏᴜᴛ ᴀ ɢɪᴛʜᴜʙ ᴜsᴇʀ.
+ ❍ /github <用户名> *:* 获取指定 GitHub 用户的信息。
 """

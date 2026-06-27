@@ -28,7 +28,7 @@ async def _(event):
             end = datetime.now()
             ms = (end - start).seconds
             h = await event.reply(
-                "Downloaded to {} in {} seconds.".format(downloaded_file_name, ms)
+                "已下载到 {}，耗时 {} 秒。".format(downloaded_file_name, ms)
             )
             if downloaded_file_name.endswith((".webp")):
                 resize_image(downloaded_file_name)
@@ -36,14 +36,14 @@ async def _(event):
                 start = datetime.now()
                 media_urls = upload_file(downloaded_file_name)
             except exceptions.TelegraphException as exc:
-                await h.edit("ERROR: " + str(exc))
+                await h.edit("错误：" + str(exc))
                 os.remove(downloaded_file_name)
             else:
                 end = datetime.now()
                 (end - start).seconds
                 os.remove(downloaded_file_name)
                 await h.edit(
-                    "Uploaded to https://graph.org{})".format(media_urls[0]),
+                    "已上传至 https://graph.org{})".format(media_urls[0]),
                     link_preview=True,
                 )
         elif input_str == "t":
@@ -69,13 +69,13 @@ async def _(event):
             end = datetime.now()
             ms = (end - start).seconds
             await event.reply(
-                "Pasted to https://graph.org/{} in {} seconds.".format(
+                "已发布至 https://graph.org/{}，耗时 {} 秒。".format(
                     response["path"], ms
                 ),
                 link_preview=True,
             )
     else:
-        await event.reply("Reply to a message to get a permanent telegra.ph link.")
+        await event.reply("请回复一条消息以获取永久 telegra.ph 链接。")
 
 
 def resize_image(image):
@@ -84,10 +84,10 @@ def resize_image(image):
 
 
 __help__ = """
-ɪ ᴄᴀɴ ᴜᴘʟᴏᴀᴅ ғɪʟᴇs ᴛᴏ ᴛᴇʟᴇɢʀᴀᴘʜ
- ❍ /tgm :ɢᴇᴛ ᴛᴇʟᴇɢʀᴀᴘʜ ʟɪɴᴋ ᴏғ ʀᴇᴘʟɪᴇᴅ ᴍᴇᴅɪᴀ
- ❍ /tgt :ɢᴇᴛ ᴛᴇʟᴇɢʀᴀᴘʜ ʟɪɴᴋ ᴏғ ʀᴇᴘʟɪᴇᴅ ᴛᴇxᴛ
- ❍ /tgt [ᴄᴜsᴛᴏᴍ ɴᴀᴍᴇ]: ɢᴇᴛ ᴛᴇʟᴇɢʀᴀᴘʜ ʟɪɴᴋ ᴏғ ʀᴇᴘʟɪᴇᴅ ᴛᴇxᴛ ᴡɪᴛʜ ᴄᴜsᴛᴏᴍ ɴᴀᴍᴇ.
+可以将文件上传到 Telegraph
+ ❍ /tgm : 获取回复媒体的 Telegraph 链接
+ ❍ /tgt : 获取回复文本的 Telegraph 链接
+ ❍ /tgt [自定义标题]: 获取回复文本的 Telegraph 链接（带自定义标题）
 """
 
-__mod_name__ = "T-Gʀᴀᴘʜ"
+__mod_name__ = "Telegraph"

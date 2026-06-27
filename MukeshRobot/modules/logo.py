@@ -247,10 +247,10 @@ async def lego(event):
     quew = event.pattern_match.group(1)
     if event.sender_id != OWNER_ID and not quew:
         await event.reply(
-            "`ɢɪᴠᴇ sᴏᴍᴇ ᴛᴇxᴛ ᴛᴏ ᴄʀᴇᴀᴛᴇ ʟᴏɢᴏ ʙᴀʙᴇ​ !`\n`Example /logo <mukesh>`"
+            "`请提供文字以生成 Logo！`\n`示例：/logo <mukesh>`"
         )
         return
-    pesan = await event.reply("**ᴄʀᴇᴀᴛɪɴɢ ʏᴏᴜʀ ʀᴇǫᴜᴇsᴛᴇᴅ ʟᴏɢᴏ ᴘʟᴇᴀsᴇ ᴡᴀɪᴛ ᴀ sᴇᴄ​...**")
+    pesan = await event.reply("**正在生成你的 Logo，请稍候……**")
     try:
         text = event.pattern_match.group(1)
         randc = random.choice(LOGO_LINKS)
@@ -293,23 +293,23 @@ async def lego(event):
             file=fname,
             caption=f"""━━━━━━━{BOT_NAME}━━━━━━━
 
-☘️ ʟᴏɢᴏ ᴄʀᴇᴀᴛᴇᴅ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ☘️
+☘️ Logo 生成成功 ☘️
 ◈──────────────◈
-🔥 ᴄʀᴇᴀᴛᴇᴅ ʙʏ : @{BOT_USERNAME}
+🔥 由 @{BOT_USERNAME} 生成
 ━━━━━━━{BOT_NAME}━━━━━━━""",buttons=button_row
 )
         await pesan.delete()
         if os.path.exists(fname):
             os.remove(fname)
     except Exception as e:
-        await event.reply(f"ᴇʀʀᴏʀ {e}, ʀᴇᴩᴏʀᴛ ᴛʜɪs ᴀᴛ @{SUPPORT_CHAT} ")
+        await event.reply(f"错误：{e}，请在 @{SUPPORT_CHAT} 反馈此问题")
 
 
-__mod_name__ = "Lᴏɢᴏ"
+__mod_name__ = "文字 Logo"
 
 __help__ = f"""
-@{BOT_USERNAME} ᴄᴀɴ ᴄʀᴇᴀᴛᴇ sᴏᴍᴇ ʙᴇᴀᴜᴛɪғᴜʟ ᴀɴᴅ ᴀᴛᴛʀᴀᴄᴛɪᴠᴇ ʟᴏɢᴏ ғᴏʀ ʏᴏᴜʀ ᴘʀᴏғɪʟᴇ ᴘɪᴄs.
+@{BOT_USERNAME} 可以为你的头像生成精美的文字 Logo。
 
 
-❍ /logo (Text) *:* ᴄʀᴇᴀᴛᴇ ᴀ ʟᴏɢᴏ ᴏғ ʏᴏᴜʀ ɢɪᴠᴇɴ ᴛᴇxᴛ ᴡɪᴛʜ ʀᴀɴᴅᴏᴍ ᴠɪᴇᴡ.
+❍ /logo (文本) *:* 用给定文字生成随机风格的 Logo。
 """

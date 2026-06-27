@@ -19,7 +19,7 @@ async def horny(e):
     user_name = e.sender.first_name
     mention = f"[{user_name}](tg://user?id={str(user_id)})"
     mm = random.randint(1, 100)
-    HORNY = f"**🔥** {mention} **ɪꜱ** {mm}**% ʜᴏʀɴʏ!**"
+    HORNY = f"**🔥** {mention} **的色气值为** {mm}**%！**"
     await e.reply(HORNY, buttons=BUTTON, file=HOT)
 
 
@@ -29,7 +29,7 @@ async def gay(e):
     user_name = e.sender.first_name
     mention = f"[{user_name}](tg://user?id={str(user_id)})"
     mm = random.randint(1, 100)
-    GAY = f"**🍷** {mention} **ɪꜱ** {mm}**% ɢᴀʏ!**"
+    GAY = f"**🍷** {mention} **的同性向指数为** {mm}**%！**"
     await e.reply(GAY, buttons=BUTTON, file=SMEXY)
 
 
@@ -39,7 +39,7 @@ async def lezbian(e):
     user_name = e.sender.first_name
     mention = f"[{user_name}](tg://user?id={str(user_id)})"
     mm = random.randint(1, 100)
-    FEK = f"**💜** {mention} **ɪꜱ** {mm}**% ʟᴇᴢʙɪᴀɴ!**"
+    FEK = f"**💜** {mention} **的百合值为** {mm}**%！**"
     await e.reply(FEK, buttons=BUTTON, file=LEZBIAN)
 
 
@@ -49,7 +49,7 @@ async def boob(e):
     user_name = e.sender.first_name
     mention = f"[{user_name}](tg://user?id={str(user_id)})"
     mm = random.randint(1, 100)
-    BOOBS = f"**🍒** {mention}**'ꜱ ʙᴏᴏʙꜱ ꜱɪᴢᴇ ɪᴢ** {mm}**!**"
+    BOOBS = f"**🍒** {mention} **的胸部尺寸为** {mm}**！**"
     await e.reply(BOOBS, buttons=BUTTON, file=BIGBALL)
 
 
@@ -59,7 +59,7 @@ async def cock(e):
     user_name = e.sender.first_name
     mention = f"[{user_name}](tg://user?id={str(user_id)})"
     mm = random.randint(1, 100)
-    COCK = f"**🍆** {mention}**'ꜱ ᴄᴏᴄᴋ ꜱɪᴢᴇ ɪᴢ** {mm}**ᴄᴍ**"
+    COCK = f"**🍆** {mention} **的尺寸为** {mm}**cm**"
     await e.reply(COCK, buttons=BUTTON, file=LANG)
 
 
@@ -69,20 +69,20 @@ async def cute(e):
     user_name = e.sender.first_name
     mention = f"[{user_name}](tg://user?id={str(user_id)})"
     mm = random.randint(1, 100)
-    CUTE = f"**🍑** {mention} {mm}**% ᴄᴜᴛᴇ**"
+    CUTE = f"**🍑** {mention} **可爱度为** {mm}**%**"
     await e.reply(CUTE, buttons=BUTTON, file=CUTIE)
 
 
 __help__ = """
-➻ /horny - ᴄʜᴇᴄᴋ ʏᴏᴜʀ ᴄᴜʀʀᴇɴᴛ ʜᴏʀɴʏᴇꜱꜱ
+➻ /horny - 查看你当前的色气值
 
-➻ /gay - ᴄʜᴇᴄᴋ ʏᴏᴜʀ ᴄᴜʀʀᴇɴᴛ ɢᴜʏɴᴇꜱꜱ
+➻ /gay - 查看你当前的同性向指数
 
-➻ /lezbian - ᴄʜᴇᴄᴋ ᴜʀ ᴄᴜʀʀᴇɴᴛ ʟᴀᴢʙɪᴀɴ
+➻ /lezbian - 查看你当前的百合值
 
-➻ /boob - ᴄʜᴇᴄᴋ ʏᴏᴜʀ ᴄᴜʀʀᴇɴᴛ ʙᴏᴏʙꜱ ꜱɪᴢᴇ
+➻ /boob - 查看你当前的胸部尺寸
 
-➻ /cute - ᴄʜᴇᴄᴋ ʏᴏᴜʀ ᴄᴜʀʀᴇɴᴛ ᴄᴜᴛᴇɴᴇꜱꜱ
+➻ /cute - 查看你当前的可爱度
 """
 
-__mod_name__ = "Sᴇᴍxʏ"
+__mod_name__ = "魅力值"

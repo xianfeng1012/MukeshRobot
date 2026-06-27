@@ -54,23 +54,23 @@ def check_flood(update, context) -> str:
         getmode, getvalue = sql.get_flood_setting(chat.id)
         if getmode == 1:
             chat.ban_member(user.id)
-            execstrings = "Banned"
+            execstrings = "已封禁"
             tag = "BANNED"
         elif getmode == 2:
             chat.ban_member(user.id)
             chat.unban_member(user.id)
-            execstrings = "Kicked"
+            execstrings = "已踢出"
             tag = "KICKED"
         elif getmode == 3:
             context.bot.restrict_chat_member(
                 chat.id, user.id, permissions=ChatPermissions(can_send_messages=False)
             )
-            execstrings = "Muted"
+            execstrings = "已禁言"
             tag = "MUTED"
         elif getmode == 4:
             bantime = extract_time(msg, getvalue)
             chat.kick_member(user.id, until_date=bantime)
-            execstrings = "ʙᴀɴɴᴇᴅ ғᴏʀ {}".format(getvalue)
+            execstrings = "封禁 {}".format(getvalue)
             tag = "TBAN"
         elif getmode == 5:
             mutetime = extract_time(msg, getvalue)
@@ -80,17 +80,17 @@ def check_flood(update, context) -> str:
                 until_date=mutetime,
                 permissions=ChatPermissions(can_send_messages=False),
             )
-            execstrings = "ᴍᴜᴛᴇᴅ ғᴏʀ ☞︎︎︎ {}".format(getvalue)
+            execstrings = "禁言 {}".format(getvalue)
             tag = "TMUTE"
         send_message(
-            update.effective_message, "Beep Boop! Boop Beep!\n{}!".format(execstrings)
+            update.effective_message, "正在刷屏！\n{}！".format(execstrings)
         )
 
         return (
             "<b>{}:</b>"
             "\n#{}"
-            "\n<b>User:</b> {}"
-            "\nғʟᴏᴏᴅᴇᴅ ᴛʜᴇ ɢʀᴏᴜᴘ ɴᴏᴏʙ.".format(
+            "\n<b>用户:</b> {}"
+            "\n在群组中刷屏。".format(
                 tag,
                 html.escape(chat.title),
                 mention_html(user.id, html.escape(user.first_name)),
@@ -99,13 +99,13 @@ def check_flood(update, context) -> str:
 
     except BadRequest:
         msg.reply_text(
-            "I ᴄᴀɴ'ᴛ ʀᴇsᴛʀɪᴄᴛ 🚫 ᴘᴇᴏᴘʟᴇ ʜᴇʀᴇ, ɢɪᴠᴇ ᴍᴇ ᴘᴇʀᴍɪssɪᴏɴs ғɪʀsᴛ ᴜɴᴛɪʟ, ɪ'ʟʟ ᴅɪsᴀʙʟᴇ ᴀɴᴛɪғʟᴏᴏᴅ ʟᴏʟ ᴏᴡɴᴇʀ."
+            "我无法在此群限制用户 🚫，请先给我相应权限，否则我将禁用防刷屏功能。"
         )
         sql.set_flood(chat.id, 0)
         return (
             "<b>{}:</b>"
             "\n#INFO"
-            "\nᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴇɴᴏᴜɢʜ ᴘᴇʀᴍɪssɪᴏɴ ᴛᴏ ʀᴇsᴛʀɪᴄᴛ ᴜsᴇʀs sᴏ ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ ᴅɪsᴀʙʟᴇᴅ ᴀɴᴛɪ-ғʟᴏᴏᴅ".format(
+            "\n权限不足，无法限制用户，已自动禁用防刷屏。".format(
                 chat.title
             )
         )
@@ -133,7 +133,7 @@ def flood_button(update: Update, context: CallbackContext):
                 ),
             )
             update.effective_message.edit_text(
-                f"ᴜɴᴍᴜᴛᴇᴅ ʙʏ ♥︎{mention_html(user.id, html.escape(user.first_name))}.",
+                f"已由 ♥︎{mention_html(user.id, html.escape(user.first_name))} 解除禁言。",
                 parse_mode="HTML",
             )
         except:
@@ -156,7 +156,7 @@ def set_flood(update, context) -> str:
         if update.effective_message.chat.type == "private":
             send_message(
                 update.effective_message,
-                "This command is meant to use in group not in PM",
+                "此命令只能在群组中使用，不能在私聊中使用",
             )
             return ""
         chat_id = update.effective_chat.id
@@ -168,10 +168,10 @@ def set_flood(update, context) -> str:
             sql.set_flood(chat_id, 0)
             if conn:
                 text = message.reply_text(
-                    "Antiflood has been disabled in {}.".format(chat_name)
+                    "已在 {} 中禁用防刷屏。".format(chat_name)
                 )
             else:
-                text = message.reply_text("Antiflood has been disabled.")
+                text = message.reply_text("防刷屏已禁用。")
 
         elif val.isdigit():
             amount = int(val)
@@ -179,15 +179,15 @@ def set_flood(update, context) -> str:
                 sql.set_flood(chat_id, 0)
                 if conn:
                     text = message.reply_text(
-                        "Antiflood has been disabled in {}.".format(chat_name)
+                        "已在 {} 中禁用防刷屏。".format(chat_name)
                     )
                 else:
-                    text = message.reply_text("Antiflood has been disabled.")
+                    text = message.reply_text("防刷屏已禁用。")
                 return (
                     "<b>{}:</b>"
                     "\n#SETFLOOD"
-                    "\n<b>Admin:</b> {}"
-                    "\nDisable antiflood.".format(
+                    "\n<b>管理员:</b> {}"
+                    "\n已禁用防刷屏。".format(
                         html.escape(chat_name),
                         mention_html(user.id, html.escape(user.first_name)),
                     )
@@ -196,7 +196,7 @@ def set_flood(update, context) -> str:
             elif amount <= 3:
                 send_message(
                     update.effective_message,
-                    "Antiflood must be either 0 (disabled) or number greater than 3!",
+                    "防刷屏上限必须为 0（禁用）或大于 3 的数字！",
                 )
                 return ""
 
@@ -204,19 +204,19 @@ def set_flood(update, context) -> str:
                 sql.set_flood(chat_id, amount)
                 if conn:
                     text = message.reply_text(
-                        "Anti-flood has been set to {} in chat: {}".format(
-                            amount, chat_name
+                        "已在群组 {} 中将防刷屏设置为 {} 条消息。".format(
+                            chat_name, amount
                         )
                     )
                 else:
                     text = message.reply_text(
-                        "Successfully updated anti-flood limit to {}!".format(amount)
+                        "防刷屏已设置为 {} 条消息。".format(amount)
                     )
                 return (
                     "<b>{}:</b>"
                     "\n#SETFLOOD"
-                    "\n<b>Admin:</b> {}"
-                    "\nsᴇᴛ ᴀɴᴛɪғʟᴏᴏᴅ ᴛᴏ <code>{}</code>.".format(
+                    "\n<b>管理员:</b> {}"
+                    "\n已将防刷屏设置为 <code>{}</code> 条消息。".format(
                         html.escape(chat_name),
                         mention_html(user.id, html.escape(user.first_name)),
                         amount,
@@ -224,11 +224,11 @@ def set_flood(update, context) -> str:
                 )
 
         else:
-            message.reply_text("ɪɴᴠᴀʟɪᴅ ᴀʀɢᴜᴍᴇɴᴛ ᴘʟᴇᴀsᴇ ᴜsᴇ ᴀ ɴᴜᴍʙᴇʀ, 'off' or 'no'")
+            message.reply_text("参数无效，请使用数字、'off' 或 'no'")
     else:
         message.reply_text(
             (
-                "Usᴇ `/setflood number` ᴛᴏ ᴇɴᴀʙʟᴇ ᴀɴᴛɪ-ғʟᴏᴏᴅ.\nᴏʀ ᴜsᴇ `/setflood off` ᴛᴏ ᴅɪsᴀʙʟᴇ ᴀɴᴛɪғʟᴏᴏᴅ!."
+                "使用 `/setflood 数量` 来开启防刷屏。\n或使用 `/setflood off` 来关闭防刷屏。"
             ),
             parse_mode="markdown",
         )
@@ -248,7 +248,7 @@ def flood(update, context):
         if update.effective_message.chat.type == "private":
             send_message(
                 update.effective_message,
-                "Tʜɪs ᴄᴏᴍᴍᴀɴᴅ ɪs ᴍᴇᴀɴᴛ ᴛᴏ ᴜsᴇ  ɪɴ ɢʀᴏᴜᴘ ɴᴏᴛ ɪɴ ᴍʏ ᴘᴍ ɴᴏᴏʙ",
+                "此命令只能在群组中使用，不能在私聊中使用",
             )
             return
         chat_id = update.effective_chat.id
@@ -258,20 +258,20 @@ def flood(update, context):
     if limit == 0:
         if conn:
             text = msg.reply_text(
-                "I'ᴍ ɴᴏᴛ ғᴏʀᴄɪɴɢ ᴀɴʏ ғʟᴏᴏᴅ ᴄᴏɴᴛʀᴏʟ ɪɴ  {}!".format(chat_name)
+                "群组 {} 尚未开启防刷屏！".format(chat_name)
             )
         else:
-            text = msg.reply_text("ɪ'ᴍ ɴᴏᴛ ᴇɴғᴏʀᴄɪɴɢ  ᴀɴʏ ғʟᴏᴏᴅ ᴄᴏɴᴛʀᴏʟ ʜᴇʀᴇ!")
+            text = msg.reply_text("此群尚未开启防刷屏。")
     else:
         if conn:
             text = msg.reply_text(
-                "ɪ'ᴍ ᴄᴜʀʀᴇɴᴛʟʏ ʀᴇsᴛʀɪᴄᴛɪɴɢ ᴍᴇᴍʙᴇʀs ᴀғᴛᴇʀ {} ᴄᴏɴsᴇᴄᴛɪᴠᴇ ᴍᴇssᴀɢᴇs. {}.".format(
-                    limit, chat_name
+                "当前在群组 {} 中，连续发送 {} 条消息后将受到限制。".format(
+                    chat_name, limit
                 )
             )
         else:
             text = msg.reply_text(
-                "I'ᴍ ᴄᴜʀʀᴇɴᴛʟʏ ʀᴇsᴛʀɪᴄᴛɪɴɢ ᴍᴇᴍʙᴇʀ ᴀғᴛᴇʀ {} ᴄᴏɴsᴇᴄᴜᴛɪᴠᴇ ᴍᴇssᴀɢᴇs.".format(
+                "当前连续发送 {} 条消息后将受到限制。".format(
                     limit
                 )
             )
@@ -293,7 +293,7 @@ def set_flood_mode(update, context):
         if update.effective_message.chat.type == "private":
             send_message(
                 update.effective_message,
-                "This command is meant to use in group not in PM",
+                "此命令只能在群组中使用，不能在私聊中使用",
             )
             return ""
         chat = update.effective_chat
@@ -302,54 +302,54 @@ def set_flood_mode(update, context):
 
     if args:
         if args[0].lower() == "ban":
-            settypeflood = "ban"
+            settypeflood = "封禁"
             sql.set_flood_strength(chat_id, 1, "0")
         elif args[0].lower() == "kick":
-            settypeflood = "kick"
+            settypeflood = "踢出"
             sql.set_flood_strength(chat_id, 2, "0")
         elif args[0].lower() == "mute":
-            settypeflood = "mute"
+            settypeflood = "禁言"
             sql.set_flood_strength(chat_id, 3, "0")
         elif args[0].lower() == "tban":
             if len(args) == 1:
-                teks = """It looks like you tried to set time value for antiflood but you didn't specified time; Try, `/setfloodmode tban <timevalue>`.
-Examples of time value: 4m = 4 minutes, 3h = 3 hours, 6d = 6 days, 5w = 5 weeks."""
+                teks = """看起来你尝试为防刷屏设置时间值，但未指定时间；请尝试 `/setfloodmode tban <时间值>`。
+时间值示例：4m = 4 分钟，3h = 3 小时，6d = 6 天，5w = 5 周。"""
                 send_message(update.effective_message, teks, parse_mode="markdown")
                 return
-            settypeflood = "tban for {}".format(args[1])
+            settypeflood = "临时封禁 {}".format(args[1])
             sql.set_flood_strength(chat_id, 4, str(args[1]))
         elif args[0].lower() == "tmute":
             if len(args) == 1:
                 teks = (
                     update.effective_message,
-                    """It looks like you tried to set time value for antiflood but you didn't specified time; Try, `/setfloodmode tmute <timevalue>`.
-Examples of time value: 4m = 4 minutes, 3h = 3 hours, 6d = 6 days, 5w = 5 weeks.""",
+                    """看起来你尝试为防刷屏设置时间值，但未指定时间；请尝试 `/setfloodmode tmute <时间值>`。
+时间值示例：4m = 4 分钟，3h = 3 小时，6d = 6 天，5w = 5 周。""",
                 )
                 send_message(update.effective_message, teks, parse_mode="markdown")
                 return
-            settypeflood = "tmute for {}".format(args[1])
+            settypeflood = "临时禁言 {}".format(args[1])
             sql.set_flood_strength(chat_id, 5, str(args[1]))
         else:
             send_message(
-                update.effective_message, "I only understand ban/kick/mute/tban/tmute!"
+                update.effective_message, "仅支持 ban/kick/mute/tban/tmute！"
             )
             return
         if conn:
             text = msg.reply_text(
-                "Exceeding consecutive flood limit will result in {} in {}!".format(
+                "超过刷屏上限后，将对用户执行{}操作（群组：{}）！".format(
                     settypeflood, chat_name
                 )
             )
         else:
             text = msg.reply_text(
-                "Exceeding consecutive flood limit will result in {}!".format(
+                "超过刷屏上限后，将对用户执行{}操作！".format(
                     settypeflood
                 )
             )
         return (
             "<b>{}:</b>\n"
-            "<b>Admin:</b> {}\n"
-            "Has changed antiflood mode. User will {}.".format(
+            "<b>管理员:</b> {}\n"
+            "已更改刷屏处罚方式，将对用户执行{}。".format(
                 settypeflood,
                 html.escape(chat.title),
                 mention_html(user.id, html.escape(user.first_name)),
@@ -358,24 +358,24 @@ Examples of time value: 4m = 4 minutes, 3h = 3 hours, 6d = 6 days, 5w = 5 weeks.
     else:
         getmode, getvalue = sql.get_flood_setting(chat.id)
         if getmode == 1:
-            settypeflood = "ban"
+            settypeflood = "封禁"
         elif getmode == 2:
-            settypeflood = "kick"
+            settypeflood = "踢出"
         elif getmode == 3:
-            settypeflood = "mute"
+            settypeflood = "禁言"
         elif getmode == 4:
-            settypeflood = "tban for {}".format(getvalue)
+            settypeflood = "临时封禁 {}".format(getvalue)
         elif getmode == 5:
-            settypeflood = "tmute for {}".format(getvalue)
+            settypeflood = "临时禁言 {}".format(getvalue)
         if conn:
             text = msg.reply_text(
-                "Sending more messages than flood limit will result in {} in {}.".format(
-                    settypeflood, chat_name
+                "超过刷屏上限后，将在群组 {} 中对用户执行{}操作。".format(
+                    chat_name, settypeflood
                 )
             )
         else:
             text = msg.reply_text(
-                "Sending more message than flood limit will result in {}.".format(
+                "超过刷屏上限后，将对用户执行{}操作。".format(
                     settypeflood
                 )
             )
@@ -389,31 +389,20 @@ def __migrate__(old_chat_id, new_chat_id):
 def __chat_settings__(chat_id, user_id):
     limit = sql.get_flood_limit(chat_id)
     if limit == 0:
-        return "Not enforcing to flood control."
+        return "尚未开启防刷屏。"
     else:
-        return "Antiflood has been set to`{}`.".format(limit)
+        return "防刷屏已设置为 `{}` 条消息。".format(limit)
 
 
 __help__ = """
-*ᴀɴᴛɪғʟᴏᴏᴅ* ᴀʟʟᴏᴡs ʏᴏᴜ ᴛᴏ ᴛᴀᴋᴇ ᴀᴄᴛɪᴏɴ ᴏɴ ᴜsᴇʀs ᴛʜᴀᴛ sᴇɴᴅ ᴍᴏʀᴇ ᴛʜᴀɴ x ᴍᴇssᴀɢᴇs ɪɴ ᴀ ʀᴏᴡ. ᴇxᴄᴇᴇᴅɪɴɢ ᴛʜᴇ sᴇᴛ ғʟᴏᴏᴅ \
-ᴡɪʟʟ ʀᴇsᴜʟᴛ ɪɴ ʀᴇsᴛʀɪᴄᴛɪɴɢ ᴛʜᴀᴛ ᴜsᴇʀ.
- ᴛʜɪs ᴡɪʟʟ ᴍᴜᴛᴇ ᴜsᴇʀs ɪғ ᴛʜᴇʏ sᴇɴᴅ ᴍᴏʀᴇ ᴛʜᴀɴ 10 ᴍᴇssᴀɢᴇs ɪɴ ᴀ ʀᴏᴡ, ʙᴏᴛs ᴀʀᴇ ɪɢɴᴏʀᴇᴅ.
+ ❍ /flood*:* 获取当前防刷屏设置
 
- ❍ /flood *:* ɢᴇᴛ ᴛʜᴇ ᴄᴜʀʀᴇɴᴛ ғʟᴏᴏᴅ ᴄᴏɴᴛʀᴏʟ sᴇᴛᴛɪɴɢ
-• *ᴀᴅᴍɪɴs ᴏɴʟʏ:*
- ❍ /setflood <ɪɴᴛ/'ɴᴏ'/'ᴏғғ'>*:* ᴇɴᴀʙʟᴇs ᴏʀ ᴅɪsᴀʙʟᴇs ғʟᴏᴏᴅ ᴄᴏɴᴛʀᴏʟ
- *ᴇxᴀᴍᴘʟᴇ:* `/sᴇᴛғʟᴏᴏᴅ 10`
- ❍ /setfloodmode <ʙᴀɴ/ᴋɪᴄᴋ/ᴍᴜᴛᴇ/ᴛʙᴀɴ/ᴛᴍᴜᴛᴇ> <ᴠᴀʟᴜᴇ>*:* ᴀᴄᴛɪᴏɴ ᴛᴏ ᴘᴇʀғᴏʀᴍ ᴡʜᴇɴ ᴜsᴇʀ ʜᴀᴠᴇ ᴇxᴄᴇᴇᴅᴇᴅ ғʟᴏᴏᴅ ʟɪᴍɪᴛ. ʙᴀɴ/ᴋɪᴄᴋ/ᴍᴜᴛᴇ/ᴛᴍᴜᴛᴇ/ᴛʙᴀɴ
-• *ɴᴏᴛᴇ:*
- • ᴠᴀʟᴜᴇ ᴍᴜsᴛ ʙᴇ ғɪʟʟᴇᴅ ғᴏʀ ᴛʙᴀɴ ᴀɴᴅ ᴛᴍᴜᴛᴇ!!
- ɪᴛ ᴄᴀɴ ʙᴇ:
- `5ᴍ` = 5 ᴍɪɴᴜᴛᴇs
- `6ʜ` = 6 ʜᴏᴜʀs
- `3ᴅ` = 3 ᴅᴀʏs
- `1ᴡ` = 1 ᴡᴇᴇᴋ
- """
+*仅管理员:*
+ ❍ /setflood <数量/关闭>*:* 开启或关闭刷屏控制。设置为 0 或 'off' 表示关闭。
+ ❍ /setfloodmode <封禁/踢出/禁言/tban/tmute> <时间值>*:* 设置达到刷屏上限后的处罚方式。
+"""
 
-__mod_name__ = "Fʟᴏᴏᴅ"
+__mod_name__ = "防刷屏"
 
 FLOOD_BAN_HANDLER = MessageHandler(
     Filters.all & ~Filters.status_update & Filters.chat_type.groups,

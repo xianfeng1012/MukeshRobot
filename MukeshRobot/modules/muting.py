@@ -24,24 +24,24 @@ from MukeshRobot.modules.log_channel import loggable
 
 def check_user(user_id: int, bot: Bot, chat: Chat) -> Optional[str]:
     if not user_id:
-        reply = "You don't seem to be referring to a user or the ID specified is incorrect.."
+        reply = "您似乎没有指定用户，或者提供的 ID 不正确。"
         return reply
 
     try:
         member = chat.get_member(user_id)
     except BadRequest as excp:
         if excp.message == "User not found":
-            reply = "I can't seem to find this user"
+            reply = "找不到该用户。"
             return reply
         else:
             raise
 
     if user_id == bot.id:
-        reply = "I'm not gonna MUTE myself, How high are you?"
+        reply = "我才不会禁言自己，你在想什么呢？"
         return reply
 
     if is_user_admin(chat, user_id, member) or user_id in TIGERS:
-        reply = "Can't. Find someone else to mute but not this one."
+        reply = "无法禁言。请找其他人禁言，这个用户不行。"
         return reply
 
     return None
@@ -83,13 +83,13 @@ def mute(update: Update, context: CallbackContext) -> str:
         bot.restrict_chat_member(chat.id, user_id, chat_permissions)
         bot.sendMessage(
             chat.id,
-            f"Muted <b>{html.escape(member.user.first_name)}</b> with no expiration date!",
+            f"已对 <b>{html.escape(member.user.first_name)}</b> 永久禁言！",
             parse_mode=ParseMode.HTML,
         )
         return log
 
     else:
-        message.reply_text("This user is already muted!")
+        message.reply_text("该用户已经被禁言了。")
 
     return ""
 @connection_status
@@ -148,7 +148,7 @@ def unmute(update: Update, context: CallbackContext) -> str:
     user_id = extract_user(message, args)
     if not user_id:
         message.reply_text(
-            "You'll need to either give me a username to unmute, or reply to someone to be unmuted."
+            "请提供要解除禁言的用户名，或者回复某人的消息来解除其禁言。"
         )
         return ""
 
@@ -161,7 +161,7 @@ def unmute(update: Update, context: CallbackContext) -> str:
             and member.can_send_other_messages
             and member.can_add_web_page_previews
         ):
-            message.reply_text("This user already has the right to speak.")
+            message.reply_text("该用户已经可以发言了。")
         else:
             chat_permissions = ChatPermissions(
                 can_send_messages=True,
@@ -179,7 +179,7 @@ def unmute(update: Update, context: CallbackContext) -> str:
                 pass
             bot.sendMessage(
                 chat.id,
-                f"I shall allow <b>{html.escape(member.user.first_name)}</b> to text!",
+                f"已解除 <b>{html.escape(member.user.first_name)}</b> 的禁言！",
                 parse_mode=ParseMode.HTML,
             )
             return (
@@ -190,8 +190,7 @@ def unmute(update: Update, context: CallbackContext) -> str:
             )
     else:
         message.reply_text(
-            "This user isn't even in the chat, unmuting them won't make them talk more than they "
-            "already do!"
+            "该用户甚至不在群里，解除禁言也不会让他们多说一句话！"
         )
 
     return ""
@@ -218,7 +217,7 @@ def temp_mute(update: Update, context: CallbackContext) -> str:
     member = chat.get_member(user_id)
 
     if not reason:
-        message.reply_text("You haven't specified a time to mute this user for!")
+        message.reply_text("您没有指定禁言时长！")
         return ""
 
     split_reason = reason.split(None, 1)
@@ -252,17 +251,17 @@ def temp_mute(update: Update, context: CallbackContext) -> str:
             )
             bot.sendMessage(
                 chat.id,
-                f"Muted <b>{html.escape(member.user.first_name)}</b> for {time_val}!",
+                f"已对 <b>{html.escape(member.user.first_name)}</b> 禁言 {time_val}！",
                 parse_mode=ParseMode.HTML,
             )
             return log
         else:
-            message.reply_text("This user is already muted.")
+            message.reply_text("该用户已经被禁言了。")
 
     except BadRequest as excp:
         if excp.message == "Reply message not found":
             # Do not reply
-            message.reply_text(f"Muted for {time_val}!", quote=False)
+            message.reply_text(f"已禁言 {time_val}！", quote=False)
             return log
         else:
             LOGGER.warning(update)
@@ -273,17 +272,17 @@ def temp_mute(update: Update, context: CallbackContext) -> str:
                 chat.id,
                 excp.message,
             )
-            message.reply_text("Well damn, I can't mute that user.")
+            message.reply_text("妈呀，我禁言不了这个用户。")
 
     return ""
 
 
 __help__ = """
-*ᴀᴅᴍɪɴs ᴏɴʟʏ:*
- ❍ /mute  <ᴜsᴇʀʜᴀɴᴅʟᴇ>*:* sɪʟᴇɴᴄᴇs ᴀ ᴜsᴇʀ. ᴄᴀɴ ᴀʟsᴏ ʙᴇ ᴜsᴇᴅ ᴀs ᴀ ʀᴇᴘʟʏ, ᴍᴜᴛɪɴɢ ᴛʜᴇ ʀᴇᴘʟɪᴇᴅ ᴛᴏ ᴜsᴇʀ.
- ❍ /tmute  <ᴜsᴇʀʜᴀɴᴅʟᴇ> x(ᴍ/ʜ/ᴅ)*:* ᴍᴜᴛᴇs ᴀ ᴜsᴇʀ ғᴏʀ x ᴛɪᴍᴇ. (ᴠɪᴀ ʜᴀɴᴅʟᴇ, ᴏʀ ʀᴇᴘʟʏ). `ᴍ` = `ᴍɪɴᴜᴛᴇs`, `ʜ` = `ʜᴏᴜʀs`, `ᴅ` = `ᴅᴀʏs`.
- ❍ /unmute <ᴜsᴇʀʜᴀɴᴅʟᴇ>*:* ᴜɴᴍᴜᴛᴇs ᴀ ᴜsᴇʀ. ᴄᴀɴ ᴀʟsᴏ ʙᴇ ᴜsᴇᴅ ᴀs ᴀ ʀᴇᴘʟʏ, ᴍᴜᴛɪɴɢ ᴛʜᴇ ʀᴇᴘʟɪᴇᴅ ᴛᴏ ᴜsᴇʀ.
- ❍ /dmute <ᴜsᴇʀʜᴀɴᴅʟᴇ>*:* sɪʟᴇɴᴄᴇs ᴀ ᴜsᴇʀ. ᴄᴀɴ ᴀʟsᴏ ʙᴇ ᴜsᴇᴅ ᴀs ᴀ ʀᴇᴘʟʏ, ᴍᴜᴛɪɴɢ ᴛʜᴇ ʀᴇᴘʟɪᴇᴅ ᴛᴏ ᴜsᴇʀ.
+*仅管理员:*
+ ❍ /mute  <用户名>*:* 对用户禁言。也可通过回复使用，对被回复用户禁言。
+ ❍ /tmute  <用户名> x(m/h/d)*:* 禁言用户 x 时长。（通过用户名或回复）。`m`=分钟，`h`=小时，`d`=天。
+ ❍ /unmute <用户名>*:* 解除用户禁言。也可通过回复使用。
+ ❍ /dmute <用户名>*:* 禁言用户并删除触发消息。也可通过回复使用。
 """
 DMUTE_HANDLER = CommandHandler("dmute", dmute, run_async=True)
 MUTE_HANDLER = CommandHandler("mute", mute, run_async=True)
@@ -294,5 +293,5 @@ dispatcher.add_handler(MUTE_HANDLER)
 dispatcher.add_handler(UNMUTE_HANDLER)
 dispatcher.add_handler(TEMPMUTE_HANDLER)
 
-__mod_name__ = "Mᴜᴛᴇ​"
+__mod_name__ = "禁言"
 __handlers__ = [DMUTE_HANDLER,MUTE_HANDLER, UNMUTE_HANDLER, TEMPMUTE_HANDLER]

@@ -70,25 +70,25 @@ def set_blue_text_must_click(update: Update, context: CallbackContext):
         val = args[0].lower()
         if val in ("off", "no"):
             sql.set_cleanbt(chat.id, False)
-            reply = "Bluetext cleaning has been disabled for <b>{}</b>".format(
+            reply = "服务消息清理已对 <b>{}</b> 禁用".format(
                 html.escape(chat.title)
             )
             message.reply_text(reply, parse_mode=ParseMode.HTML)
 
         elif val in ("yes", "on"):
             sql.set_cleanbt(chat.id, True)
-            reply = "Bluetext cleaning has been enabled for <b>{}</b>".format(
+            reply = "服务消息清理已对 <b>{}</b> 启用".format(
                 html.escape(chat.title)
             )
             message.reply_text(reply, parse_mode=ParseMode.HTML)
 
         else:
-            reply = "Invalid argument.Accepted values are 'yes', 'on', 'no', 'off'"
+            reply = "无效参数，可接受的值为：'yes'、'on'、'no'、'off'"
             message.reply_text(reply)
     else:
         clean_status = sql.is_enabled(chat.id)
-        clean_status = "Enabled" if clean_status else "Disabled"
-        reply = "Bluetext cleaning for <b>{}</b> : <b>{}</b>".format(
+        clean_status = "已启用" if clean_status else "已禁用"
+        reply = "<b>{}</b> 的服务消息清理状态：<b>{}</b>".format(
             html.escape(chat.title), clean_status
         )
         message.reply_text(reply, parse_mode=ParseMode.HTML)
@@ -103,15 +103,15 @@ def add_bluetext_ignore(update: Update, context: CallbackContext):
         val = args[0].lower()
         added = sql.chat_ignore_command(chat.id, val)
         if added:
-            reply = "<b>{}</b> has been added to bluetext cleaner ignore list.".format(
+            reply = "<b>{}</b> 已添加至服务消息清理白名单。".format(
                 args[0]
             )
         else:
-            reply = "Command is already ignored."
+            reply = "该命令已在白名单中。"
         message.reply_text(reply, parse_mode=ParseMode.HTML)
 
     else:
-        reply = "No command supplied to be ignored."
+        reply = "未指定要忽略的命令。"
         message.reply_text(reply)
 
 
@@ -125,16 +125,16 @@ def remove_bluetext_ignore(update: Update, context: CallbackContext):
         removed = sql.chat_unignore_command(chat.id, val)
         if removed:
             reply = (
-                "<b>{}</b> has been removed from bluetext cleaner ignore list.".format(
+                "<b>{}</b> 已从服务消息清理白名单中移除。".format(
                     args[0]
                 )
             )
         else:
-            reply = "Command isn't ignored currently."
+            reply = "该命令当前不在白名单中。"
         message.reply_text(reply, parse_mode=ParseMode.HTML)
 
     else:
-        reply = "No command supplied to be unignored."
+        reply = "未指定要取消忽略的命令。"
         message.reply_text(reply)
 
 
@@ -146,15 +146,15 @@ def add_bluetext_ignore_global(update: Update, context: CallbackContext):
         val = args[0].lower()
         added = sql.global_ignore_command(val)
         if added:
-            reply = "<b>{}</b> has been added to global bluetext cleaner ignore list.".format(
+            reply = "<b>{}</b> 已添加至全局服务消息清理白名单。".format(
                 args[0]
             )
         else:
-            reply = "Command is already ignored."
+            reply = "该命令已在全局白名单中。"
         message.reply_text(reply, parse_mode=ParseMode.HTML)
 
     else:
-        reply = "No command supplied to be ignored."
+        reply = "未指定要忽略的命令。"
         message.reply_text(reply)
 
 
@@ -166,15 +166,15 @@ def remove_bluetext_ignore_global(update: Update, context: CallbackContext):
         val = args[0].lower()
         removed = sql.global_unignore_command(val)
         if removed:
-            reply = "<b>{}</b> has been removed from global bluetext cleaner ignore list.".format(
+            reply = "<b>{}</b> 已从全局服务消息清理白名单中移除。".format(
                 args[0]
             )
         else:
-            reply = "Command isn't ignored currently."
+            reply = "该命令当前不在全局白名单中。"
         message.reply_text(reply, parse_mode=ParseMode.HTML)
 
     else:
-        reply = "No command supplied to be unignored."
+        reply = "未指定要取消忽略的命令。"
         message.reply_text(reply)
 
 
@@ -188,19 +188,19 @@ def bluetext_ignore_list(update: Update, context: CallbackContext):
     text = ""
 
     if global_ignored_list:
-        text = "The following commands are currently ignored globally from bluetext cleaning :\n"
+        text = "以下命令当前已全局豁免服务消息清理：\n"
 
         for x in global_ignored_list:
             text += f" - <code>{x}</code>\n"
 
     if local_ignore_list:
-        text += "\nThe following commands are currently ignored locally from bluetext cleaning :\n"
+        text += "\n以下命令当前已在本群豁免服务消息清理：\n"
 
         for x in local_ignore_list:
             text += f" - <code>{x}</code>\n"
 
     if text == "":
-        text = "No commands are currently ignored from bluetext cleaning."
+        text = "当前没有任何命令被豁免服务消息清理。"
         message.reply_text(text)
         return
 
@@ -209,11 +209,11 @@ def bluetext_ignore_list(update: Update, context: CallbackContext):
 
 
 __help__ = """
-*ʙʟᴜᴇ ᴛᴇxᴛ ᴄʟᴇᴀɴᴇʀ* ʀᴇᴍᴏᴠᴇᴅ ᴀɴʏ ᴍᴀᴅᴇ ᴜᴘ ᴄᴏᴍᴍᴀɴᴅs ᴛʜᴀᴛ ᴘᴇᴏᴘʟᴇ sᴇɴᴅ ɪɴ ʏᴏᴜʀ ᴄʜᴀᴛ.
- ❍ /cleanblue <ᴏɴ/ᴏғғ/ʏᴇs/ɴᴏ>*:* ᴄʟᴇᴀɴ ᴄᴏᴍᴍᴀɴᴅs ᴀғᴛᴇʀ sᴇɴᴅɪɴɢ
- ❍ /ignoreblue <ᴡᴏʀᴅ>*:* ᴘʀᴇᴠᴇɴᴛ ᴀᴜᴛᴏ ᴄʟᴇᴀɴɪɴɢ ᴏғ ᴛʜᴇ ᴄᴏᴍᴍᴀɴᴅ
- ❍ /unignoreblue <ᴡᴏʀᴅ>*:* ʀᴇᴍᴏᴠᴇ ᴘʀᴇᴠᴇɴᴛ ᴀᴜᴛᴏ ᴄʟᴇᴀɴɪɴɢ ᴏғ ᴛʜᴇ ᴄᴏᴍᴍᴀɴᴅ
- ❍ /listblue *:* ʟɪsᴛ ᴄᴜʀʀᴇɴᴛʟʏ ᴡʜɪᴛᴇʟɪsᴛᴇᴅ ᴄᴏᴍᴍᴀɴᴅs
+*服务消息清理* 会自动删除群内无效命令消息（即未被机器人识别的命令）。
+ ❍ /cleanblue <on/off/yes/no>*:* 开启或关闭服务消息清理
+ ❍ /ignoreblue <命令>*:* 将某命令添加至白名单，不自动清理
+ ❍ /unignoreblue <命令>*:* 将某命令从白名单中移除
+ ❍ /listblue *:* 查看当前白名单中的命令
 """
 
 SET_CLEAN_BLUE_TEXT_HANDLER = CommandHandler(
@@ -248,7 +248,7 @@ dispatcher.add_handler(REMOVE_CLEAN_BLUE_TEXT_GLOBAL_HANDLER)
 dispatcher.add_handler(LIST_CLEAN_BLUE_TEXT_HANDLER)
 dispatcher.add_handler(CLEAN_BLUE_TEXT_HANDLER, BLUE_TEXT_CLEAN_GROUP)
 
-__mod_name__ = "Cʟᴇᴀɴ"
+__mod_name__ = "清理"
 __handlers__ = [
     SET_CLEAN_BLUE_TEXT_HANDLER,
     ADD_CLEAN_BLUE_TEXT_HANDLER,

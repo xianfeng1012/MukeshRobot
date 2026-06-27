@@ -56,21 +56,21 @@ def list_handlers(update, context):
     if not conn is False:
         chat_id = conn
         chat_name = dispatcher.bot.getChat(conn).title
-        filter_list = "*Filter in {}:*\n"
+        filter_list = "*{}的过滤器：*\n"
     else:
         chat_id = update.effective_chat.id
         if chat.type == "private":
-            chat_name = "Local filters"
-            filter_list = "*local filters:*\n"
+            chat_name = "本地过滤器"
+            filter_list = "*本地过滤器：*\n"
         else:
             chat_name = chat.title
-            filter_list = "*Filters in {}*:\n"
+            filter_list = "*{}的过滤器：*\n"
 
     all_handlers = sql.get_chat_triggers(chat_id)
 
     if not all_handlers:
         send_message(
-            update.effective_message, "No filters saved in {}!".format(chat_name)
+            update.effective_message, "{}中暂无已保存的过滤器！".format(chat_name)
         )
         return
 
@@ -110,14 +110,14 @@ def filters(update, context):
     else:
         chat_id = update.effective_chat.id
         if chat.type == "private":
-            chat_name = "local filters"
+            chat_name = "本地过滤器"
         else:
             chat_name = chat.title
 
     if not msg.reply_to_message and len(args) < 2:
         send_message(
             update.effective_message,
-            "Please provide keyboard keyword for this filter to reply with!",
+            "请提供该过滤器的关键词以及回复内容！",
         )
         return
 
@@ -125,7 +125,7 @@ def filters(update, context):
         if len(args) < 2:
             send_message(
                 update.effective_message,
-                "Please provide keyword for this filter to reply with!",
+                "请提供该过滤器的关键词！",
             )
             return
         else:
@@ -155,7 +155,7 @@ def filters(update, context):
         if not text:
             send_message(
                 update.effective_message,
-                "There is no note message - You can't JUST have buttons, you need a message to go with it!",
+                "没有消息内容——不能只有按钮，还需要配套的消息文字！",
             )
             return
 
@@ -177,7 +177,7 @@ def filters(update, context):
     elif not text and not file_type:
         send_message(
             update.effective_message,
-            "Please provide keyword for this filter reply with!",
+            "请提供该过滤器的回复内容！",
         )
         return
 
@@ -198,12 +198,12 @@ def filters(update, context):
         if (msg.reply_to_message.text or msg.reply_to_message.caption) and not text:
             send_message(
                 update.effective_message,
-                "There is no note message - You can't JUST have buttons, you need a message to go with it!",
+                "没有消息内容——不能只有按钮，还需要配套的消息文字！",
             )
             return
 
     else:
-        send_message(update.effective_message, "Invalid filter!")
+        send_message(update.effective_message, "无效的过滤器！")
         return
 
     add = addnew_filter(update, chat_id, keyword, text, file_type, file_id, buttons)
@@ -213,7 +213,7 @@ def filters(update, context):
     if add is True:
         send_message(
             update.effective_message,
-            "Saved filter '{}' in *{}*!".format(keyword, chat_name),
+            "过滤器 '{}' 已保存至 *{}*！".format(keyword, chat_name),
             parse_mode=telegram.ParseMode.MARKDOWN,
         )
     raise DispatcherHandlerStop
@@ -234,18 +234,18 @@ def stop_filter(update, context):
     else:
         chat_id = update.effective_chat.id
         if chat.type == "private":
-            chat_name = "Local filters"
+            chat_name = "本地过滤器"
         else:
             chat_name = chat.title
 
     if len(args) < 2:
-        send_message(update.effective_message, "What should i stop?")
+        send_message(update.effective_message, "请指定要停止的过滤器关键词！")
         return
 
     chat_filters = sql.get_chat_triggers(chat_id)
 
     if not chat_filters:
-        send_message(update.effective_message, "No filters active here!")
+        send_message(update.effective_message, "本群当前没有活跃的过滤器！")
         return
 
     for keyword in chat_filters:
@@ -253,14 +253,14 @@ def stop_filter(update, context):
             sql.remove_filter(chat_id, args[1])
             send_message(
                 update.effective_message,
-                "Okay, I'll stop replying to that filter in *{}*.".format(chat_name),
+                "好的，我将停止回复 *{}* 中的该过滤器。".format(chat_name),
                 parse_mode=telegram.ParseMode.MARKDOWN,
             )
             raise DispatcherHandlerStop
 
     send_message(
         update.effective_message,
-        "That's not a filter - Click: /filters to get currently active filters.",
+        "该关键词不是过滤器——点击 /filters 查看当前活跃的过滤器。",
     )
 
 
@@ -320,7 +320,7 @@ def reply_filter(update, context):
                             ):
                                 context.bot.send_message(
                                     chat.id,
-                                    "Message couldn't be sent, Is the sticker id valid?",
+                                    "消息发送失败，贴纸 ID 是否有效？",
                                 )
                                 return
                             else:
@@ -411,7 +411,7 @@ def reply_filter(update, context):
                     except BadRequest:
                         send_message(
                             message,
-                            "I don't have the permission to send the content of the filter.",
+                            "我没有权限发送该过滤器的内容。",
                         )
                 break
             else:
@@ -445,9 +445,7 @@ def reply_filter(update, context):
                             try:
                                 send_message(
                                     update.effective_message,
-                                    "You seem to be trying to use an unsupported url protocol. "
-                                    "Telegram doesn't support buttons for some protocols, such as tg://. Please try "
-                                    "again...",
+                                    "您似乎正在使用不受支持的 URL 协议。Telegram 不支持某些协议（如 tg://）的按钮，请重试……",
                                 )
                             except BadRequest as excp:
                                 LOGGER.exception("Error in filters: " + excp.message)
@@ -466,7 +464,7 @@ def reply_filter(update, context):
                             try:
                                 send_message(
                                     update.effective_message,
-                                    "This message couldn't be sent as it's incorrectly formatted.",
+                                    "该消息格式不正确，无法发送。",
                                 )
                             except BadRequest as excp:
                                 LOGGER.exception("Error in filters: " + excp.message)
@@ -494,21 +492,21 @@ def rmall_filters(update, context):
     member = chat.get_member(user.id)
     if member.status != "creator" and user.id not in DRAGONS:
         update.effective_message.reply_text(
-            "Only the chat owner can clear all notes at once."
+            "只有群主才能一次性清除所有过滤器。"
         )
     else:
         buttons = InlineKeyboardMarkup(
             [
                 [
                     InlineKeyboardButton(
-                        text="Stop all filters", callback_data="filters_rmall"
+                        text="停止所有过滤器", callback_data="filters_rmall"
                     )
                 ],
-                [InlineKeyboardButton(text="Cancel", callback_data="filters_cancel")],
+                [InlineKeyboardButton(text="取消", callback_data="filters_cancel")],
             ]
         )
         update.effective_message.reply_text(
-            f"Are you sure you would like to stop ALL filters in {chat.title}? This action cannot be undone.",
+            f"你确定要停止 {chat.title} 中的所有过滤器吗？此操作不可撤销。",
             reply_markup=buttons,
             parse_mode=ParseMode.MARKDOWN,
         )
@@ -523,7 +521,7 @@ def rmall_callback(update, context):
         if member.status == "creator" or query.from_user.id in DRAGONS:
             allfilters = sql.get_chat_triggers(chat.id)
             if not allfilters:
-                msg.edit_text("No filters in this chat, nothing to stop!")
+                msg.edit_text("本群暂无过滤器，无需停止！")
                 return
 
             count = 0
@@ -535,27 +533,27 @@ def rmall_callback(update, context):
             for i in filterlist:
                 sql.remove_filter(chat.id, i)
 
-            msg.edit_text(f"Cleaned {count} filters in {chat.title}")
+            msg.edit_text(f"已清除 {chat.title} 中的 {count} 个过滤器")
 
         if member.status == "administrator":
-            query.answer("Only owner of the chat can do this.")
+            query.answer("只有群主才能执行此操作。")
 
         if member.status == "member":
-            query.answer("You need to be admin to do this.")
+            query.answer("您需要是管理员才能执行此操作。")
     elif query.data == "filters_cancel":
         if member.status == "creator" or query.from_user.id in DRAGONS:
-            msg.edit_text("Clearing of all filters has been cancelled.")
+            msg.edit_text("已取消清除所有过滤器的操作。")
             return
         if member.status == "administrator":
-            query.answer("Only owner of the chat can do this.")
+            query.answer("只有群主才能执行此操作。")
         if member.status == "member":
-            query.answer("You need to be admin to do this.")
+            query.answer("您需要是管理员才能执行此操作。")
 
 
 # NOT ASYNC NOT A HANDLER
 def get_exception(excp, filt, chat):
     if excp.message == "Unsupported url protocol":
-        return "You seem to be trying to use the URL protocol which is not supported. Telegram does not support key for multiple protocols, such as tg: //. Please try again!"
+        return "您似乎正在使用不受支持的 URL 协议。Telegram 不支持某些协议（如 tg://）的按钮，请重试！"
     elif excp.message == "Reply message not found":
         return "noreply"
     else:
@@ -563,7 +561,7 @@ def get_exception(excp, filt, chat):
         LOGGER.exception(
             "Could not parse filter %s in chat %s", str(filt.keyword), str(chat.id)
         )
-        return "This data could not be sent because it is incorrectly formatted."
+        return "该数据格式不正确，无法发送。"
 
 
 # NOT ASYNC NOT A HANDLER
@@ -571,7 +569,7 @@ def addnew_filter(update, chat_id, keyword, text, file_type, file_id, buttons):
     msg = update.effective_message
     totalfilt = sql.get_chat_triggers(chat_id)
     if len(totalfilt) >= 150:  # Idk why i made this like function....
-        msg.reply_text("This group has reached its max filters limit of 150.")
+        msg.reply_text("本群过滤器数量已达上限（150 个）。")
         return False
     else:
         sql.new_add_filter(chat_id, keyword, text, file_type, file_id, buttons)
@@ -595,37 +593,34 @@ def __migrate__(old_chat_id, new_chat_id):
 
 def __chat_settings__(chat_id, user_id):
     cust_filters = sql.get_chat_triggers(chat_id)
-    return "There are `{}` custom filters here.".format(len(cust_filters))
+    return "本群共有 `{}` 个自定义过滤器。".format(len(cust_filters))
 
 
 __help__ = """
 
- ❍ /filters*:* ʟɪsᴛ ᴀʟʟ ᴀᴄᴛɪᴠᴇ ғɪʟᴛᴇʀs sᴀᴠᴇᴅ ɪɴ ᴛʜᴇ ᴄʜᴀᴛ.
+ ❍ /filters*:* 列出本群所有已保存的活跃过滤器。
 
-*ᴀᴅᴍɪɴ ᴏɴʟʏ:*
- ❍ /filter <ᴋᴇʏᴡᴏʀᴅ> <ʀᴇᴘʟʏ ᴍᴇssᴀɢᴇ>*:* ᴀᴅᴅ ᴀ ғɪʟᴛᴇʀ ᴛᴏ ᴛʜɪs ᴄʜᴀᴛ. ᴛʜᴇ ʙᴏᴛ ᴡɪʟʟ ɴᴏᴡ ʀᴇᴘʟʏ ᴛʜᴀᴛ ᴍᴇssᴀɢᴇ ᴡʜᴇɴᴇᴠᴇʀ 'ᴋᴇʏᴡᴏʀᴅ'\
-ɪs ᴍᴇɴᴛɪᴏɴᴇᴅ. ɪғ ʏᴏᴜ ʀᴇᴘʟʏ ᴛᴏ ᴀ sᴛɪᴄᴋᴇʀ ᴡɪᴛʜ ᴀ ᴋᴇʏᴡᴏʀᴅ, ᴛʜᴇ ʙᴏᴛ ᴡɪʟʟ ʀᴇᴘʟʏ ᴡɪᴛʜ ᴛʜᴀᴛ sᴛɪᴄᴋᴇʀ. ɴᴏᴛᴇ: ᴀʟʟ ғɪʟᴛᴇʀ \
-ᴋᴇʏᴡᴏʀᴅs ᴀʀᴇ ɪɴ ʟᴏᴡᴇʀᴄᴀsᴇ. ɪғ ʏᴏᴜ ᴡᴀɴᴛ ʏᴏᴜʀ ᴋᴇʏᴡᴏʀᴅ ᴛᴏ ʙᴇ ᴀ sᴇɴᴛᴇɴᴄᴇ, ᴜsᴇ ǫᴜᴏᴛᴇs. ᴇɢ: /ғɪʟᴛᴇʀ "ʜᴇʏ ᴛʜᴇʀᴇ" ʜᴏᴡ ʏᴏᴜ \
-ᴅᴏɪɴ?
- sᴇᴘᴀʀᴀᴛᴇ ᴅɪғғ ʀᴇᴘʟɪᴇs ʙʏ `%%%` ᴛᴏ ɢᴇᴛ ʀᴀɴᴅᴏᴍ ʀᴇᴘʟɪᴇs
- *ᴇxᴀᴍᴘʟᴇ:* 
- ` /filter  "ғɪʟᴛᴇʀɴᴀᴍᴇ"
- ʀᴇᴘʟʏ 1
+*仅管理员：*
+ ❍ /filter <关键词> <回复内容>*:* 为本群添加过滤器。当有人提到"关键词"时，机器人将自动回复该内容。若回复某条贴纸并附上关键词，机器人将回复该贴纸。注意：所有过滤器关键词均为小写。若关键词为句子，请使用引号，例如：/filter "你好啊" 你好！
+ 用 `%%%` 分隔不同的回复内容，可随机回复。
+ *示例：*
+ `/filter "过滤器名"
+ 回复1
  %%%
- ʀᴇᴘʟʏ 2
+ 回复2
  %%%
- ʀᴇᴘʟʏ 3`
- ❍ /stop  <ғɪʟᴛᴇʀ ᴋᴇʏᴡᴏʀᴅ>*:* sᴛᴏᴘ ᴛʜᴀᴛ ғɪʟᴛᴇʀ.
+ 回复3`
+ ❍ /stop <过滤器关键词>*:* 停止某个过滤器。
 
-*ᴄʜᴀᴛ ᴄʀᴇᴀᴛᴏʀ ᴏɴʟʏ:*
- ❍ /removeallfilters*:* ʀᴇᴍᴏᴠᴇ ᴀʟʟ ᴄʜᴀᴛ ғɪʟᴛᴇʀs ᴀᴛ ᴏɴᴄᴇ.
+*仅群主：*
+ ❍ /removeallfilters*:* 一次性移除本群所有过滤器。
 
-*ɴᴏᴛᴇ*: ғɪʟᴛᴇʀs ᴀʟsᴏ sᴜᴘᴘᴏʀᴛ ᴍᴀʀᴋᴅᴏᴡɴ ғᴏʀᴍᴀᴛᴛᴇʀs ʟɪᴋᴇ: {ғɪʀsᴛ}, {ʟᴀsᴛ} ᴇᴛᴄ.. ᴀɴᴅ ʙᴜᴛᴛᴏɴs.
-ᴄʜᴇᴄᴋ ❍ /markdownhelp ᴛᴏ ᴋɴᴏᴡ ᴍᴏʀᴇ!
+*注意*：过滤器也支持 Markdown 格式变量，如：{first}、{last} 等，以及按钮。
+查看 ❍ /markdownhelp 了解更多！
 
 """
 
-__mod_name__ = "Fɪʟᴛᴇʀs"
+__mod_name__ = "自定义过滤器"
 
 FILTER_HANDLER = CommandHandler("filter", filters, run_async=True)
 STOP_HANDLER = CommandHandler("stop", stop_filter, run_async=True)

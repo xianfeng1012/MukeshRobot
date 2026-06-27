@@ -11,18 +11,18 @@ async def chat_gpt(bot, message):
         await bot.send_chat_action(message.chat.id, ChatAction.TYPING)
         if len(message.command) < 2:
             await message.reply_text(
-            "Example:**\n\n`/chatgpt Where is TajMahal?`")
+            "示例：**\n\n`/chatgpt 泰姬陵在哪里？`")
         else:
             a = message.text.split(' ', 1)[1]
             r=api.gemini(a)["results"]
-            await message.reply_text(f" {r} \n\n🎉ᴘᴏᴡᴇʀᴇᴅ ʙʏ @{BOT_USERNAME} ", parse_mode=ParseMode.MARKDOWN)     
+            await message.reply_text(f" {r} \n\n🎉由 @{BOT_USERNAME} 提供支持 ", parse_mode=ParseMode.MARKDOWN)
     except Exception as e:
-        await message.reply_text(f"**ᴇʀʀᴏʀ: {e} ")
+        await message.reply_text(f"**错误：{e} ")
 
-__mod_name__ = "Cʜᴀᴛɢᴘᴛ"
+__mod_name__ = "ChatGPT"
 __help__ = """
- Cʜᴀᴛɢᴘᴛ ᴄᴀɴ ᴀɴsᴡᴇʀ ʏᴏᴜʀ ǫᴜᴇsᴛɪᴏɴ  ᴀɴᴅ sʜᴏᴡs ʏᴏᴜ ᴛʜᴇ ʀᴇsᴜʟᴛ
+ ChatGPT 可以回答您的问题并展示结果
 
- ❍ /chatgpt  *:* ʀᴇᴘʟʏ ᴛo ᴍᴇssᴀɢᴇ ᴏʀ ɢɪᴠᴇ sᴏᴍᴇ ᴛᴇxᴛ
- 
+ ❍ /chatgpt *:* 回复消息或直接输入问题
+
  """

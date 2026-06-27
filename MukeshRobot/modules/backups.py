@@ -40,7 +40,7 @@ def import_data(update, context):
         chat_name = dispatcher.bot.getChat(conn).title
     else:
         if update.effective_message.chat.type == "private":
-            update.effective_message.reply_text("This is a group only command!")
+            update.effective_message.reply_text("此命令仅限在群组中使用！")
             return ""
 
         chat = update.effective_chat
@@ -51,7 +51,7 @@ def import_data(update, context):
             file_info = context.bot.get_file(msg.reply_to_message.document.file_id)
         except BadRequest:
             msg.reply_text(
-                "Try downloading and uploading the file yourself again, This one seem broken to me!"
+                "请重新下载并上传该文件，此文件似乎已损坏！"
             )
             return
 
@@ -71,19 +71,19 @@ def import_data(update, context):
         try:
             if data.get(str(chat.id)) is None:
                 if conn:
-                    text = "Backup comes from another chat, I can't return another chat to chat *{}*".format(
+                    text = "备份来自其他聊天，无法将其他聊天的数据还原到 *{}*".format(
                         chat_name
                     )
                 else:
-                    text = "Backup comes from another chat, I can't return another chat to this chat"
+                    text = "备份来自其他聊天，无法将其他聊天的数据还原到此群组"
                 return msg.reply_text(text, parse_mode="markdown")
         except Exception:
-            return msg.reply_text("There was a problem while importing the data!")
+            return msg.reply_text("导入数据时发生错误！")
         # Check if backup is from self
         try:
             if str(context.bot.id) != str(data[str(chat.id)]["bot"]):
                 return msg.reply_text(
-                    "Backup from another bot that is not suggested might cause the problem, documents, photos, videos, audios, records might not work as it should be."
+                    "备份来自其他机器人，可能导致问题，文档、图片、视频、音频、语音等媒体文件可能无法正常使用。"
                 )
         except Exception:
             pass
@@ -98,7 +98,7 @@ def import_data(update, context):
                 mod.__import_data__(str(chat.id), data)
         except Exception:
             msg.reply_text(
-                f"An error occurred while recovering your data. The process failed. If you experience a problem with this, please take it to @{SUPPORT_CHAT}"
+                f"恢复数据时发生错误，进程失败。如遇问题请联系 @{SUPPORT_CHAT}"
             )
 
             EVENT_LOGS.exception(
@@ -112,9 +112,9 @@ def import_data(update, context):
         # NOTE: consider default permissions stuff?
         if conn:
 
-            text = "Backup fully restored on *{}*.".format(chat_name)
+            text = "备份已完全还原到 *{}*。".format(chat_name)
         else:
-            text = "Backup fully restored"
+            text = "备份已完全还原"
         msg.reply_text(text, parse_mode="markdown")
 
 
@@ -133,7 +133,7 @@ def export_data(update, context):
         # chat_name = dispatcher.bot.getChat(conn).title
     else:
         if update.effective_message.chat.type == "private":
-            update.effective_message.reply_text("This is a group only command!")
+            update.effective_message.reply_text("此命令仅限在群组中使用！")
             return ""
         chat = update.effective_chat
         chat_id = update.effective_chat.id
@@ -148,7 +148,7 @@ def export_data(update, context):
                 "%H:%M:%S %d/%m/%Y", time.localtime(checkchat.get("value"))
             )
             update.effective_message.reply_text(
-                "You can only backup once a day!\nYou can backup again in about `{}`".format(
+                "每天只能备份一次！\n下次可备份时间约为 `{}`".format(
                     timeformatt
                 ),
                 parse_mode=ParseMode.MARKDOWN,
@@ -331,7 +331,7 @@ def export_data(update, context):
     try:
         context.bot.sendMessage(
             EVENT_LOGS,
-            "*Successfully imported backup:*\nChat: `{}`\nChat ID: `{}`\nOn: `{}`".format(
+            "*备份导出成功：*\n群组：`{}`\n群组 ID：`{}`\n时间：`{}`".format(
                 chat.title, chat_id, tgl
             ),
             parse_mode=ParseMode.MARKDOWN,
@@ -341,7 +341,7 @@ def export_data(update, context):
     context.bot.sendDocument(
         current_chat_id,
         document=open("MukeshRobot{}backup.json".format(chat_id), "rb"),
-        caption="📤*Successfully Exported backup:*\nChat: `{}`\nChat ID: `{}`\nOn: `{}`\n\nNote: This `MukeshRobot-Backup` was specially made for notes 📚.".format(
+        caption="📤*备份导出成功：*\n群组：`{}`\n群组 ID：`{}`\n时间：`{}`\n\n注意：此 `MukeshRobot-Backup` 专为笔记 📚 备份而生成。".format(
             chat.title, chat_id, tgl
         ),
         timeout=360,
@@ -366,15 +366,15 @@ def get_chat(chat_id, chat_data):
         return {"status": False, "value": False}
 
 
-__mod_name__ = "Bᴀᴄᴋᴜᴘ"
+__mod_name__ = "备份"
 
 __help__ = """
-*ᴏɴʟʏ ғᴏʀ ɢʀᴏᴜᴘ ᴏᴡɴᴇʀ:*
+*仅限群组所有者使用：*
 
- ❍ /import : ʀᴇᴘʟʏ ᴛᴏ ᴛʜᴇ ʙᴀᴄᴋᴜᴘ ғɪʟᴇ ғᴏʀ ᴛʜᴇ ʙᴜᴛʟᴇʀ / ᴇᴍɪʟɪᴀ ɢʀᴏᴜᴘ ᴛᴏ ɪᴍᴘᴏʀᴛ ᴀs ᴍᴜᴄʜ ᴀs ᴘᴏssɪʙʟᴇ, ᴍᴀᴋɪɴɢ ᴛʀᴀɴsғᴇʀs ᴠᴇʀʏ ᴇᴀsʏ! \
- ɴᴏᴛᴇ ᴛʜᴀᴛ ғɪʟᴇs / ᴘʜᴏᴛᴏs ᴄᴀɴɴᴏᴛ ʙᴇ ɪᴍᴘᴏʀᴛᴇᴅ ᴅᴜᴇ ᴛᴏ ᴛᴇʟᴇɢʀᴀᴍ ʀᴇsᴛʀɪᴄᴛɪᴏɴs.
+ ❍ /import : 回复备份文件以导入尽可能多的数据，轻松实现数据迁移！\
+ 注意：由于 Telegram 限制，文件/图片无法导入。
 
- ❍ /export : ᴇxᴘᴏʀᴛ ɢʀᴏᴜᴘ ᴅᴀᴛᴀ, ᴡʜɪᴄʜ ᴡɪʟʟ ʙᴇ ᴇxᴘᴏʀᴛᴇᴅ ᴀʀᴇ: ʀᴜʟᴇs, ɴᴏᴛᴇs (ᴅᴏᴄᴜᴍᴇɴᴛs, ɪᴍᴀɢᴇs, ᴍᴜsɪᴄ, ᴠɪᴅᴇᴏ, ᴀᴜᴅɪᴏ, ᴠᴏɪᴄᴇ, ᴛᴇxᴛ, ᴛᴇxᴛ ʙᴜᴛᴛᴏɴs) \
+ ❍ /export : 导出群组数据，导出内容包括：规则、笔记（文档、图片、音乐、视频、音频、语音、文本、文本按钮）
 
 """
 

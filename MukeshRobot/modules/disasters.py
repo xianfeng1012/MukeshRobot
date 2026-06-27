@@ -29,10 +29,10 @@ from MukeshRobot.modules.log_channel import gloggable
 def check_user_id(user_id: int, context: CallbackContext) -> Optional[str]:
     bot = context.bot
     if not user_id:
-        reply = "That...is a chat! baka ka omae?"
+        reply = "这是一个群组，不是用户！"
 
     elif user_id == bot.id:
-        reply = "This does not work that way."
+        reply = "这个操作无法对机器人自身执行。"
 
     else:
         reply = None
@@ -57,26 +57,26 @@ def addsudo(update: Update, context: CallbackContext) -> str:
 
     
     if user_id in DRAGONS:
-        message.reply_text("This member is already a Dragon Disaster")
+        message.reply_text("该用户已经是超级管理员（Dragon）了")
         return ""
 
     if user_id in DEMONS:
-        rt += "Requested HA to promote a Demon Disaster to Dragon."
-        
+        rt += "已请求将支持用户（Demon）晋升为超级管理员（Dragon）。"
+
         DEMONS.remove(user_id)
 
     if user_id in WOLVES:
-        rt += "Requested HA to promote a Wolf Disaster to Dragon."
-        
+        rt += "已请求将白名单用户（Wolf）晋升为超级管理员（Dragon）。"
+
         WOLVES.remove(user_id)
 
-    
+
     DRAGONS.append(user_id)
 
-    
+
     update.effective_message.reply_text(
         rt
-        + "\nSuccessfully set Disaster level of {} to Dragon!".format(
+        + "\n已成功将 {} 设置为超级管理员（Dragon）！".format(
             user_member.first_name
         )
     )
@@ -114,25 +114,25 @@ def addsupport(
 
     
     if user_id in DRAGONS:
-        rt += "Requested HA to demote this Dragon to Demon"
-        
+        rt += "已请求将超级管理员（Dragon）降级为支持用户（Demon）"
+
         DRAGONS.remove(user_id)
 
     if user_id in DEMONS:
-        message.reply_text("This user is already a Demon Disaster.")
+        message.reply_text("该用户已经是支持用户（Demon）了。")
         return ""
 
     if user_id in WOLVES:
-        rt += "Requested HA to promote this Wolf Disaster to Demon"
-        
+        rt += "已请求将白名单用户（Wolf）晋升为支持用户（Demon）"
+
         WOLVES.remove(user_id)
 
-    
+
     DEMONS.append(user_id)
 
-    
+
     update.effective_message.reply_text(
-        rt + f"\n{user_member.first_name} was added as a Demon Disaster!"
+        rt + f"\n{user_member.first_name} 已被添加为支持用户（Demon）！"
     )
 
     log_message = (
@@ -166,25 +166,25 @@ def addwhitelist(update: Update, context: CallbackContext) -> str:
     
 
     if user_id in DRAGONS:
-        rt += "This member is a Dragon Disaster, Demoting to Wolf."
-        
+        rt += "该用户是超级管理员（Dragon），将降级为白名单用户（Wolf）。"
+
         DRAGONS.remove(user_id)
 
     if user_id in DEMONS:
-        rt += "This user is already a Demon Disaster, Demoting to Wolf."
-        
+        rt += "该用户是支持用户（Demon），将降级为白名单用户（Wolf）。"
+
         DEMONS.remove(user_id)
 
     if user_id in WOLVES:
-        message.reply_text("This user is already a Wolf Disaster.")
+        message.reply_text("该用户已经是白名单用户（Wolf）了。")
         return ""
 
-    
+
     WOLVES.append(user_id)
 
-    
+
     update.effective_message.reply_text(
-        rt + f"\nSuccessfully promoted {user_member.first_name} to a Wolf Disaster!"
+        rt + f"\n已成功将 {user_member.first_name} 晋升为白名单用户（Wolf）！"
     )
 
     log_message = (
@@ -217,30 +217,30 @@ def addtiger(update: Update, context: CallbackContext) -> str:
 
     
     if user_id in DRAGONS:
-        rt += "This member is a Dragon Disaster, Demoting to Tiger."
-        
+        rt += "该用户是超级管理员（Dragon），将降级为 Tiger。"
+
         DRAGONS.remove(user_id)
 
     if user_id in DEMONS:
-        rt += "This user is already a Demon Disaster, Demoting to Tiger."
-        
+        rt += "该用户是支持用户（Demon），将降级为 Tiger。"
+
         DEMONS.remove(user_id)
 
     if user_id in WOLVES:
-        rt += "This user is already a Wolf Disaster, Demoting to Tiger."
-        
+        rt += "该用户是白名单用户（Wolf），将降级为 Tiger。"
+
         WOLVES.remove(user_id)
 
     if user_id in TIGERS:
-        message.reply_text("This user is already a Tiger.")
+        message.reply_text("该用户已经是 Tiger 了。")
         return ""
 
-    
+
     TIGERS.append(user_id)
 
-    
+
     update.effective_message.reply_text(
-        rt + f"\nSuccessfully promoted {user_member.first_name} to a Tiger Disaster!"
+        rt + f"\n已成功将 {user_member.first_name} 晋升为 Tiger！"
     )
 
     log_message = (
@@ -272,7 +272,7 @@ def removesudo(update: Update, context: CallbackContext) -> str:
 
     
     if user_id in DRAGONS:
-        message.reply_text("Requested HA to demote this user to Civilian")
+        message.reply_text("已请求将该用户从超级管理员（Dragon）降级为普通用户")
         DRAGONS.remove(user_id)
         
 
@@ -289,7 +289,7 @@ def removesudo(update: Update, context: CallbackContext) -> str:
         return log_message
 
     else:
-        message.reply_text("This user is not a Dragon Disaster!")
+        message.reply_text("该用户不是超级管理员（Dragon）！")
         return ""
 
 
@@ -310,7 +310,7 @@ def removesupport(update: Update, context: CallbackContext) -> str:
 
     
     if user_id in DEMONS:
-        message.reply_text("Requested HA to demote this user to Civilian")
+        message.reply_text("已请求将该用户从支持用户（Demon）降级为普通用户")
         DEMONS.remove(user_id)
         
 
@@ -327,7 +327,7 @@ def removesupport(update: Update, context: CallbackContext) -> str:
         return log_message
 
     else:
-        message.reply_text("This user is not a Demon level Disaster!")
+        message.reply_text("该用户不是支持用户（Demon）！")
         return ""
 
 
@@ -348,7 +348,7 @@ def removewhitelist(update: Update, context: CallbackContext) -> str:
 
     
     if user_id in WOLVES:
-        message.reply_text("Demoting to normal user")
+        message.reply_text("已降级为普通用户")
         WOLVES.remove(user_id)
         
 
@@ -364,7 +364,7 @@ def removewhitelist(update: Update, context: CallbackContext) -> str:
 
         return log_message
     else:
-        message.reply_text("This user is not a Wolf Disaster!")
+        message.reply_text("该用户不是白名单用户（Wolf）！")
         return ""
 
 
@@ -385,7 +385,7 @@ def removetiger(update: Update, context: CallbackContext) -> str:
 
     
     if user_id in TIGERS:
-        message.reply_text("Demoting to normal user")
+        message.reply_text("已降级为普通用户")
         TIGERS.remove(user_id)
         
 
@@ -401,13 +401,13 @@ def removetiger(update: Update, context: CallbackContext) -> str:
 
         return log_message
     else:
-        message.reply_text("This user is not a Tiger Disaster!")
+        message.reply_text("该用户不是 Tiger！")
         return ""
 
 
 @whitelist_plus
 def whitelistlist(update: Update, context: CallbackContext):
-    reply = "<b>Known Wolf Disasters 🐺:</b>\n"
+    reply = "<b>已知白名单用户（Wolf）🐺：</b>\n"
     m = update.effective_message.reply_text(
         "<code>..</code>", parse_mode=ParseMode.HTML
     )
@@ -425,9 +425,9 @@ def whitelistlist(update: Update, context: CallbackContext):
 
 @whitelist_plus
 def tigerlist(update: Update, context: CallbackContext):
-    reply = "<b>ᴋɴᴏᴡɴ ᴛɪɢᴇʀ ᴅɪsᴀsᴛᴇʀs 🐯:</b>\n"
+    reply = "<b>已知 Tiger 用户 🐯：</b>\n"
     m = update.effective_message.reply_text(
-        "<code>Gathering intel..</code>", parse_mode=ParseMode.HTML
+        "<code>正在收集信息……</code>", parse_mode=ParseMode.HTML
     )
     bot = context.bot
     for each_user in TIGERS:
@@ -444,9 +444,9 @@ def tigerlist(update: Update, context: CallbackContext):
 def supportlist(update: Update, context: CallbackContext):
     bot = context.bot
     m = update.effective_message.reply_text(
-        "<code>Gathering intel..</code>", parse_mode=ParseMode.HTML
+        "<code>正在收集信息……</code>", parse_mode=ParseMode.HTML
     )
-    reply = "<b> ᴋɴᴏᴡɴ ᴅᴇᴍᴏɴ ᴅɪsᴀsᴛᴇʀs👹:</b>\n"
+    reply = "<b>已知支持用户（Demon）👹：</b>\n"
     for each_user in DEMONS:
         user_id = int(each_user)
         try:
@@ -461,10 +461,10 @@ def supportlist(update: Update, context: CallbackContext):
 def sudolist(update: Update, context: CallbackContext):
     bot = context.bot
     m = update.effective_message.reply_text(
-        "<code>Gathering intel..</code>", parse_mode=ParseMode.HTML
+        "<code>正在收集信息……</code>", parse_mode=ParseMode.HTML
     )
     true_sudo = list(set(DRAGONS)- set(DEV_USERS))
-    reply = "<b> ᴋɴᴏᴡɴ ᴅʀᴀɢᴏɴ ᴅɪsᴀsᴛᴇʀs🐉:</b>\n"
+    reply = "<b>已知超级管理员（Dragon）🐉：</b>\n"
     for each_user in true_sudo:
         user_id = int(each_user)
         try:
@@ -479,10 +479,10 @@ def sudolist(update: Update, context: CallbackContext):
 def devlist(update: Update, context: CallbackContext):
     bot = context.bot
     m = update.effective_message.reply_text(
-        "<code>ɢᴀᴛʜᴇʀɪɴɢ..</code>", parse_mode=ParseMode.HTML
+        "<code>正在收集信息……</code>", parse_mode=ParseMode.HTML
     )
     true_dev = list(set(DEV_USERS) -{OWNER_ID})
-    reply = "✨ <b>ᴅᴇᴠs ᴜsᴇʀ ʟɪsᴛ :</b>\n"
+    reply = "✨ <b>开发者用户列表：</b>\n"
     for each_user in true_dev:
         user_id = int(each_user)
         try:
@@ -494,35 +494,35 @@ def devlist(update: Update, context: CallbackContext):
 
 
 __help__ = f"""
-*⚠️ ɴᴏᴛɪᴄᴇ:*
-ᴄᴏᴍᴍᴀɴᴅs ʟɪsᴛᴇᴅ ʜᴇʀᴇ ᴏɴʟʏ ᴡᴏʀᴋ ғᴏʀ ᴜsᴇʀs ᴡɪᴛʜ sᴘᴇᴄɪᴀʟ ᴀᴄᴄᴇss ᴀʀᴇ ᴍᴀɪɴʟʏ ᴜsᴇᴅ ғᴏʀ ᴛʀᴏᴜʙʟᴇsʜᴏᴏᴛɪɴɢ, ᴅᴇʙᴜɢɢɪɴɢ ᴘᴜʀᴘᴏsᴇs.
-ɢʀᴏᴜᴘ ᴀᴅᴍɪɴs/ɢʀᴏᴜᴘ ᴏᴡɴᴇʀs ᴅᴏ ɴᴏᴛ ɴᴇᴇᴅ ᴛʜᴇsᴇ ᴄᴏᴍᴍᴀɴᴅs. 
+*⚠️ 注意：*
+以下命令仅对拥有特殊权限的用户有效，主要用于故障排查和调试目的。
+群组管理员/群组所有者无需使用这些命令。
 
-*ʟɪsᴛ ᴀʟʟ sᴘᴇᴄɪᴀʟ ᴜsᴇʀs:*
- ❍ /sudolist*:* ʟɪsᴛs ᴀʟʟ ᴅʀᴀɢᴏɴ ᴅɪsᴀsᴛᴇʀs
- ❍ /supportlist *:* ʟɪsᴛs ᴀʟʟ ᴅᴇᴍᴏɴ ᴅɪsᴀsᴛᴇʀs
- ❍ /tigers *:* ʟɪsᴛs ᴀʟʟ ᴛɪɢᴇʀs ᴅɪsᴀsᴛᴇʀs
- ❍ /wolves *:* ʟɪsᴛs ᴀʟʟ ᴡᴏʟғ ᴅɪsᴀsᴛᴇʀs
- ❍ /devlist *:* ʟɪsᴛs ᴀʟʟ ʜᴇʀᴏ ᴀssᴏᴄɪᴀᴛɪᴏɴ ᴍᴇᴍʙᴇʀs
- ❍ /addsudo  *:* ᴀᴅᴅs ᴀ ᴜsᴇʀ ᴛᴏ ᴅʀᴀɢᴏɴ
- ❍ /adddemon *:* ᴀᴅᴅs ᴀ ᴜsᴇʀ ᴛᴏ ᴅᴇᴍᴏɴ
- ❍ /addtiger *:* ᴀᴅᴅs ᴀ ᴜsᴇʀ ᴛᴏ ᴛɪɢᴇʀ
- ❍ /addwolf*:* ᴀᴅᴅs ᴀ ᴜsᴇʀ ᴛᴏ ᴡᴏʟғ
- ❍ `ᴀᴅᴅ ᴅᴇᴠ ᴅᴏᴇsɴᴛ ᴇxɪsᴛ, ᴅᴇᴠs sʜᴏᴜʟᴅ ᴋɴᴏᴡ ʜᴏᴡ ᴛᴏ ᴀᴅᴅ ᴛʜᴇᴍsᴇʟᴠᴇs`
+*列出所有特权用户：*
+ ❍ /sudolist*：* 列出所有超级管理员（Dragon）
+ ❍ /supportlist *：* 列出所有支持用户（Demon）
+ ❍ /tigers *：* 列出所有 Tiger 用户
+ ❍ /wolves *：* 列出所有白名单用户（Wolf）
+ ❍ /devlist *：* 列出所有开发者
+ ❍ /addsudo  *：* 将用户添加为超级管理员（Dragon）
+ ❍ /adddemon *：* 将用户添加为支持用户（Demon）
+ ❍ /addtiger *：* 将用户添加为 Tiger
+ ❍ /addwolf*：* 将用户添加为白名单用户（Wolf）
+ ❍ `添加开发者命令不存在，开发者应自行知道如何添加`
 
-*ᴘɪɴɢ:*
- ❍ /ping *:* ɢᴇᴛs ᴘɪɴɢ ᴛɪᴍᴇ ᴏғ ʙᴏᴛ ᴛᴏ ᴛᴇʟᴇɢʀᴀᴍ sᴇʀᴠᴇʀ
+*Ping：*
+ ❍ /ping *：* 获取机器人到 Telegram 服务器的延迟时间
 
-*ʙʀᴏᴀᴅᴄᴀsᴛ: (ʙᴏᴛ ᴏᴡɴᴇʀ ᴏɴʟʏ)*
-*ɴᴏᴛᴇ:* ᴛʜɪs sᴜᴘᴘᴏʀᴛs ʙᴀsɪᴄ ᴍᴀʀᴋᴅᴏᴡɴ
- ❍ /broadcastall *:* ʙʀᴏᴀᴅᴄᴀsᴛs ᴇᴠᴇʀʏᴡʜᴇʀᴇ
- ❍ broadcastusers *:* ʙʀᴏᴀᴅᴄᴀsᴛs ᴛᴏᴏ ᴀʟʟ ᴜsᴇʀs
- ❍ /broadcastgroups *:* ʙʀᴏᴀᴅᴄᴀsᴛs ᴛᴏᴏ ᴀʟʟ ɢʀᴏᴜᴘs
+*广播：（仅限机器人所有者）*
+*注意：* 支持基本 Markdown 格式
+ ❍ /broadcastall *：* 向所有地方广播
+ ❍ broadcastusers *：* 向所有用户广播
+ ❍ /broadcastgroups *：* 向所有群组广播
 
 
 
-`⚠️ ʀᴇᴀᴅ ғʀᴏᴍ ᴛᴏᴘ`
-ᴠɪsɪᴛ [sᴜᴘᴘᴏʀᴛ ᴄʜᴀᴛ]("https://t.me{SUPPORT_CHAT}") ғᴏʀ ᴍᴏʀᴇ ɪɴғᴏʀᴍᴀᴛɪᴏɴ.
+`⚠️ 请从顶部开始阅读`
+访问[支持群]("https://t.me{SUPPORT_CHAT}")获取更多信息。
 """
 
 SUDO_HANDLER = CommandHandler("addsudo", addsudo, run_async=True)
@@ -561,7 +561,7 @@ dispatcher.add_handler(SUPPORTLIST_HANDLER)
 dispatcher.add_handler(SUDOLIST_HANDLER)
 dispatcher.add_handler(DEVLIST_HANDLER)
 
-__mod_name__ = "Dᴇᴠꜱ"
+__mod_name__ = "超级管理"
 __handlers__ = [
     SUDO_HANDLER,
     SUPPORT_HANDLER,

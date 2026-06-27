@@ -71,18 +71,18 @@ button_row = [
 async def close_ws(event):
     if event.is_group:
         if not (await is_register_admin(event.input_chat, event.message.sender_id)):
-            await event.reply("🤦🏻‍♂️ʏᴏᴜ ᴀʀᴇ ɴᴏᴛ ᴀᴅᴍɪɴ ꜱᴏ ʏᴏᴜ ᴄᴀɴ'ᴛ ᴜꜱᴇ ᴛʜɪꜱ ᴄᴏᴍᴍᴀɴᴅ...")
+            await event.reply("🤦🏻‍♂️您不是管理员，无法使用此命令……")
             return
 
     if not event.is_group:
-        await event.reply("ʏᴏᴜ ᴄᴀɴ ᴏɴʟʏ ᴇɴᴀʙʟᴇ ɴɪɢʜᴛ ᴍᴏᴅᴇ ɪɴ ɢʀᴏᴜᴘꜱ.")
+        await event.reply("夜间模式只能在群组中启用。")
         return
     if is_nightmode_indb(str(event.chat_id)):
-        await event.reply("ᴛʜɪꜱ ᴄʜᴀᴛ ɪꜱ ʜᴀꜱ ᴀʟʀᴇᴀᴅʏ ᴇɴᴀʙʟᴇᴅ ɴɪɢʜᴛ ᴍᴏᴅᴇ")
+        await event.reply("该群组已启用夜间模式")
         return
     add_nightmode(str(event.chat_id))
     await event.reply(
-        f"​ᴀᴅᴅᴇᴅ ᴄʜᴀᴛ​ ​​: {event.chat.title} \n​ɪᴅ​: {event.chat_id} ᴛᴏ ᴅᴀᴛᴀʙᴀꜱᴇ. \n**ᴛʜɪꜱ ɢʀᴏᴜᴘ ᴡɪʟʟ ʙᴇ ᴄʟᴏꜱᴇᴅ ᴏɴ 12ᴀᴍ(ɪꜱᴛ) ᴀɴᴅ ᴡɪʟʟ ᴏᴘᴇɴᴇᴅ ᴏɴ 06ᴀᴍ(ɪꜱᴛ)**",
+        f"已添加群组：{event.chat.title} \nID：{event.chat_id} 到数据库。\n**该群组将在 12:00 AM（IST）关闭，06:00 AM（IST）开放**",
        buttons=button_row )
 
 
@@ -90,18 +90,18 @@ async def close_ws(event):
 async def disable_ws(event):
     if event.is_group:
         if not (await is_register_admin(event.input_chat, event.message.sender_id)):
-            await event.reply("🤦🏻‍♂️ʏᴏᴜ ᴀʀᴇ ɴᴏᴛ ᴀᴅᴍɪɴ ꜱᴏ ʏᴏᴜ ᴄᴀɴ'ᴛ ᴜꜱᴇ ᴛʜɪꜱ ᴄᴏᴍᴍᴀɴᴅ..")
+            await event.reply("🤦🏻‍♂️您不是管理员，无法使用此命令……")
             return
 
     if not event.is_group:
-        await event.reply("ʏᴏᴜ ᴄᴀɴ ᴏɴʟʏ ᴅɪꜱᴀʙʟᴇ ɴɪɢʜᴛ ᴍᴏᴅᴇ ɪɴ ɢʀᴏᴜᴘꜱ.")
+        await event.reply("夜间模式只能在群组中禁用。")
         return
     if not is_nightmode_indb(str(event.chat_id)):
-        await event.reply("ᴛʜɪꜱ ᴄʜᴀᴛ ɪꜱ ​ɴᴏᴛ ᴀʟʀᴇᴀᴅʏ ᴇɴᴀʙʟᴇᴅ ɴɪɢʜᴛ ᴍᴏᴅᴇ")
+        await event.reply("该群组尚未启用夜间模式")
         return
     rmnightmode(str(event.chat_id))
     await event.reply(
-        f"ʀᴇᴍᴏᴠᴇᴅ ᴄʜᴀᴛ : {event.chat.title} \n​ɪᴅ​:  {event.chat_id} ꜰʀᴏᴍ ᴅᴀᴛᴀʙᴀꜱᴇ."
+        f"已从数据库移除群组：{event.chat.title} \nID：{event.chat_id}"
     )
 
 
@@ -113,7 +113,7 @@ async def job_close():
         try:
             await tbot.send_message(
                 int(warner.chat_id),
-                f"12:00 ᴀᴍ, ɢʀᴏᴜᴘ ɪꜱ ᴄʟᴏꜱɪɴɢ ᴛɪʟʟ 6 ᴀᴍ.\n ɴɪɢʜᴛ ᴍᴏᴅᴇ ꜱᴛᴀʀᴛᴇᴅ ! \n**ᴘᴏᴡᴇʀᴇᴅ ʙʏ {BOT_NAME}**",buttons=button_row)
+                f"现在是 12:00 AM，群组将关闭至 6:00 AM。\n夜间模式已启动！\n**由 {BOT_NAME} 提供支持**",buttons=button_row)
             await tbot(
                 functions.messages.EditChatDefaultBannedRightsRequest(
                     peer=int(warner.chat_id), banned_rights=hehes
@@ -137,7 +137,7 @@ async def job_open():
         try:
             await tbot.send_message(
                 int(warner.chat_id),
-                f"06:00 ᴀᴍ, ɢʀᴏᴜᴘ ɪꜱ ᴏᴘᴇɴɪɴɢ.\n**ᴘᴏᴡᴇʀᴇᴅ ʙʏ {BOT_NAME}**",
+                f"现在是 06:00 AM，群组已开放。\n**由 {BOT_NAME} 提供支持**",
             )
             await tbot(
                 functions.messages.EditChatDefaultBannedRightsRequest(
@@ -154,12 +154,12 @@ scheduler.add_job(job_open, trigger="cron", hour=6, minute=1)
 scheduler.start()
 
 __help__ = """
-*ᴀᴅᴍɪɴs ᴏɴʟʏ*
+*仅限管理员*
 
- ❍ /nightmode *:* ᴀᴅᴅs ɢʀᴏᴜᴘ ᴛᴏ ɴɪɢʜᴛᴍᴏᴅᴇ ᴄʜᴀᴛs
- ❍ /rmnight *:* ʀᴇᴍᴏᴠᴇs ɢʀᴏᴜᴘ ғʀᴏᴍ ɴɪɢʜᴛᴍᴏᴅᴇ ᴄʜᴀᴛs
+ ❍ /nightmode *：* 将群组添加到夜间模式列表
+ ❍ /rmnight *：* 将群组从夜间模式列表中移除
 
-*ɴᴏᴛᴇ:* ɴɪɢʜᴛ ᴍᴏᴅᴇ ᴄʜᴀᴛs ɢᴇᴛ ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ ᴄʟᴏsᴇᴅ ᴀᴛ 12 ᴀᴍ(ɪsᴛ) ᴀɴᴅ ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ ᴏᴘᴇɴɴᴇᴅ ᴀᴛ 6 ᴀᴍ(ɪsᴛ) ᴛᴏ ᴘʀᴇᴠᴇɴᴛ ɴɪɢʜᴛ sᴘᴀᴍs.
+*注意：* 夜间模式群组将在 12:00 AM（IST）自动关闭，在 6:00 AM（IST）自动开放，以防止夜间刷屏。
 """
 
-__mod_name__ = "Nɪɢʜᴛ​"
+__mod_name__ = "夜间模式"

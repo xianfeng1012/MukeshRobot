@@ -77,8 +77,7 @@ def get(update, context, notename, show_none=True, no_format=False):
                 except BadRequest as excp:
                     if excp.message == "Message to forward not found":
                         message.reply_text(
-                            "This message seems to have been lost - I'll remove it "
-                            "from your notes list."
+                            "此消息似乎已丢失，我将从笔记列表中移除它。"
                         )
                         sql.rm_note(chat_id, notename)
                     else:
@@ -91,10 +90,7 @@ def get(update, context, notename, show_none=True, no_format=False):
                 except BadRequest as excp:
                     if excp.message == "Message to forward not found":
                         message.reply_text(
-                            "Looks like the original sender of this note has deleted "
-                            "their message - sorry! Get your bot admin to start using a "
-                            "message dump to avoid this. I'll remove this note from "
-                            "your saved notes."
+                            "此笔记的原始发送者似乎已删除了他们的消息，抱歉！请让机器人管理员使用消息转储以避免此问题。我将从已保存的笔记中移除此笔记。"
                         )
                         sql.rm_note(chat_id, notename)
                     else:
@@ -176,21 +172,16 @@ def get(update, context, notename, show_none=True, no_format=False):
             except BadRequest as excp:
                 if excp.message == "Entity_mention_user_invalid":
                     message.reply_text(
-                        "Looks like you tried to mention someone I've never seen before. If you really "
-                        "want to mention them, forward one of their messages to me, and I'll be able "
-                        "to tag them!"
+                        "您尝试提及的用户我从未见过。如果您确实想提及他们，请将他们的一条消息转发给我，这样我就能标记他们了！"
                     )
                 elif FILE_MATCHER.match(note.value):
                     message.reply_text(
-                        "This note was an incorrectly imported file from another bot - I can't use "
-                        "it. If you really need it, you'll have to save it again. In "
-                        "the meantime, I'll remove it from your notes list."
+                        "此笔记是从其他机器人错误导入的文件，我无法使用它。如果您确实需要它，请重新保存。我将先从笔记列表中移除它。"
                     )
                     sql.rm_note(chat_id, notename)
                 else:
                     message.reply_text(
-                        "This note could not be sent, as it is incorrectly formatted. Ask in "
-                        f"@{SUPPORT_CHAT} if you can't figure out why!"
+                        f"此笔记因格式不正确而无法发送。如果您不明白原因，请在 @{SUPPORT_CHAT} 提问！"
                     )
                     EVENT_LOGS.exception(
                         "Could not parse message #%s in chat %s", notename, str(chat_id)
@@ -198,7 +189,7 @@ def get(update, context, notename, show_none=True, no_format=False):
                     EVENT_LOGS.warning("Message was: %s", str(note.value))
         return
     elif show_none:
-        message.reply_text("This note doesn't exist")
+        message.reply_text("未找到笔记")
 
 
 @connection_status
@@ -209,7 +200,7 @@ def cmd_get(update: Update, context: CallbackContext):
     elif len(args) >= 1:
         get(update, context, args[0].lower(), show_none=True)
     else:
-        update.effective_message.reply_text("Get rekt")
+        update.effective_message.reply_text("请提供笔记名")
 
 
 @connection_status
@@ -231,7 +222,7 @@ def slash_get(update: Update, context: CallbackContext):
         note_name = str(noteid).strip(">").split()[1]
         get(update, context, note_name, show_none=False)
     except IndexError:
-        update.effective_message.reply_text("Wrong Note ID 😾")
+        update.effective_message.reply_text("笔记编号错误 😾")
 
 
 @user_admin
@@ -243,7 +234,7 @@ def save(update: Update, context: CallbackContext):
     note_name, text, data_type, content, buttons = get_note_type(msg)
     note_name = note_name.lower()
     if data_type is None:
-        msg.reply_text("Dude, there's no note")
+        msg.reply_text("没有内容可保存为笔记")
         return
 
     sql.add_note_to_db(
@@ -251,24 +242,19 @@ def save(update: Update, context: CallbackContext):
     )
 
     msg.reply_text(
-        f"Yas! Added `{note_name}`.\nGet it with /get `{note_name}`, or `#{note_name}`",
+        f"笔记已保存！添加了 `{note_name}`。\n用 /get `{note_name}` 或 `#{note_name}` 获取",
         parse_mode=ParseMode.MARKDOWN,
     )
 
     if msg.reply_to_message and msg.reply_to_message.from_user.is_bot:
         if text:
             msg.reply_text(
-                "Seems like you're trying to save a message from a bot. Unfortunately, "
-                "bots can't forward bot messages, so I can't save the exact message. "
-                "\nI'll save all the text I can, but if you want more, you'll have to "
-                "forward the message yourself, and then save it."
+                "您似乎正在尝试保存来自机器人的消息。遗憾的是，机器人无法转发机器人消息，所以我无法保存完整消息。\n"
+                "我会尽量保存所有文字内容，但如果您需要完整内容，请自行转发该消息后再保存。"
             )
         else:
             msg.reply_text(
-                "Bots are kinda handicapped by telegram, making it hard for bots to "
-                "interact with other bots, so I can't save this message "
-                "like I usually would - do you mind forwarding it and "
-                "then saving that new message? Thanks!"
+                "Telegram 对机器人间交互有限制，我无法像平常一样保存此消息。请您手动转发该消息后再保存，谢谢！"
             )
         return
 
@@ -282,9 +268,9 @@ def clear(update: Update, context: CallbackContext):
         notename = args[0].lower()
 
         if sql.rm_note(chat_id, notename):
-            update.effective_message.reply_text("Successfully removed note.")
+            update.effective_message.reply_text("笔记已删除。")
         else:
-            update.effective_message.reply_text("That's not a note in my database!")
+            update.effective_message.reply_text("数据库中没有该笔记！")
 
 
 def clearall(update: Update, context: CallbackContext):
@@ -293,21 +279,21 @@ def clearall(update: Update, context: CallbackContext):
     member = chat.get_member(user.id)
     if member.status != "creator" :
         update.effective_message.reply_text(
-            "Only the chat owner can clear all notes at once."
+            "只有群主才能一次性删除所有笔记。"
         )
     else:
         buttons = InlineKeyboardMarkup(
             [
                 [
                     InlineKeyboardButton(
-                        text="Delete all notes", callback_data="notes_rmall"
+                        text="删除所有笔记", callback_data="notes_rmall"
                     )
                 ],
-                [InlineKeyboardButton(text="Cancel", callback_data="notes_cancel")],
+                [InlineKeyboardButton(text="取消", callback_data="notes_cancel")],
             ]
         )
         update.effective_message.reply_text(
-            f"Are you sure you would like to clear ALL notes in {chat.title}? This action cannot be undone.",
+            f"您确定要删除 {chat.title} 中的所有笔记吗？此操作无法撤销。",
             reply_markup=buttons,
             parse_mode=ParseMode.MARKDOWN,
         )
@@ -325,23 +311,23 @@ def clearall_btn(update: Update, context: CallbackContext):
                 for notename in note_list:
                     note = notename.name.lower()
                     sql.rm_note(chat.id, note)
-                message.edit_text("Deleted all notes.")
+                message.edit_text("所有笔记已删除。")
             except BadRequest:
                 return
 
         if member.status == "administrator":
-            query.answer("Only owner of the chat can do this.")
+            query.answer("只有群主才能执行此操作。")
 
         if member.status == "member":
-            query.answer("You need to be admin to do this.")
+            query.answer("您需要是管理员才能执行此操作。")
     elif query.data == "notes_cancel":
         if member.status == "creator" or query.from_user.id in DRAGONS:
-            message.edit_text("Clearing of all notes has been cancelled.")
+            message.edit_text("已取消删除所有笔记的操作。")
             return
         if member.status == "administrator":
-            query.answer("Only owner of the chat can do this.")
+            query.answer("只有群主才能执行此操作。")
         if member.status == "member":
-            query.answer("You need to be admin to do this.")
+            query.answer("您需要是管理员才能执行此操作。")
 
 
 @connection_status
@@ -349,7 +335,7 @@ def list_notes(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
     note_list = sql.get_all_chat_notes(chat_id)
     notes = len(note_list) + 1
-    msg = "Get note by `/notenumber` or `#notename` \n\n  *ID*    *Note* \n"
+    msg = "用 `/笔记编号` 或 `#笔记名` 获取笔记 \n\n  *编号*    *笔记* \n"
     for note_id, note in zip(range(1, notes), note_list):
         if note_id < 10:
             note_name = f"`{note_id:2}.`  `#{(note.name.lower())}`\n"
@@ -361,7 +347,7 @@ def list_notes(update: Update, context: CallbackContext):
         msg += note_name
 
     if not note_list:
-        update.effective_message.reply_text("No notes in this chat!")
+        update.effective_message.reply_text("暂无已保存的笔记！")
 
     elif len(msg) != 0:
         update.effective_message.reply_text(msg, parse_mode=ParseMode.MARKDOWN)
@@ -468,9 +454,7 @@ def __import_data__(chat_id, data):
                 chat_id,
                 document=output,
                 filename="failed_imports.txt",
-                caption="These files/photos failed to import due to originating "
-                "from another bot. This is a telegram API restriction, and can't "
-                "be avoided. Sorry for the inconvenience!",
+                caption="以下文件/图片因来源于其他机器人而导入失败。这是 Telegram API 的限制，无法避免。对此造成的不便深感抱歉！",
             )
 
 
@@ -484,29 +468,24 @@ def __migrate__(old_chat_id, new_chat_id):
 
 def __chat_settings__(chat_id, user_id):
     notes = sql.get_all_chat_notes(chat_id)
-    return f"There are `{len(notes)}` notes in this chat."
+    return f"此群共有 `{len(notes)}` 条笔记。"
 
 
 __help__ = """
+ ❍ /get <笔记名>*:* 获取该名称的笔记
+ ❍ #<笔记名>*:* 同 /get
+ ❍ /notes 或 /saved*:* 列出此群的所有已保存笔记
 
- ❍ `/get <notename>`*:* get the note with this notename
- ❍ `#<notename>`*:* same as /get
- ❍ `/notes` or `/saved`*:* list all saved notes in this chat
- ❍ `/number` *:* Will pull the note of that number in the list. 
-If you would like to retrieve the contents of a note without any formatting, use `/get <notename> noformat`. This can \
-be useful when updating a current note.
-
-*Admins only:*
- ❍ `/save <notename> <notedata>`*:* saves notedata as a note with name notename
-A button can be added to a note by using standard markdown link syntax - the link should just be prepended with a \
-`buttonurl:` section, as such: `[somelink](buttonurl:example.com)`. Check `/markdownhelp` for more info.
- ❍ `/save <notename>`*:* save the replied message as a note with name notename
- ❍ `/clear <notename>`*:* clear note with this name
- ❍ `/removeallnotes`*:* removes all notes from the group
- *Note:* Note names are case-insensitive, and they are automatically converted to lowercase before getting saved.
+*仅管理员:*
+ ❍ /save <笔记名> <内容>*:* 将内容保存为指定名称的笔记。
+可用标准 Markdown 链接语法添加按钮，链接前加 `buttonurl:` 前缀，如：`[链接文本](buttonurl:example.com)`。
+ ❍ /save <笔记名>*:* 将被回复的消息保存为笔记
+ ❍ /clear <笔记名>*:* 删除该名称的笔记
+ ❍ /removeallnotes*:* 删除群内所有笔记
+ *注意:* 笔记名不区分大小写，保存前会自动转换为小写。
 """
 
-__mod_name__ = "Nᴏᴛᴇs"
+__mod_name__ = "笔记"
 
 GET_HANDLER = CommandHandler("get", cmd_get, run_async=True)
 HASH_GET_HANDLER = MessageHandler(Filters.regex(r"^#[^\s]+"), hash_get, run_async=True)

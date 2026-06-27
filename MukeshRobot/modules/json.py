@@ -26,7 +26,7 @@ async def _(event):
     if event.is_group:
         if not (await is_register_admin(event.input_chat, event.message.sender_id)):
             await event.reply(
-                "🥴 ɴᴇᴇᴅ ᴀᴅᴍɪɴ ᴩᴏᴡᴇʀ ᴛᴏ ᴜsᴇ ᴛʜɪs ɪɴ ɢʀᴏᴜᴩs﹐ ʙᴜᴛ ʏᴏᴜ ᴄᴀɴ ᴜsᴇ ɪᴛ ɪɴ ᴍʏ ᴩᴍ."
+                "🥴 在群组中使用此功能需要管理员权限，但你可以在私信中使用。"
             )
             return
 

@@ -144,14 +144,14 @@ if is_module_loaded(FILENAME):
             if disable_cmd in set(DISABLE_CMDS + DISABLE_OTHER):
                 sql.disable_command(chat.id, str(disable_cmd).lower())
                 update.effective_message.reply_text(
-                    f"Disabled the use of `{disable_cmd}`",
+                    f"已禁用 `{disable_cmd}` 命令的使用",
                     parse_mode=ParseMode.MARKDOWN,
                 )
             else:
-                update.effective_message.reply_text("That command can't be disabled")
+                update.effective_message.reply_text("该命令不能被禁用")
 
         else:
-            update.effective_message.reply_text("What should I disable?")
+            update.effective_message.reply_text("请指定要禁用的命令。")
 
     @connection_status
     @user_admin
@@ -164,14 +164,14 @@ if is_module_loaded(FILENAME):
             try:
                 module = importlib.import_module(disable_module)
             except:
-                update.effective_message.reply_text("Does that module even exist?")
+                update.effective_message.reply_text("该模块不存在。")
                 return
 
             try:
                 command_list = module.__command_list__
             except:
                 update.effective_message.reply_text(
-                    "Module does not contain command list!"
+                    "该模块不包含命令列表！"
                 )
                 return
 
@@ -191,19 +191,19 @@ if is_module_loaded(FILENAME):
             if disabled_cmds:
                 disabled_cmds_string = ", ".join(disabled_cmds)
                 update.effective_message.reply_text(
-                    f"Disabled the uses of `{disabled_cmds_string}`",
+                    f"已禁用以下命令的使用：`{disabled_cmds_string}`",
                     parse_mode=ParseMode.MARKDOWN,
                 )
 
             if failed_disabled_cmds:
                 failed_disabled_cmds_string = ", ".join(failed_disabled_cmds)
                 update.effective_message.reply_text(
-                    f"Commands `{failed_disabled_cmds_string}` can't be disabled",
+                    f"命令 `{failed_disabled_cmds_string}` 不能被禁用",
                     parse_mode=ParseMode.MARKDOWN,
                 )
 
         else:
-            update.effective_message.reply_text("What should I disable?")
+            update.effective_message.reply_text("请指定要禁用的命令。")
 
     @connection_status
     @user_admin
@@ -217,13 +217,13 @@ if is_module_loaded(FILENAME):
 
             if sql.enable_command(chat.id, enable_cmd):
                 update.effective_message.reply_text(
-                    f"Enabled the use of `{enable_cmd}`", parse_mode=ParseMode.MARKDOWN
+                    f"已启用 `{enable_cmd}` 命令的使用", parse_mode=ParseMode.MARKDOWN
                 )
             else:
-                update.effective_message.reply_text("Is that even disabled?")
+                update.effective_message.reply_text("该命令当前未被禁用。")
 
         else:
-            update.effective_message.reply_text("What should I enable?")
+            update.effective_message.reply_text("请指定要启用的命令。")
 
     @connection_status
     @user_admin
@@ -237,14 +237,14 @@ if is_module_loaded(FILENAME):
             try:
                 module = importlib.import_module(enable_module)
             except:
-                update.effective_message.reply_text("Does that module even exist?")
+                update.effective_message.reply_text("该模块不存在。")
                 return
 
             try:
                 command_list = module.__command_list__
             except:
                 update.effective_message.reply_text(
-                    "Module does not contain command list!"
+                    "该模块不包含命令列表！"
                 )
                 return
 
@@ -263,19 +263,19 @@ if is_module_loaded(FILENAME):
             if enabled_cmds:
                 enabled_cmds_string = ", ".join(enabled_cmds)
                 update.effective_message.reply_text(
-                    f"Enabled the uses of `{enabled_cmds_string}`",
+                    f"已启用以下命令的使用：`{enabled_cmds_string}`",
                     parse_mode=ParseMode.MARKDOWN,
                 )
 
             if failed_enabled_cmds:
                 failed_enabled_cmds_string = ", ".join(failed_enabled_cmds)
                 update.effective_message.reply_text(
-                    f"Are the commands `{failed_enabled_cmds_string}` even disabled?",
+                    f"命令 `{failed_enabled_cmds_string}` 当前未被禁用。",
                     parse_mode=ParseMode.MARKDOWN,
                 )
 
         else:
-            update.effective_message.reply_text("What should I enable?")
+            update.effective_message.reply_text("请指定要启用的命令。")
 
     @connection_status
     @user_admin
@@ -285,22 +285,22 @@ if is_module_loaded(FILENAME):
             for cmd in set(DISABLE_CMDS + DISABLE_OTHER):
                 result += f" - `{escape_markdown(cmd)}`\n"
             update.effective_message.reply_text(
-                f"The following commands are toggleable:\n{result}",
+                f"以下命令可以被禁用/启用：\n{result}",
                 parse_mode=ParseMode.MARKDOWN,
             )
         else:
-            update.effective_message.reply_text("No commands can be disabled.")
+            update.effective_message.reply_text("暂无可禁用的命令。")
 
     # do not async
     def build_curr_disabled(chat_id: Union[str, int]) -> str:
         disabled = sql.get_all_disabled(chat_id)
         if not disabled:
-            return "No commands are disabled!"
+            return "暂无已禁用的命令！"
 
         result = ""
         for cmd in disabled:
             result += " - `{}`\n".format(escape_markdown(cmd))
-        return "The following commands are currently restricted:\n{}".format(result)
+        return "以下命令当前已被禁用：\n{}".format(result)
 
     @connection_status
     def commands(update: Update, context: CallbackContext):
@@ -337,17 +337,17 @@ if is_module_loaded(FILENAME):
     dispatcher.add_handler(TOGGLE_HANDLER)
 
     __help__ = """
-    ❍ /cmds*:* ᴄʜᴇᴄᴋ ᴛʜᴇ ᴄᴜʀʀᴇɴᴛ sᴛᴀᴛᴜs ᴏғ ᴅɪsᴀʙʟᴇᴅ ᴄᴏᴍᴍᴀɴᴅs
+    ❍ /cmds*:* 查看本群当前已禁用命令的状态
 
-    *ᴀᴅᴍɪɴs ᴏɴʟʏ:*
-    ❍ /enable <ᴄᴍᴅ ɴᴀᴍᴇ>*:* ᴇɴᴀʙʟᴇ ᴛʜᴀᴛ ᴄᴏᴍᴍᴀɴᴅ
-    ❍ /disable <ᴄᴍᴅ ɴᴀᴍᴇ>*:* ᴅɪsᴀʙʟᴇ ᴛʜᴀᴛ ᴄᴏᴍᴍᴀɴᴅ
-    ❍ /enablemodule <ᴍᴏᴅᴜʟᴇ ɴᴀᴍᴇ>*:* ᴇɴᴀʙʟᴇ ᴀʟʟ ᴄᴏᴍᴍᴀɴᴅs ɪɴ ᴛʜᴀᴛ ᴍᴏᴅᴜʟᴇ
-    ❍ /disablemodule <ᴍᴏᴅᴜʟᴇ ɴᴀᴍᴇ>*:* ᴅɪsᴀʙʟᴇ ᴀʟʟ ᴄᴏᴍᴍᴀɴᴅs ɪɴ ᴛʜᴀᴛ ᴍᴏᴅᴜʟᴇ
-    ❍ /listcmds*:* ʟɪsᴛ ᴀʟʟ ᴘᴏssɪʙʟᴇ ᴛᴏɢɢʟᴇᴀʙʟᴇ ᴄᴏᴍᴍᴀɴᴅs
+    *仅管理员：*
+    ❍ /enable <命令名>*:* 启用该命令
+    ❍ /disable <命令名>*:* 禁用该命令
+    ❍ /enablemodule <模块名>*:* 启用该模块中的所有命令
+    ❍ /disablemodule <模块名>*:* 禁用该模块中的所有命令
+    ❍ /listcmds*:* 列出所有可被禁用/启用的命令
     """
 
-    __mod_name__ = "Dɪsᴀʙʟᴇ"
+    __mod_name__ = "禁用命令"
 
 else:
     DisableAbleCommandHandler = CommandHandler

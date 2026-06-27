@@ -29,7 +29,7 @@ async def bug(_, msg: Message):
     if msg.chat.username:
         chat_username = f"@{msg.chat.username}/`{msg.chat.id}`"
     else:
-        chat_username = f"ᴩʀɪᴠᴀᴛᴇ ɢʀᴏᴜᴩ/`{msg.chat.id}`"
+        chat_username = f"私人群组/`{msg.chat.id}`"
 
     bugs = content(msg)
     user_id = msg.from_user.id
@@ -42,35 +42,35 @@ async def bug(_, msg: Message):
     
 
     bug_report = f"""
-**#ʙᴜɢ : ** **tg://user?id={owner_id}**
+**#问题反馈 : ** **tg://user?id={owner_id}**
 
-**ʀᴇᴩᴏʀᴛᴇᴅ ʙʏ : ** **{mention}**
-**ᴜsᴇʀ ɪᴅ : ** **{user_id}**
-**ᴄʜᴀᴛ : ** **{chat_username}**
+**反馈者 : ** **{mention}**
+**用户 ID : ** **{user_id}**
+**群组 : ** **{chat_username}**
 
-**ʙᴜɢ : ** **{bugs}**
+**问题描述 : ** **{bugs}**
 
-**ᴇᴠᴇɴᴛ sᴛᴀᴍᴩ : ** **{datetimes}**"""
+**时间戳 : ** **{datetimes}**"""
 
     if msg.chat.type == "private":
-        await msg.reply_text("<b>» ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ɪs ᴏɴʟʏ ғᴏʀ ɢʀᴏᴜᴩs.</b>")
+        await msg.reply_text("<b>» 此命令仅限群组中使用。</b>")
         return
 
     if user_id == owner_id:
         if bugs:
             await msg.reply_text(
-                "<b>» ᴀʀᴇ ʏᴏᴜ ᴄᴏᴍᴇᴅʏ ᴍᴇ 🤣, ʏᴏᴜ'ʀᴇ ᴛʜᴇ ᴏᴡɴᴇʀ ᴏғ ᴛʜᴇ ʙᴏᴛ.</b>",
+                "<b>» 你在逗我吗 🤣，你就是机器人的主人。</b>",
             )
             return
         else:
-            await msg.reply_text("ᴄʜᴜᴍᴛɪʏᴀ ᴏᴡɴᴇʀ!")
+            await msg.reply_text("主人！")
     elif user_id != owner_id:
         if bugs:
             await msg.reply_text(
-                f"<b>ʙᴜɢ ʀᴇᴩᴏʀᴛ : {bugs}</b>\n\n"
-                "<b>» ʙᴜɢ sᴜᴄᴄᴇssғᴜʟʟʏ ʀᴇᴩᴏʀᴛᴇᴅ ᴀᴛ sᴜᴩᴩᴏʀᴛ ᴄʜᴀᴛ !</b>",
+                f"<b>问题反馈：{bugs}</b>\n\n"
+                "<b>» 问题已成功反馈至支持群组！</b>",
                 reply_markup=InlineKeyboardMarkup(
-                    [[InlineKeyboardButton("• ᴄʟᴏsᴇ •", callback_data=f"close_reply")]]
+                    [[InlineKeyboardButton("• 关闭 •", callback_data=f"close_reply")]]
                 ),
             )
             await Client.send_photo(
@@ -79,10 +79,10 @@ async def bug(_, msg: Message):
                 caption=f"{bug_report}",
                 reply_markup=InlineKeyboardMarkup(
                     [
-                        [InlineKeyboardButton("• ᴠɪᴇᴡ ʙᴜɢ •", url=f"{msg.link}")],
+                        [InlineKeyboardButton("• 查看问题 •", url=f"{msg.link}")],
                         [
                             InlineKeyboardButton(
-                                "• ᴄʟᴏsᴇ •", callback_data="close_send_photo"
+                                "• 关闭 •", callback_data="close_send_photo"
                             )
                         ],
                     ]
@@ -90,7 +90,7 @@ async def bug(_, msg: Message):
             )
         else:
             await msg.reply_text(
-                f"<b>» ɴᴏ ʙᴜɢ ᴛᴏ ʀᴇᴩᴏʀᴛ !</b>",
+                f"<b>» 请提供问题描述内容！</b>",
             )
 
 
@@ -106,14 +106,14 @@ async def close_send_photo(_, CallbackQuery):
     )
     if not is_Admin.can_delete_messages:
         return await CallbackQuery.answer(
-            "ʏᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ʀɪɢʜᴛs ᴛᴏ ᴄʟᴏsᴇ ᴛʜɪs.", show_alert=True
+            "你没有权限关闭此消息。", show_alert=True
         )
     else:
         await CallbackQuery.message.delete()
 
 
 __help__ = """
-*ғᴏʀ ʀᴇᴩᴏʀᴛɪɴɢ ᴀ ʙᴜɢ *
- ❍ /bug *:* ᴛᴏ ʀᴇᴩᴏʀᴛ ᴀ ʙᴜɢ ᴀᴛ sᴜᴩᴩᴏʀᴛ ᴄʜᴀᴛ.
+*反馈问题*
+ ❍ /bug *：* 向支持群组反馈一个问题。
 """
-__mod_name__ = "Bᴜɢ"
+__mod_name__ = "反馈问题"

@@ -212,20 +212,20 @@ def table(update: Update, context: CallbackContext):
 
 
 __help__ = """
- ❍ /runs *:* ʀᴇᴘʟʏ ᴀ ʀᴀɴᴅᴏᴍ sᴛʀɪɴɢ ғʀᴏᴍ ᴀɴ ᴀʀʀᴀʏ ᴏғ ʀᴇᴘʟɪᴇs
- ❍ /slap *:* sʟᴀᴘ ᴀ ᴜsᴇʀ, ᴏʀ ɢᴇᴛ sʟᴀᴘᴘᴇᴅ ɪғ ɴᴏᴛ ᴀ ʀᴇᴘʟʏ
- ❍ /shrug *:* ɢᴇᴛ sʜʀᴜɢ xᴅ
- ❍ /table *:* ɢᴇᴛ ғʟɪᴘ/ᴜɴғʟɪᴘ :ᴠ
- ❍ /decide *:* ʀᴀɴᴅᴏᴍʟʏ ᴀɴsᴡᴇʀs ʏᴇs/ɴᴏ/ᴍᴀʏʙᴇ
- ❍ /toss *:* ᴛᴏssᴇs ᴀ ᴄᴏɪɴ
- ❍ /bluetext *:* ᴄʜᴇᴄᴋ ᴜʀsᴇʟғ :ᴠ
- ❍ /roll *:* ʀᴏʟʟ ᴀ ᴅɪᴄᴇ
- ❍ /rlg *:* ᴊᴏɪɴ ᴇᴀʀs,ɴᴏsᴇ,ᴍᴏᴜᴛʜ ᴀɴᴅ ᴄʀᴇᴀᴛᴇ ᴀɴ ᴇᴍᴏ ;-;
- ❍ /shout  <ᴋᴇʏᴡᴏʀᴅ>*:* ᴡʀɪᴛᴇ ᴀɴʏᴛʜɪɴɢ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ɢɪᴠᴇ ʟᴏᴜᴅ sʜᴏᴜᴛ
- ❍ /weebify  <ᴛᴇxᴛ>*:* ʀᴇᴛᴜʀɴs ᴀ ᴡᴇᴇʙɪғɪᴇᴅ ᴛᴇxᴛ
- ❍ /sanitize *:* ᴀʟᴡᴀʏs ᴜsᴇ ᴛʜɪs ʙᴇғᴏʀᴇ /ᴘᴀᴛ ᴏʀ ᴀɴʏ ᴄᴏɴᴛᴀᴄᴛ
- ❍ /pat *:* ᴘᴀᴛs ᴀ ᴜsᴇʀ, ᴏʀ ɢᴇᴛ ᴘᴀᴛᴛᴇᴅ
- ❍ /8ball *:* ᴘʀᴇᴅɪᴄᴛs ᴜsɪɴɢ 8ʙᴀʟʟ ᴍᴇᴛʜᴏᴅ 
+ ❍ /runs *:* 从回复列表中随机发送一条回复
+ ❍ /slap *:* 拍打某用户，若未回复则自己被拍
+ ❍ /shrug *:* 发送耸肩表情
+ ❍ /table *:* 掀桌/放桌表情
+ ❍ /decide *:* 随机回答是/否/也许
+ ❍ /toss *:* 抛硬币
+ ❍ /bluetext *:* 蓝字挑战（点击试试）
+ ❍ /roll *:* 掷骰子
+ ❍ /rlg *:* 随机组合耳朵、鼻子、嘴巴创建表情
+ ❍ /shout <关键词>*:* 大声喊出任何内容
+ ❍ /weebify <文字>*:* 将文字转换为二次元风格
+ ❍ /sanitize *:* 在 /pat 或任何接触命令前使用
+ ❍ /pat *:* 拍拍某用户，若未回复则自己被拍
+ ❍ /8ball *:* 使用 8 球预测法回答问题
 """
 
 SANITIZE_HANDLER = DisableAbleCommandHandler("sanitize", sanitize, run_async=True)
@@ -256,7 +256,7 @@ dispatcher.add_handler(DECIDE_HANDLER)
 dispatcher.add_handler(EIGHTBALL_HANDLER)
 dispatcher.add_handler(TABLE_HANDLER)
 
-__mod_name__ = "Fᴜɴ"
+__mod_name__ = "娱乐"
 __command_list__ = [
     "runs",
     "slap",

@@ -43,7 +43,7 @@ async def _(event):
     creator = chat.creator
     if event.is_private:
         return await event.respond(
-            "__ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ᴄᴀɴ ʙᴇ ᴜsᴇ ɪɴ ɢʀᴏᴜᴘs ᴀɴᴅ ᴄʜᴀɴɴᴇʟs!__"
+            "__此命令只能在群组和频道中使用！__"
         )
 
     is_admin = False
@@ -61,13 +61,13 @@ async def _(event):
         ):
             is_admin = True
     if not is_admin:
-        return await event.respond("__ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴜɴᴍᴜᴛᴇᴀʟʟ!__")
+        return await event.respond("__只有管理员才能执行解封全体操作！__")
 
     if not admin and not creator:
-        await event.reply("`ɪ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴇɴᴏᴜɢʜ ᴘᴇʀᴍɪssɪᴏɴs!`")
+        await event.reply("`我没有足够的权限！`")
         return
 
-    done = await event.reply("sᴇᴀʀᴄʜɪɴɢ ᴘᴀʀᴛɪᴄɪᴘᴀɴᴛ ʟɪsᴛs")
+    done = await event.reply("正在获取成员列表……")
     p = 0
     async for i in telethn.iter_participants(
         event.chat_id, filter=ChannelParticipantsKicked, aggressive=True
@@ -86,9 +86,9 @@ async def _(event):
             p += 1
 
     if p == 0:
-        await done.edit("ɴᴏ ᴏɴᴇ ɪs ʙᴀɴɴᴇᴅ ɪɴ ᴛʜɪs ᴄʜᴀᴛ")
+        await done.edit("该群组没有被封禁的成员")
         return
-    required_string = "sᴜᴄᴇssғᴜʟʟʏ ᴜɴʙᴀɴɴᴇᴅ **{}** ᴜsᴇʀs"
+    required_string = "已成功解封 **{}** 名用户"
     await event.reply(required_string.format(p))
 
 
@@ -96,7 +96,7 @@ async def _(event):
 async def _(event):
     if event.is_private:
         return await event.respond(
-            "__This command can be use in groups and channels!__"
+            "__此命令只能在群组和频道中使用！__"
         )
 
     is_admin = False
@@ -114,17 +114,17 @@ async def _(event):
         ):
             is_admin = True
     if not is_admin:
-        return await event.respond("__ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴜɴᴍᴜᴛᴇᴀʟʟ!__")
+        return await event.respond("__只有管理员才能执行解除禁言全体操作！__")
     chat = await event.get_chat()
     admin = chat.admin_rights.ban_users
     creator = chat.creator
 
     # Well
     if not admin and not creator:
-        await event.reply("`I don't have enough permissions!`")
+        await event.reply("`我没有足够的权限！`")
         return
 
-    done = await event.reply("Working ...")
+    done = await event.reply("处理中……")
     p = 0
     async for i in telethn.iter_participants(
         event.chat_id, filter=ChannelParticipantsBanned, aggressive=True
@@ -146,9 +146,9 @@ async def _(event):
             p += 1
 
     if p == 0:
-        await done.edit("ɴᴏ ᴏɴᴇ ɪs ᴍᴜᴛᴇᴅ ɪɴ ᴛʜɪs ᴄʜᴀᴛ")
+        await done.edit("该群组没有被禁言的成员")
         return
-    required_string = "sᴜᴄᴇssғᴜʟʟʏ ᴜɴᴍᴜᴛᴇᴅ **{}** ᴜsᴇʀs"
+    required_string = "已成功解除 **{}** 名用户的禁言"
     await event.reply(required_string.format(p))
 
 
@@ -160,10 +160,10 @@ async def get_users(show):
         return
     info = await telethn.get_entity(show.chat_id)
     title = info.title or "this chat"
-    mentions = f"ᴜsᴇʀs ɪɴ {title}: \n"
+    mentions = f"{title} 的用户列表：\n"
     async for user in telethn.iter_participants(show.chat_id):
         mentions += (
-            f"\nᴅᴇʟᴇᴛᴇᴅ ᴀᴄᴄᴏᴜɴᴛs  {user.id}"
+            f"\n已注销账号  {user.id}"
             if user.deleted
             else f"\n[{user.first_name}](tg://user?id={user.id}) ❣ {user.id}"
         )
@@ -173,20 +173,20 @@ async def get_users(show):
     await telethn.send_file(
         show.chat_id,
         "userslist.txt",
-        caption=f"ᴜsᴇʀs ɪɴ {title}",
+        caption=f"{title} 的用户列表",
         reply_to=show.id,
     )
 
     os.remove("userslist.txt")
 
 
-__mod_name__ = "Aᴅᴠᴀɴᴄᴇ"
+__mod_name__ = "解封全体"
 __help__ = """
 
-➥ /unbanall : ᴜɴʙᴀɴ ᴀʟʟ ᴍᴀᴍʙᴇʀ 
+➥ /unbanall : 解封群内所有被封禁成员
 
-➥ /unmuteall : ᴜɴᴍᴜᴛᴇ ᴀʟʟ ᴍᴀᴍʙᴇʀ
+➥ /unmuteall : 解除群内所有成员的禁言
 
-➥ /users : ɢᴇᴛ ɢʀᴏᴜᴘ ᴜsᴇʀs ʟɪsᴛ
+➥ /users : 获取群组用户列表
 
 """

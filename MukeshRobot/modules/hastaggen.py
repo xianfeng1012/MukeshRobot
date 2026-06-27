@@ -10,14 +10,14 @@ async def hastag(bot, message):
         res = requests.get(f"https://mukesh-api.vercel.app/hastag?query={text}").json()["results"]
 
     except IndexError:
-        return await message.reply_text("Example:\n\n`/hastag python`")
+        return await message.reply_text("示例：\n\n`/hastag python`")
         
     
-    await message.reply_text(f"ʜᴇʀᴇ ɪs ʏᴏᴜʀ  ʜᴀsᴛᴀɢ :\n<pre>{res}</pre>", quote=True)
+    await message.reply_text(f"你的话题标签如下：\n<pre>{res}</pre>", quote=True)
     
-__mod_name__ = "Hᴀsʜᴛᴀɢ"
+__mod_name__ = "标签生成"
 __help__= """
-**Yᴏᴜ ᴄᴀɴ ᴜsᴇ ᴛʜɪs ʜᴀsʜᴛᴀɢ ɢᴇɴᴇʀᴀᴛᴏʀ ᴡʜɪᴄʜ ᴡɪʟʟ ɢɪᴠᴇ ʏᴏᴜ ᴛʜᴇ ᴛᴏᴘ 𝟹𝟶 ᴀɴᴅ ᴍᴏʀᴇ ʜᴀsʜᴛᴀɢs ʙᴀsᴇᴅ ᴏғғ ᴏғ ᴏɴᴇ ᴋᴇʏᴡᴏʀᴅ sᴇʟᴇᴄᴛɪᴏɴ.**
-° /hastag enter word to generate hastag.
-°Exᴀᴍᴘʟᴇ: ` /hastag python `"""
+**你可以使用此话题标签生成器，根据一个关键词生成前 30 个及更多相关标签。**
+° /hastag 输入词语即可生成话题标签。
+°示例：` /hastag python `"""
 

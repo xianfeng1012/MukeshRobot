@@ -12,29 +12,29 @@ async def carbon_func(_, message):
         if message.reply_to_message.text:
             txt = message.reply_to_message.text
         else:
-            return await message.reply_text("ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴍᴇssᴀɢᴇ ᴏʀ ɢɪᴠᴇ sᴏᴍᴇ ᴛᴇxᴛ.")
+            return await message.reply_text("请回复一条消息或提供文本内容。")
     else:
         try:
             txt = message.text.split(None, 1)[1]
         except IndexError:
-            return await message.reply_text("ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴍᴇssᴀɢᴇ ᴏʀ ɢɪᴠᴇ sᴏᴍᴇ ᴛᴇxᴛ.")
-    m = await message.reply_text("ɢᴇɴᴇʀᴀᴛɪɴɢ ᴄᴀʀʙᴏɴ...")
+            return await message.reply_text("请回复一条消息或提供文本内容。")
+    m = await message.reply_text("正在生成代码美化图片……")
     carbon = await make_carbon(txt)
-    await m.edit_text("ᴜᴩʟᴏᴀᴅɪɴɢ ɢᴇɴᴇʀᴀᴛᴇᴅ ᴄᴀʀʙᴏɴ...")
+    await m.edit_text("正在上传生成的图片……")
     await pbot.send_photo(
         message.chat.id,
         photo=carbon,
-        caption=f"» ʀᴇᴏ̨ᴜᴇsᴛᴇᴅ ʙʏ : {message.from_user.mention}",
+        caption=f"» 请求者：{message.from_user.mention}",
     )
     await m.delete()
     carbon.close()
 
-__mod_name__ = "Cᴀʀʙᴏɴ"
+__mod_name__ = "代码美化"
 
 __help__ = """
 
-ᴍᴀᴋᴇs ᴀ ᴄᴀʀʙᴏɴ ᴏғ ᴛʜᴇ ɢɪᴠᴇɴ ᴛᴇxᴛ ᴀɴᴅ sᴇɴᴅ ɪᴛ ᴛᴏ ʏᴏᴜ.
+将给定文本生成代码美化图片并发送给您。
 
-❍ /carbon *:* ᴍᴀᴋᴇs ᴄᴀʀʙᴏɴ ɪғ ʀᴇᴩʟɪᴇᴅ ᴛᴏ ᴀ ᴛᴇxᴛ
+❍ /carbon *:* 回复一条文本消息或直接携带文本，生成代码美化图片。
 
  """

@@ -22,7 +22,7 @@ def wiki(update: Update, context: CallbackContext):
         res = wikipedia.summary(search)
     except DisambiguationError as e:
         update.message.reply_text(
-            "Disambiguated pages found! Adjust your query accordingly.\n<i>{}</i>".format(
+            "找到多个同名页面！请调整搜索词后重试。\n<i>{}</i>".format(
                 e
             ),
             parse_mode=ParseMode.HTML,
@@ -34,7 +34,7 @@ def wiki(update: Update, context: CallbackContext):
     if res:
         result = f"<b>{search}</b>\n\n"
         result += f"<i>{res}</i>\n"
-        result += f"""<a href="https://en.wikipedia.org/wiki/{search.replace(" ", "%20")}">Read more...</a>"""
+        result += f"""<a href="https://en.wikipedia.org/wiki/{search.replace(" ", "%20")}">阅读更多……</a>"""
         if len(result) > 4000:
             with open("result.txt", "w") as f:
                 f.write(f"{result}\n\nUwU OwO OmO UmU")
@@ -56,6 +56,6 @@ WIKI_HANDLER = DisableAbleCommandHandler("wiki", wiki, run_async=True)
 dispatcher.add_handler(WIKI_HANDLER)
 
 __help__ = """
-» /wiki (text) *:* sᴇᴀʀᴄʜs ᴀʙᴏᴜᴛ ᴛʜᴇ ɢɪᴠᴇɴ ᴛᴇxᴛ ᴏɴ ᴡɪᴋɪᴘᴇᴅɪᴀ.
+» /wiki <搜索词> *:* 在维基百科中搜索并返回摘要。
 """
-__mod_name__ = "Wɪᴋɪ"
+__mod_name__ = "维基百科"

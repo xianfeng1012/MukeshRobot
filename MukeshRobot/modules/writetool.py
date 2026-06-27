@@ -33,23 +33,23 @@ async def handwrite(_, message: Message):
         text = message.reply_to_message.text
     else:
         text =message.text.split(None, 1)[1]
-    m =await message.reply_text( "`Please wait...,\n\nWriting your text...`")
+    m =await message.reply_text( "`请稍候……\n\n正在书写文字……`")
     
     write = requests.get(f"https://apis.xditya.me/write?text={text}").url
 
     caption = f"""
-sᴜᴄᴇssғᴜʟʟʏ ᴡʀɪᴛᴛᴇɴ ᴛᴇxᴛ 💘
-✨ **ᴡʀɪᴛᴛᴇɴ ʙʏ :** [{BOT_NAME}](https://t.me/{BOT_USERNAME})
-🥀 **ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ :** {message.from_user.mention}
+文字书写成功 💘
+✨ **书写机器人：** [{BOT_NAME}](https://t.me/{BOT_USERNAME})
+🥀 **请求者：** {message.from_user.mention}
 """
     await m.delete()
     await message.reply_photo(photo=write,caption=caption)
 
-__mod_name__ = "WʀɪᴛᴇTᴏᴏʟ"
+__mod_name__ = "写字工具"
 
 __help__ = """
 
- ᴡʀɪᴛᴇs ᴛʜᴇ ɢɪᴠᴇɴ ᴛᴇxᴛ ᴏɴ ᴡʜɪᴛᴇ ᴘᴀɢᴇ ᴡɪᴛʜ ᴀ ᴘᴇɴ 🖊
+ 用钢笔将给定文字写在白纸上 🖊
 
-❍ /write <ᴛᴇxᴛ> *:* ᴡʀɪᴛᴇs ᴛʜᴇ ɢɪᴠᴇɴ ᴛᴇxᴛ.
+❍ /write <文字> *：* 将给定文字书写成图片。
  """

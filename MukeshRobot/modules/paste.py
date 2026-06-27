@@ -71,16 +71,16 @@ async def isPreviewUp(preview: str) -> bool:
 
 async def paste_func(_, message):
     if not message.reply_to_message:
-        return await message.reply_text("Reply To A Message With /paste")
-    m = await message.reply_text("Pasting...")
+        return await message.reply_text("请回复一条消息，然后使用 /paste")
+    m = await message.reply_text("上传中……")
     if message.reply_to_message.text:
         content = str(message.reply_to_message.text)
     elif message.reply_to_message.document:
         document = message.reply_to_message.document
         if document.file_size > 1048576:
-            return await m.edit("You can only paste files smaller than 1MB.")
+            return await m.edit("只能上传小于 1MB 的文件。")
         if not pattern.search(document.mime_type):
-            return await m.edit("Only text files can be pasted.")
+            return await m.edit("只有文本文件才能上传。")
         doc = await message.reply_to_message.download()
         async with aiofiles.open(doc, mode="r") as f:
             content = await f.read()
@@ -90,15 +90,15 @@ async def paste_func(_, message):
     button=InlineKeyboardMarkup([[(InlineKeyboardButton(text="• ᴘᴀsᴛᴇ ʟɪɴᴋ •", url=link))]])
    # button.add(InlineKeyboardButton("• ᴘᴀsᴛᴇ ʟɪɴᴋ 2 •", url=link2))
     try:
-        await message.reply("ʜᴇʀᴇ ɪs ʏᴏᴜʀ ᴘᴀsᴛᴇ ʟɪɴᴋ :",reply_markup=button)
+        await message.reply("这是你的粘贴链接：",reply_markup=button)
         await m.delete()     
     except Exception as e:
         await m.edit(f"{e} {link2}")
           
 
-__mod_name__ = "Pᴀs​ᴛᴇ"
+__mod_name__ = "粘贴板"
 __help__ = """
- ᴘᴀsᴛᴇs ᴛʜᴇ ɢɪᴠᴇɴ ғɪʟᴇ ᴀɴᴅ sʜᴏᴡs ʏᴏᴜ ᴛʜᴇ ʀᴇsᴜʟᴛ
+ 将指定文件上传至粘贴服务并返回链接
 
- ❍ /paste  *:* ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴛᴇxᴛ ғɪʟᴇ
+ ❍ /paste  *:* 回复一个文本文件即可上传
  """

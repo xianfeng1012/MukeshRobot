@@ -6,21 +6,21 @@ from MukeshRobot import pbot as mukesh
 @mukesh.on_message(filters.command("encrypt"))
 async def encyrpt(bot, message):
     if len(message.command) < 2:
-        return await message.reply_text("**Example:**\n\n`/encyrpt India`")
+        return await message.reply_text("**示例：**\n\n`/encyrpt 你好世界`")
     m = message.text.split(' ',1)[1]
     try:
         Secure = secureme.encrypt(m)
-        
+
         await message.reply_text(f"`{Secure}`")
-        
+
 
     except Exception as e:
-        await message.reply_text(f"Error {e}")
+        await message.reply_text(f"错误：{e}")
 
 @mukesh.on_message(filters.command("decrypt"))
 async def decrypt(bot, message):
     if len(message.command) < 2:
-        return await message.reply_text("**Example:**\n\n`/decrypt Nsinf`")
+        return await message.reply_text("**示例：**\n\n`/decrypt Nsinf`")
     m = message.text.split(' ',1)[1]
     try:
         Decrypt = secureme.decrypt(m)
@@ -32,16 +32,16 @@ async def decrypt(bot, message):
         await message.reply_text(f"{e}")
 
 
-__mod_name__ = "ᴘᴀssᴡᴏʀᴅ"
+__mod_name__ = "加密"
 
 __help__ = """
-*ᴄᴏɴᴠᴇʀᴛs*
- ❍ /encrypt*:* ᴇɴᴄʀʏᴘᴛs ᴛʜᴇ ɢɪᴠᴇɴ ᴛᴇxᴛ
- ❍ /decrypt*:* ᴅᴇᴄʀʏᴘᴛs ᴘʀᴇᴠɪᴏᴜsʟʏ ᴇᴄʀʏᴘᴛᴇᴅ ᴛᴇxᴛ
- ❍ /encode*:* ᴇɴᴄᴏᴅᴇ ᴛʜᴇ ɢɪᴠᴇɴ ᴛᴇxᴛ
- ❍ /decode*:* ᴅᴇᴄᴏᴅᴇ ᴘʀᴇᴠɪᴏᴜsʟʏ ᴇᴄʀʏᴘᴛᴇᴅ ᴛᴇxᴛ
- ❍ /morseencode*:* Mᴏʀsᴇ Eɴᴄᴏᴅᴇ ᴛʜᴇ ɢɪᴠᴇɴ ᴛᴇxᴛ
- ❍ /morsedecode*:* ᴅᴇᴄʀʏᴘᴛs ᴘʀᴇᴠɪᴏᴜsʟʏ ᴇᴄʀʏᴘᴛᴇᴅ ᴛᴇxᴛ
- ❍ /password *:*  ɢɪᴠᴇ ʟᴇɴɢᴛʜ ᴏғ ᴘᴀssᴡᴏʀᴅ ᴛᴏ ɢᴇɴᴇʀᴀᴛᴇ
- ❍ /uselessfact *:* Gᴇɴᴇʀᴀᴛᴇ  Rᴀᴍᴅᴏᴍ Usᴇʟᴇss Fᴀᴄᴛ
+*文本转换*
+ ❍ /encrypt*：* 加密给定的文本
+ ❍ /decrypt*：* 解密已加密的文本
+ ❍ /encode*：* 编码给定的文本
+ ❍ /decode*：* 解码已编码的文本
+ ❍ /morseencode*：* 将文本转换为摩斯密码
+ ❍ /morsedecode*：* 解码摩斯密码
+ ❍ /password *：* 指定长度生成随机密码
+ ❍ /uselessfact *：* 生成随机无聊冷知识
 """
